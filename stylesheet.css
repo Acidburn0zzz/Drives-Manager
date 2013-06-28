@@ -1,0 +1,42 @@
+.driveframe-box{
+   padding: 10px;
+   border: 2px solid #ffffff;
+   background-color: rgba(0, 0, 0, 0.7);    
+   border-radius: 12px;    
+}
+
+.root-container{
+   color:#fff;
+   text-shadow: 1px 1px 2px #000;
+   padding: 0px 0px 0px 0px;
+}
+
+.menu-icon{
+}
+
+.drive-container{
+   background:url(./image/background/bg1.png) center center no-repeat fixed;
+   padding: 0px 30px 0px 0px;
+}
+
+.info-container{
+   padding: 0px 0px 0px 0px;
+}
+
+.icon-container{
+}
+
+.name-container{
+}
+
+.capacity-container{
+}
+
+.percent-container{
+
+}
+
+.eject-container{
+}
+
+.clock-date-label{}

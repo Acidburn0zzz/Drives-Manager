@@ -1,0 +1,89 @@
+{
+    "mainBox": {
+        "default": true,
+        "description": "Show Main Box",
+        "type" : "checkbox"
+    },
+    "driveBox": {
+        "default": true,
+        "description": "Show Drive Box",
+        "type" : "checkbox"
+    },
+    "driveBoxTheme": {
+        "default": true,
+        "description": "Uses Drive Box Theme",
+        "type" : "checkbox"
+    },
+    "theme": {
+        "type": "combobox",
+        "description": "Selected Theme:",
+        "default": "mind",
+        "options": {
+            "Mind": "mind",
+            "Ubuntu": "ubuntu",
+            "Linux": "linux",
+            "Comic": "comic",
+            "Windows": "windows",
+            "Blue": "blue",
+            "Yellow": "yellow",
+            "Black": "black",
+            "Orange": "orange",
+            "Pink": "pink"
+        }
+    },
+    "hardDrives": {
+        "default": true,
+        "description": "Show Hard Drives",
+        "type" : "checkbox"
+    },
+    "removableDrives": {
+        "default": true,
+        "description": "Show Removable Drives",
+        "type" : "checkbox"
+    },
+    "unmountVolumes": {
+        "default": true,
+        "description": "Show UnMount Volumes",
+        "type" : "checkbox"
+    },
+    "emptyDrives": {
+        "default": false,
+        "description": "Show Empty Drives",
+        "type" : "checkbox"
+    },
+    "directory": {
+        "default": "~/Pictures", 
+        "type": "filechooser", 
+        "description" : "Folder:", 
+        "allow-none" : false,
+        "select-dir" : true
+    },
+    "height": {
+        "default": 200,
+        "type": "spinbutton",
+        "min": 50,
+        "max": 1600,
+        "description" : "Height:",
+        "units" : "pixels",
+        "step": 50
+    },
+    "width": {
+        "default": 300,
+        "type": "spinbutton",
+        "min": 50,
+        "max": 1600,
+        "description" : "Width:",
+        "units" : "pixels",
+        "step": 50
+    },
+    "quality": {
+        "type": "combobox",
+        "description": "Image quality:",
+        "default": 2,
+        "options": {
+            "Low": 0,
+            "Medium": 1,
+            "High": 2
+        }
+    }
+}

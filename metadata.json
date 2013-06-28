@@ -1,0 +1,11 @@
+{
+    "uuid": "drivesManager@vampire", 
+    "dateFormat": "%A,%e %B", 
+    "description": "A desklet that displays the drives mount", 
+    "dateSize": "11pt", 
+    "name": "Drives Desklet", 
+    "timeSize": "7pt", 
+    "timeFormat": "%H:%M", 
+    "prevent-decorations": false, 
+    "last-edited": "1371648230"
+}
