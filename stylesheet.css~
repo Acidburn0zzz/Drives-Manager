@@ -1,3 +1,7 @@
+.info-container{
+   padding: 0px 0px 0px 0px;
+}
+
 .eject-container{
     padding: 8px 0px 0px 4px;
 }

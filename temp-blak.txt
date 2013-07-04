@@ -1,0 +1,56 @@
+initialized:            true
+usec since initialized: 88652358580
+subsystem:              block
+devtype:                disk
+name:                   sr0
+number:                 0
+sysfs_path:             /sys/devices/pci0000:00/0000:00:11.0/host4/target4:0:0/4:0:0:0/block/sr0
+driver:                 null
+action:                 null
+seqnum:                 0
+device type:            98
+device number:          2816
+device file:            /dev/sr0
+device file symlinks:   /dev/cdrom2,/dev/cdrw2,/dev/disk/by-id/ata-TSSTcorp_CDDVDW_SH-S223C_R4136GGB221394,/dev/disk/by-path/pci-0000:00:11.0-scsi-4:0:0:0,/dev/dvd2,/dev/dvdrw2
+tags:                   udev-acl
+    DEVLINKS=/dev/cdrom2 /dev/cdrw2 /dev/disk/by-id/ata-TSSTcorp_CDDVDW_SH-S223C_R4136GGB221394 /dev/disk/by-path/pci-0000:00:11.0-scsi-4:0:0:0 /dev/dvd2 /dev/dvdrw2
+    DEVNAME=/dev/sr0
+    DEVPATH=/devices/pci0000:00/0000:00:11.0/host4/target4:0:0/4:0:0:0/block/sr0
+    DEVTYPE=disk
+    GENERATED=1
+    ID_ATA=1
+    ID_ATA_SATA=1
+    ID_ATA_SATA_SIGNAL_RATE_GEN1=1
+    ID_BUS=ata
+    ID_CDROM=1
+    ID_CDROM_CD=1
+    ID_CDROM_CD_R=1
+    ID_CDROM_CD_RW=1
+    ID_CDROM_DVD=1
+    ID_CDROM_DVD_PLUS_R=1
+    ID_CDROM_DVD_PLUS_RW=1
+    ID_CDROM_DVD_PLUS_R_DL=1
+    ID_CDROM_DVD_R=1
+    ID_CDROM_DVD_RAM=1
+    ID_CDROM_DVD_RW=1
+    ID_CDROM_MEDIA=1
+    ID_CDROM_MEDIA_DVD_PLUS_RW=1
+    ID_CDROM_MEDIA_SESSION_COUNT=1
+    ID_CDROM_MEDIA_SESSION_NEXT=1
+    ID_CDROM_MEDIA_STATE=blank
+    ID_CDROM_MEDIA_TRACK_COUNT=1
+    ID_MODEL=TSSTcorp_CDDVDW_SH-S223C
+    ID_MODEL_ENC=TSSTcorp\x20CDDVDW\x20SH-S223C\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+    ID_PATH=pci-0000:00:11.0-scsi-4:0:0:0
+    ID_PATH_TAG=pci-0000_00_11_0-scsi-4_0_0_0
+    ID_REVISION=SB07
+    ID_SERIAL=TSSTcorp_CDDVDW_SH-S223C_R4136GGB221394
+    ID_SERIAL_SHORT=R4136GGB221394
+    ID_TYPE=cd
+    MAJOR=11
+    MINOR=0
+    SUBSYSTEM=block
+    TAGS=:udev-acl:
+    UDEV_LOG=3
+    UDISKS_PRESENTATION_NOPOLICY=0
+    USEC_INITIALIZED=2272761

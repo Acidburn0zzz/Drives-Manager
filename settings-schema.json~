@@ -150,16 +150,16 @@
         "type": "checkbox",
         "tooltip": "Check this to open volume's when connect drive."
     },
-    "advanceOpticalDetect": {
-        "default": false,
-        "description": "Use Advance Optical Detect Beta:to slow and incomplete.",
-        "type": "checkbox",
-        "tooltip": "Check this to use Advance Optical Detect option's. It's in Beta, slow and incomplete."
-    },
     "safelyRemove": {
         "default": false,
         "description": "Use Safely Remove (Advance Option's) Beta:to slow and incomplete.",
         "type": "checkbox",
         "tooltip": "Check this to use Safely Remove option's. It's in Beta, slow and incomplete."
+    },
+    "advanceOpticalDetect": {
+        "default": false,
+        "description": "Use Advance Optical Detect Beta:to slow and incomplete.",
+        "type": "checkbox",
+        "tooltip": "Check this to use Advance Optical Detect option's. It's in Beta, slow and incomplete."
     }
 }

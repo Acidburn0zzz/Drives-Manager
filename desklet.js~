@@ -170,7 +170,10 @@ MyDesklet.prototype = {
            let [res, out, err, status] = GLib.spawn_command_line_sync('dpkg -s pmount');
            let out_lines = out.toString().split("\n");
            if(out_lines[1] == "Status: install ok installed")
+           {
+              Main.notifyError("True Install");
               return true;
+           }
            return false;      
         },
 
