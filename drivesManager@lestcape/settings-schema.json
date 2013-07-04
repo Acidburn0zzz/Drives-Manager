@@ -1,0 +1,165 @@
+{
+    "theme": {
+        "type": "combobox",
+        "description": "Selected Theme:",
+        "default": "mind",
+        "tooltip": "Select a thema to show icon's.",
+        "options": {
+            "Mind": "mind",
+            "Ubuntu": "ubuntu",
+            "Linux": "linux",
+            "Comic": "comic",
+            "Windows": "windows",
+            "Blue": "blue",
+            "Metalic": "metalic",
+            "Black": "black",
+            "Orange": "orange",
+            "Pink": "pink"
+        }
+    },
+    "mainBox": {
+        "default": true,
+        "description": "Show Main Box",
+        "type": "checkbox",
+        "tooltip": "Check this to tourn the Main Box visible/invisible."
+    },
+    "driveBox": {
+        "default": true,
+        "description": "Show Drive Box",
+        "type": "checkbox",
+        "tooltip": "Check this to tourn the Drive Box visible/invisible."
+    },
+    "borderBoxWidth": {
+        "default": 1,
+        "type": "spinbutton",
+        "min": 0,
+        "max": 4,
+        "description": "Border's Box Width:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the border's Box width."
+    },
+    "boxColor": {
+        "type": "colorchooser",
+        "default": "rgb(0,0,0)",
+        "description": "Box Color:",
+        "tooltip": "Set your custom box's color."
+    },
+    "fixWidth": {
+        "default": true,
+        "description": "Fixed Width",
+        "type": "checkbox",
+        "tooltip": "Check this if you like to control the width of desklet."
+    },
+    "width": {
+        "default": 170,
+        "type": "spinbutton",
+        "min": 100,
+        "max": 1600,
+        "description": "Width:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixWidth",
+        "tooltip": "Increase or decrease the desklet width."
+    },
+    "fontColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "Font's Color:",
+        "tooltip": "Set your custom text's color."
+    },
+    "fontNameSize": {
+        "default": 9,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "Size Of Font Name:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the size of font Name."
+    },
+    "fontCapacitySize": {
+        "default": 7,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "Size Of Font Capacity:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the size of font capacity."
+    },
+    "transparency": {
+        "type": "scale",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05,
+        "description": "Transparency:",
+        "tooltip": "Transparency"
+    },
+    "hardDrives": {
+        "default": true,
+        "description": "Show Hard Drives",
+        "type": "checkbox",
+        "tooltip": "Check this to show hard drive's or not."
+    },
+    "opticalDrives": {
+        "default": true,
+        "description": "Show Optical Drives",
+        "type": "checkbox",
+        "tooltip": "Check this to show optical drive's or not."
+    },
+    "removableDrives": {
+        "default": true,
+        "description": "Show Removable Drives",
+        "type": "checkbox",
+        "tooltip": "Check this to show removable drive's or not."
+    },
+    "fixedDrives": {
+        "default": true,
+        "description": "Show Fixed Drives",
+        "type": "checkbox",
+        "tooltip": "Check this to show fixed drives or not."
+    },
+    "emptyDrives": {
+        "default": false,
+        "description": "Show Empty Drives",
+        "type": "checkbox",
+        "tooltip": "Check this to show empty drive's or not."
+    },
+    "openWith": {
+        "type": "combobox",
+        "description": "Open With:",
+        "default": "nemo",
+        "tooltip": "Select your's default browser.",
+        "options": {
+            "Nemo": "nemo",
+            "Nautilus": "nautilus"
+        }
+    },
+    "openSystem": {
+        "default": false,
+        "description": "Automatic Open Volume's On Connect",
+        "type": "checkbox",
+        "tooltip": "Check this to use automatic system volume's open when connect drive or not."
+    },
+    "openConnect": {
+        "default": false,
+        "description": "Open Volume's On Connect",
+        "type": "checkbox",
+        "tooltip": "Check this to open volume's when connect drive."
+    },
+    "advanceOpticalDetect": {
+        "default": false,
+        "description": "Use Advance Optical Detect Beta:to slow and incomplete.",
+        "type": "checkbox",
+        "tooltip": "Check this to use Advance Optical Detect option's. It's in Beta, slow and incomplete."
+    },
+    "safelyRemove": {
+        "default": false,
+        "description": "Use Safely Remove (Advance Option's) Beta:to slow and incomplete.",
+        "type": "checkbox",
+        "tooltip": "Check this to use Safely Remove option's. It's in Beta, slow and incomplete."
+    }
+}
