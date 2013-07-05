@@ -37,7 +37,7 @@ https://github.com/lestcape/Drives-Manager/issues
 Requests:
 https://github.com/lestcape/Drives-Manager/pulls
 
-Si usted quiere contribuir al desarrollo del desklet o el soporte de lenguaje, contactame sin ningun problema.
+If you want to help develop the desklet or language support, contact me without any problem.
 Thanks.
 
 Lester.
