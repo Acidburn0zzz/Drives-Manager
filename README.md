@@ -1,7 +1,7 @@
-Drives-Manager v0.1-Beta
+Drives-Manager v0.3-Beta
 ==============
 
-A Drives Manager Desklet for Cinnamon - v0.1-Beta 28 June 2013.
+A Drives Manager Desklet for Cinnamon - v0.3-Beta 05 July 2013.
 Author: Lester Carballo Pérez <lestcape@gmail.com>
 
 This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in shema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
@@ -22,14 +22,27 @@ Instalation Instructions:
 
 Issues and improvements:
 
-- Drive with more than one volume is not recognized properly.
-- The "Safely Remove" option, does not work yet.
 - Advanced Option for Optical devices, need packages "cdrecord" and "wodim" to detect status(open/closed) of the CD/DVD. The command cdrecord depends on wodim, and when the optical drive has a disk, wodim sometimes fail to properly access the device.
-- Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
+-  Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
 - The Hard drive and optical option need the "coreutils" package, for use the command df.
 - Sometimes auto mount points open devices may fail and open more than once the same volume. This is because the volume was removed using an alternative mode not recognized by the operating system, and when this reconnect may appear doubled.
-- The "Safely Removed" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
+- The "use pmount package" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
 - The code can be optimized to use less CPU in some next release.
+
+ChangeLog:
+
+0.3-Beta
+   - Now you can open mount point with space.
+   - Fixed problem to open the mount point of volumen.
+
+0.2-Beta
+   - Fixed problem with the reconnection of electrified devices.
+   - Add suport for recognized Drives with more than one volume.
+   - The option "Safely Remove" changed its name to "use pmount package".
+   - Now you can reconnect the removable devices without removing them from its connector.
+
+0.1-Beta
+   - Initial release.
 
 Report issues: 
 https://github.com/lestcape/Drives-Manager/issues
@@ -37,7 +50,7 @@ https://github.com/lestcape/Drives-Manager/issues
 Requests:
 https://github.com/lestcape/Drives-Manager/pulls
 
-If you want to help develop the desklet or language support, contact me without any problem.
+If you want to help develop the desklet, language support, or icon pack, contact me without any problem.
 Thanks.
 
 Lester.

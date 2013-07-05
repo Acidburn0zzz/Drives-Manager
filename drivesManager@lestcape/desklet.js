@@ -1,15 +1,15 @@
 
-// Drives Manager Cinnamon Desklet v0.1 - 24 June 2013 Lester Carballo Pérez lestcape@gmail.com
+// A Drives Manager Desklet for Cinnamon - v0.1-Beta 28 June 2013.
+// Author: Lester Carballo Pérez lestcape@gmail.com
 //
-// This is a desklet to display the current drives pluged to the computer.
-// We can used the avility to show the volumens of the drive, also indicate
-// if the volumens is mount. For the mount volumen if is removable, you can
-// mount and unmount the volumen. If the volumen is mount, you can access
-// directly with left click in to the icon driver. Configuration for all option
-// is in shema format, and is accesible for the cinnamon settings or directly
-// with rigth click in desklet.
+// This is a desklet to display the current drives plugged to the computer. 
+// We can used the ability to show the volumens of the drive, also indicate
+// if the volumen is mounted. When plugged a removable volumen, you can
+// mount and unmount the volumen. If the volumen is mount, you can access 
+// directly with left click in to the icon of drive. The configuration for
+// all option it is in shema format, and is accesible for the cinnamon
+// settings, or directly with right click in the desklet.
 //
-
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
@@ -97,7 +97,7 @@ MyDesklet.prototype = {
 	},
 
         _checkPackage: function() {
-           if((this._safelyRemove)&&(!this._isPackageInstall()))
+           if((this._pMountActive)&&(!this._isPackageInstall()))
            {
               let _rootContainer = this._createFrame();
               let _information = new St.Label();
@@ -159,7 +159,7 @@ MyDesklet.prototype = {
               else if(this._optionInstall == 2)
               {
                  this._optionInstall == -1;
-                 this._safelyRemove = false;
+                 this._pMountActive = false;
               }
               return false;
            }
@@ -229,7 +229,8 @@ MyDesklet.prototype = {
            }
            if(this._showRemovableDrives) {
               this._addRemovableMountDrives(_rootContainer);
-              this._addRemovableUnmountDrives(_rootContainer);
+              if(this._pMountActive)
+                this._addRemovableUnmountDrives(_rootContainer);
            }
            if(this._showFixedDrives) {
               this._addMountDrives(_rootContainer);
@@ -237,8 +238,6 @@ MyDesklet.prototype = {
            }
            if(this._showEmptyDrives)
               this._addDrivesEmpty(_rootContainer);
-
-           this._deleteRemovable();
         },
 
         _addHardDrives: function(_rootContainer) {
@@ -410,6 +409,7 @@ MyDesklet.prototype = {
                  _driveContainer.add(_infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
                  _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
                  _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
+
                  this.drives.push(_listDrives[i]);
                  this.listButtonIcon.push(null);
                  this.listButtonEject.push(_ejectButton);
@@ -430,7 +430,6 @@ MyDesklet.prototype = {
                     let _mounts = _listVols[j].get_mount();
                     if(_mounts)
                     {
-                       this._addRemovable(_listDrives[i], _mounts.get_name());
                        let _nameContainer = new St.BoxLayout({vertical:false});
                        let _capacityContainer = new St.BoxLayout({vertical:true});
                        let _percentContainer = new St.BoxLayout({vertical:true});
@@ -472,7 +471,7 @@ MyDesklet.prototype = {
                        _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
                        _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
 
-                       this.drives.push(_listDrives[i]);
+                       this.drives.push(_listVols[j]);
                        this.listButtonIcon.push(_driveButton);
                        this.listButtonEject.push(_ejectButton);
                     }
@@ -486,37 +485,42 @@ MyDesklet.prototype = {
 
            for (let i = 0; i < _listDrives.length; i++)
            {
-              if((_listDrives[i])&&(!_listDrives[i].has_volumes())&&(_listDrives[i].can_poll_for_media()))
+              if((_listDrives[i])&&(_listDrives[i].has_volumes())&&(_listDrives[i].can_eject())&&(!this._isOptical(_listDrives[i])))
               {
-                 if((this._isRemovable(_listDrives[i]))||(_listDrives[i].has_media()))
+                 let _listVols = _listDrives[i].get_volumes();
+                 for (let j = 0; j < _listVols.length; j++)
                  {
-                    let _driveIcon = this._getIconImage(this._pathToComponent("usb.png", "theme/" + this._theme + "/"));
-                    let _iconContainer = new St.BoxLayout({vertical:true});
-                    _iconContainer.add(_driveIcon, {x_fill: true, x_align: St.Align.START});
+                    if(!this._isRemovableMount(_listVols[j]))
+                    {
+                       let _driveIcon = this._getIconImage(this._pathToComponent("usb.png", "theme/" + this._theme + "/"));
+                       let _iconContainer = new St.BoxLayout({vertical:true});
+                       _iconContainer.add(_driveIcon, {x_fill: true, x_align: St.Align.START});
 
-                    let _nameContainer = new St.BoxLayout({vertical:false});
-                    let _name = new St.Label();
-                    _name.style="font-size: " + this._nameSize + "pt";
-                    _name.set_text(this._findRemovablesName(_listDrives[i]));
-                    _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
+                       let _nameContainer = new St.BoxLayout({vertical:false});
+                       let _name = new St.Label();
+                       _name.style="font-size: " + this._nameSize + "pt";
+                       _name.set_text(_listVols[j].get_name());
+                       _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
 
-                    let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
-                    let _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
-                    let _ejectButton = new St.Button({ child: _ejectIcon });
-                    _ejectButton.connect('clicked', Lang.bind(this, this._onDriveInject));
-                    _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.START});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
+                       let _ejectButton = new St.Button({ child: _ejectIcon });
+                       _ejectButton.connect('clicked', Lang.bind(this, this._onDriveInject));
+                       _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.START});
 
-                    let _infoContainer = new St.BoxLayout({vertical:true});
-                    _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
+                       let _infoContainer = new St.BoxLayout({vertical:true});
+                       _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
 
-                    let _driveContainer = this._createDriveContainer();
-                    _driveContainer.add(_iconContainer, {x_fill: true, x_align: St.Align.START});
-                    _driveContainer.add(_infoContainer, {x_fill: true, expand: true, expand: true, x_align: St.Align.START});
-                    _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
-                    _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
-                    this.drives.push(_listDrives[i]);
-                    this.listButtonIcon.push(null);
-                    this.listButtonEject.push(_ejectButton);
+                       let _driveContainer = this._createDriveContainer();
+                       _driveContainer.add(_iconContainer, {x_fill: true, x_align: St.Align.START});
+                       _driveContainer.add(_infoContainer, {x_fill: true, expand: true, expand: true, x_align: St.Align.START});
+                       _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
+                       _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
+
+                       this.drives.push(_listVols[j]);
+                       this.listButtonIcon.push(null);
+                       this.listButtonEject.push(_ejectButton);
+                    }
                  }
               }
            }
@@ -535,7 +539,6 @@ MyDesklet.prototype = {
                     let _mounts = _listVols[j].get_mount();
                     if(_mounts)
                     {
-                       this._addRemovable(_listDrives[i], _mounts.get_name());
                        let _nameContainer = new St.BoxLayout({vertical:false});
                        let _capacityContainer = new St.BoxLayout({vertical:true});
                        let _percentContainer = new St.BoxLayout({vertical:true});
@@ -577,7 +580,7 @@ MyDesklet.prototype = {
                        _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
                        _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
 
-                       this.drives.push(_listDrives[i]);
+                       this.drives.push(_listVols[j]);
                        this.listButtonIcon.push(_driveButton);
                        this.listButtonEject.push(_ejectButton);
                     }
@@ -591,7 +594,7 @@ MyDesklet.prototype = {
 
            for (let i = 0; i < _listDrives.length; i++)
            {
-              if((_listDrives[i])&&(_listDrives[i].has_volumes()))
+              if((_listDrives[i])&&(_listDrives[i].has_volumes())&&(!_listDrives[i].can_eject()))
               {
                  let _listVols = _listDrives[i].get_volumes();
                  for (let j = 0; j < _listVols.length; j++)
@@ -623,7 +626,8 @@ MyDesklet.prototype = {
                        _driveContainer.add(_infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
                        _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
                        _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
-                       this.drives.push(_listDrives[i]);
+
+                       this.drives.push(_listVols[j]);
                        this.listButtonIcon.push(null);
                        this.listButtonEject.push(_ejectButton);
                     }  
@@ -639,34 +643,32 @@ MyDesklet.prototype = {
            {
               if((_listDrives[i])&&(!_listDrives[i].has_volumes())&&(_listDrives[i].can_poll_for_media())&&(!this._isOptical(_listDrives[i])))
               {
-                 if((!(this._isRemovable(_listDrives[i])))||(_listDrives[i].has_media()))
-                 {
-                    let _driveIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/" + this._theme + "/"));
-                    let _iconContainer = new St.BoxLayout({vertical:true});
-                    _iconContainer.add(_driveIcon, {x_fill: true, x_align: St.Align.START});
+                 let _driveIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/" + this._theme + "/"));
+                 let _iconContainer = new St.BoxLayout({vertical:true});
+                 _iconContainer.add(_driveIcon, {x_fill: true, x_align: St.Align.START});
 
-                    let _nameContainer = new St.BoxLayout({vertical:false});
-                    let _name = new St.Label();
-                    _name.style="font-size: " + this._nameSize + "pt";
-                    _name.set_text(_listDrives[i].get_name());
-                    _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
+                 let _nameContainer = new St.BoxLayout({vertical:false});
+                 let _name = new St.Label();
+                 _name.style="font-size: " + this._nameSize + "pt";
+                 _name.set_text(_listDrives[i].get_name());
+                 _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
 
-                    let _infoContainer = new St.BoxLayout({vertical:true});
-                    _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
+                 let _infoContainer = new St.BoxLayout({vertical:true});
+                 _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
 
-                    let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
-                    let _ejectIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/"));
-                    _ejectContainer.add(_ejectIcon, {x_fill: true, x_align: St.Align.END});
+                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                 let _ejectIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/"));
+                 _ejectContainer.add(_ejectIcon, {x_fill: true, x_align: St.Align.END});
 
-                    let _driveContainer = this._createDriveContainer();
-                    _driveContainer.add(_iconContainer, {x_fill: true, x_align: St.Align.START});
-                    _driveContainer.add(_infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
-                    _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
-                    _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
-                    this.drives.push(_listDrives[i]);
-                    this.listButtonIcon.push(null);
-                    this.listButtonEject.push(null);
-                 }
+                 let _driveContainer = this._createDriveContainer();
+                 _driveContainer.add(_iconContainer, {x_fill: true, x_align: St.Align.START});
+                 _driveContainer.add(_infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
+                 _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
+                 _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
+
+                 this.drives.push(_listDrives[i]);
+                 this.listButtonIcon.push(null);
+                 this.listButtonEject.push(null);
               }
            }
         },
@@ -690,19 +692,22 @@ MyDesklet.prototype = {
            return this._getIconImage(this._pathToComponent("meter" + _imageNumber + ".png", "meter/"));
         },
 
-        _isRemovable: function(drive) {
-           return (this._findRemovablesName(drive) != "");
-        },
-
-        _findRemovablesName: function(drive) {
-           for (let i = 0; i < this.drivesRemovables.length; i++)
+        _isRemovableMount: function(removableVol) {
+           for (let i = 0; i < this.mountsHard.length; i++)
            {
-              //if(this.drivesRemovables[i] == drive.get_identifier(Gio.VOLUME_IDENTIFIER_KIND_UNIX_DEVICE)) 
-              //if(this.drivesRemovables[i] == drive.g_drive_get_sort_key())
-              if(this.drivesRemovables[i] == drive.get_name())
-                 return this.namesRemovables[i];
+              if(this._getIdentifier(removableVol) == this.mountsHard[i][0])
+                  return true;
            }
-           return "";
+           return false;
+        },       
+
+        _findMountHardOfIcon: function(bt) {
+           for (let i = 0; i < this.mountsHard.length; i++)
+           {
+              if(this.listHardIcon[i] == bt)
+                 return this.mountsHard[i];
+           }
+           return null;
         },
 
         _findDriveOfIcon: function(bt) {
@@ -722,62 +727,7 @@ MyDesklet.prototype = {
            }
            return null;
         },
-        //Test for drives with tow Volumes: for (let j = 0; j < _listVols.length; j++)
-
-        _findMountHardOfIcon: function(bt) {
-           for (let i = 0; i < this.mountsHard.length; i++)
-           {
-              if(this.listHardIcon[i] == bt)
-                 return this.mountsHard[i];
-           }
-           return null;
-        },
-
-        _addRemovable: function(drive, realName) {
-           let _exist = false;
-           for (let i = 0; i < this.drivesRemovables.length; i++)
-           {
-              //if(this.drivesRemovables[i] == drive.get_identifier(Gio.VOLUME_IDENTIFIER_KIND_UNIX_DEVICE)) 
-              //if(this.drivesRemovables[i] == drive.g_drive_get_sort_key())
-              if(this.drivesRemovables[i] == drive.get_name())
-              {
-                 _exist = true;
-                 break;
-              }
-           }
-           if(_exist == false)
-           {
-              //this.drivesRemovables.push(drive.get_identifier(Gio.VOLUME_IDENTIFIER_KIND_UNIX_DEVICE));
-              //this.drivesRemovables.push(drive.g_drive_get_sort_key());
-              this.drivesRemovables.push(drive.get_name());
-              this.namesRemovables.push(realName);
-           }
-        },
-
-        _deleteRemovable: function() {
-           let _exist = false;
-           for (let i = 0; i < this.drivesRemovables.length; i++)
-           {
-              _exist = false;
-              for (let j = 0; j < this.drives.length; j++)
-              {
-                 //if(this.drivesRemovables[i] == drive.get_identifier(Gio.VOLUME_IDENTIFIER_KIND_UNIX_DEVICE)) 
-                 //if(this.drivesRemovables[i] == drive.g_drive_get_sort_key())
-                 if(this.drivesRemovables[i] == this.drives[j].get_name())
-                 {
-                    _exist = true;
-                    break;
-                 }
-              }
-              if(_exist == false)
-              {
-                this.drivesRemovables.splice(i, 1);
-                this.namesRemovables.splice(i, 1);
-                i--;
-              }
-           }
-        },
-   
+  
         _driveSize: function(deviceMount) {
            let _size = 0;
            try {
@@ -834,29 +784,6 @@ MyDesklet.prototype = {
            }
            return "" + prefixNumber.toFixed(2) + "" + suffix;
         },
-/*
-        _volumeMountedFinish: function(volume, result) {
-           try {
-              volume.mount_finish(result);
-              if(this._openConnect)
-              {
-                 let urlPath = this._drivePath(volume.get_mount());
-                 Util.spawnCommandLine(this._browser + " " + urlPath);
-              }
-              Main.notifyError("Device Inject");
-    	   } catch (e) {
-              this._reportFailure(e);
-           }
-        },
-*/
-        _onDriveEject: function(bt) {
-           let _listVols = this._findDriveOfEject(bt).get_volumes();
-           let mountOp = new CinnamonMountOperation.CinnamonMountOperation(_listVols[0].get_mount());
-           if (_listVols[0].get_mount().can_eject())
-              _listVols[0].get_mount().eject_with_operation(Gio.MountUnmountFlags.NONE, mountOp.mountOp, null, Lang.bind(this, this._onEjectFinish));   
-           else
-              _listVols[0].get_mount().unmount_with_operation(Gio.MountUnmountFlags.NONE, mountOp.mountOp, null, Lang.bind(this, this._onUnmountFinish));
-        },
 
         _onOpticalInject: function(bt) {
            let _drive = this._findDriveOfEject(bt);
@@ -876,23 +803,53 @@ MyDesklet.prototype = {
            }
         },
 
+        _onDriveEject: function(bt) {
+           let _volumen = this._findDriveOfEject(bt); //In this case Volumen...
+           if(_volumen)
+           {
+              if((this._pMountActive)&&(_volumen.can_eject()))
+              {
+                 let idVol = this._getIdentifier(_volumen);
+                 Util.spawnCommandLine("pumount " + idVol);
+                 Main.notifyError("Device Eject");
+              }
+              else
+              {
+                 let _mount = _volumen.get_mount();
+                 let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen.get_mount());
+                 if (_mount.can_eject())
+                    _mount.eject_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onEjectFinish));   
+                 else
+                    _mount.unmount_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onUnmountFinish));
+              }
+           }
+        },
+
         _onDriveInject: function(bt) {
-           let _drive = this._findDriveOfEject(bt);
+           let _volumen = this._findDriveOfEject(bt); //In this case Volumen...
              
-           if(_drive)
+           if(_volumen)
            {//Test Gio.MountUnmountFlags.FORCE
               try { 
-                 
-                 if(_drive.can_eject())
-                 {
-                    let mountOp = new CinnamonMountOperation.CinnamonMountOperation(_drive);
-                    _drive.eject_with_operation(Gio.MountUnmountFlags.NONE, mountOp.mountOp, null, Lang.bind(this, this._remountFinish));  
-                 }
-                 else
-                 {
-                    let _listVols = _drive.get_volumes();
-                    let mountOp = new CinnamonMountOperation.CinnamonMountOperation(_listVols[0]);
-                 }
+                    if((this._pMountActive)&&(_volumen.can_eject()))
+                    {
+                       let idVol = this._getIdentifier(_volumen);
+                       Util.spawnCommandLine("pmount " + idVol);
+                       Main.notifyError("Device Inject");
+                    }
+                    else
+                    {
+                       if(_volumen.can_eject())
+                       {
+                          let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen);
+                          _volumen.eject_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._remountFinish));  
+                       }
+                       else
+                       {
+                          let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen);
+                          _volumen.mount(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onVolumeMountedFinish));
+                       }
+                    }
               }
               catch(e) {
                  Main.notifyError("Drives failed:", e.message);
@@ -918,12 +875,26 @@ MyDesklet.prototype = {
            }
         },
 
+        _onVolumeMountedFinish: function(volume, result) {
+           try {
+              volume.mount_finish(result);
+              if(this._openConnect)
+              {
+                 let urlPath = this._drivePath(volume.get_mount());
+                 Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
+              }
+              Main.notifyError("Device Inject");
+    	   } catch (e) {
+              this._reportFailure(e);
+           }
+        },
+
         _onMountAdded: function(monit, mount) {
            try {
               if(this._openConnect)
               {
                  let urlPath = this._drivePath(mount);
-                 Util.spawnCommandLine(this._browser + " " + urlPath);
+                 Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
               }
            } catch(e) {
               this._reportFailure(e);
@@ -931,17 +902,24 @@ MyDesklet.prototype = {
         },
 
         _onDriveClicked: function(bt) {
-           let _listVols = this._findDriveOfIcon(bt).get_volumes();
-           let urlPath = this._drivePath(_listVols[0].get_mount());
+           let _volumen = this._findDriveOfIcon(bt); //Posible Drive, not a Volumen...
+           try {
+              let _listVols = _volumen.get_volumes();//Test for a Drive?
+              _volumen = _listVols[0];//Yes it's correct, them changed.
+           } catch(e) {
+             //Drive it's a Volumen, do nothing...
+           }
+           
+           let urlPath = this._drivePath(_volumen.get_mount()); //A volumen need to be mount, or don't have mount point to open.
            this._animateIcon(bt, 0);
-           Util.spawnCommandLine(this._browser + " " + urlPath);
+           Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
         },
 
         _onMountHardClicked: function(bt) {
            let _hardDrive = this._findMountHardOfIcon(bt);
            let urlPath = _hardDrive[5];
            this._animateIcon(bt);
-           Util.spawnCommandLine(this._browser + " " + urlPath);
+           Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
         },
 
         _on_setting_changed: function() {
@@ -1141,7 +1119,7 @@ MyDesklet.prototype = {
             this.settings.bindProperty(Settings.BindingDirection.IN, "fontCapacitySize", "_capacitySize", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "advanceOpticalDetect", "_advanceOpticalDetect", this._on_setting_changed, null);
-            this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "safelyRemove", "_safelyRemove", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "pMount", "_pMountActive", this._on_setting_changed, null);
 
             this.settings.bindProperty(Settings.BindingDirection.IN, "openSystem", "_openSystem", this._onTypeOpenChanged, null);
 

@@ -156,10 +156,10 @@
         "type": "checkbox",
         "tooltip": "Check this to use Advance Optical Detect option's. It's in Beta, slow and incomplete."
     },
-    "safelyRemove": {
+    "pMount": {
         "default": false,
-        "description": "Use Safely Remove (Advance Option's) Beta:to slow and incomplete.",
+        "description": "Use pmount package to mount and umount removable drives.",
         "type": "checkbox",
-        "tooltip": "Check this to use Safely Remove option's. It's in Beta, slow and incomplete."
+        "tooltip": "Check this to use pmount package to mount and umount removable drives."
     }
 }
