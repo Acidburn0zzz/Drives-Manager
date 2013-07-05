@@ -15,7 +15,9 @@ You should have received a copy of the GNU General Public License along with thi
 Instalation Instructions:
 
 1- Download folder drivesManager@lestcape with all file and subfolder from <https://github.com/lestcape/Drives-Manager>.
+
 2- Put in /home/USER/.local/share/cinnamon/desklets/ where USER is your account.
+
 3- Enable a Desklet in Cinnamon Settings and use.
 
 Issues and improvements:
