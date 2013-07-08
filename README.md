@@ -27,7 +27,6 @@ Issues and improvements:
 - The Hard drive and optical option need the "coreutils" package, for use the command df.
 - Sometimes auto mount points open devices may fail and open more than once the same volume. This is because the volume was removed using an alternative mode not recognized by the operating system, and when this reconnect may appear doubled.
 - The "use pmount package" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
-- The code can be optimized to use less CPU in some next release.
 
 ChangeLog:
 
