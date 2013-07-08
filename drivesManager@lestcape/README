@@ -18,11 +18,10 @@ Instalation Instructions:
 Issues and improvements:
 
 - Advanced Option for Optical devices, need packages "cdrecord" and "wodim" to detect status(open/closed) of the CD/DVD. The command cdrecord depends on wodim, and when the optical drive has a disk, wodim sometimes fail to properly access the device.
--  Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
+- Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
 - The Hard drive and optical option need the "coreutils" package, for use the command df.
 - Sometimes auto mount points open devices may fail and open more than once the same volume. This is because the volume was removed using an alternative mode not recognized by the operating system, and when this reconnect may appear doubled.
 - The "use pmount package" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
--The code can be optimized to use less CPU in some next release.
 
 ChangeLog:
 
