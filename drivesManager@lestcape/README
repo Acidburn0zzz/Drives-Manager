@@ -1,4 +1,4 @@
-A Drives Manager Desklet for Cinnamon - v0.3-Beta 05 July 2013.
+A Drives Manager Desklet for Cinnamon - v0.4-Beta 07 July 2013.
 Author: Lester Carballo Pérez lestcape@gmail.com
 
 This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in shema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
