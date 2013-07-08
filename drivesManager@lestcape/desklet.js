@@ -73,12 +73,17 @@ MyDesklet.prototype = {
            this.mountsHard = [];
            this.drivesRemovables = [];
            this.namesRemovables = [];
-           //this.opticalDrives = [[]];
+           this.opticalDrives = [];
            this._firstTime = true;
            this._initSettings();		
            this.monitor = Gio.VolumeMonitor.get();
            this.monitor.connect('mount-added', Lang.bind(this, this._onMountAdded));
-           //this.monitor.connect('mount-removed', Lang.bind(this._del_drive));
+           this.monitor.connect('mount-removed', Lang.bind(this, this._onMountRemeved));
+           this.monitor.connect('volume-added', Lang.bind(this, this._onVolumeAdded));
+           this.monitor.connect('volume-removed', Lang.bind(this, this._onVolumeRemoved));
+           this.monitor.connect('drive-connected', Lang.bind(this, this._onDriveConnected));
+           this.monitor.connect('drive-disconnected', Lang.bind(this, this._onDriveDisconnected));
+           //this.monitor.connect('drive-eject-button', Lang.bind(this, this._onDriveEjectButton));
            this._timeout = null;
           // this.print_all_device();
            /*try {
@@ -89,6 +94,8 @@ MyDesklet.prototype = {
            }*/
            this._optionInstall = -1;
            this._updateDate();
+           if((this._capacityDetect)||(this._advanceOpticalDetect))
+              this._checkUpdate();
 	},
 
 	on_desklet_removed: function() {
@@ -174,10 +181,41 @@ MyDesklet.prototype = {
            return false;      
         },
 
+        _checkUpdate: function()  {
+           let _updateNeeded = false;
+           if(this._capacityDetect)
+           {
+              let _currMountsHard = this._detectMountDevice();
+              for (let _curr in _currMountsHard)
+              {
+                 if(_currMountsHard[_curr][2] != this.mountsHard[_curr][2])
+                    _updateNeeded = true;
+              }
+           }
+
+           if((!_updateNeeded)&&(this._advanceOpticalDetect))
+           {
+              for (let _opt in this.opticalDrives)
+              {
+                 let _isOptClose = this._isOpticalClosed(this.opticalDrives[_opt][0]);
+                 if(this.opticalDrives[_opt][1] != _isOptClose)
+                 {
+                    this.opticalDrives[_opt][1] = _isOptClose;
+                    _updateNeeded = true;
+                 }
+              }
+           }
+
+           if(_updateNeeded)
+              this._updateDate();
+           this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._checkUpdate));
+	},
+
 	_updateDate: function() {
            if(this._checkPackage())
            {
-              this._detectMountDevice();
+              this.opticalDrives = [];
+              this.mountsHard = this._detectMountDevice();
               this._addDrives();
               if((this._advanceOpticalDetect)&&(this._firstTime)) {
                 // this._detectOptical();
@@ -185,7 +223,7 @@ MyDesklet.prototype = {
                 this._firstTime = false;
               }
            }
-           this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._updateDate));
+           //this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._updateDate));
 	},
 
         _createFrame: function() {
@@ -351,6 +389,13 @@ MyDesklet.prototype = {
                        _driveContainer.add(_ejectContainer, {x_fill: true, x_align: St.Align.END});
                        _rootContainer.add(_driveContainer, {x_fill: true, x_align: St.Align.START});
 
+                       if(this._advanceOpticalDetect) { 
+                          let _opt = [];
+                          _opt.push(_listDrives[i]);
+                          _opt.push(true);
+                          this.opticalDrives.push(_opt);
+                       }
+
                        this.drives.push(_listDrives[i]);
                        this.listButtonIcon.push(_driveButton);
                        this.listButtonEject.push(_ejectButton);
@@ -383,19 +428,25 @@ MyDesklet.prototype = {
                  let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
                  let _ejectIcon;
                  let _ejectButton;
-                 if((this._advanceOpticalDetect)&&(!this._firstTime)) { 
+                 //if((this._advanceOpticalDetect)&&(!this._firstTime)) {
+                 if(this._advanceOpticalDetect) { 
+                    let _optCurrent = [];
+                    _optCurrent.push(_listDrives[i]);  
                     if(this._isOpticalClosed(_listDrives[i]))
                     {
                        _ejectIcon = this._getIconImage(this._pathToComponent("eject.png", "theme/" + this._theme + "/"));
                        _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onOpticalEject));
+                       _optCurrent.push(true);
                     }
                     else
                     {
                        _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
                        _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onOpticalInject));
+                       _optCurrent.push(false);
                     }
+                    this.opticalDrives.push(_optCurrent);
                  }
                  else
                  {
@@ -809,9 +860,11 @@ MyDesklet.prototype = {
            {
               if((this._pMountActive)&&(_volumen.can_eject()))
               {
-                 let idVol = this._getIdentifier(_volumen);
-                 Util.spawnCommandLine("pumount " + idVol);
-                 Main.notifyError("Device Eject");
+                 let _idVol = this._getIdentifier(_volumen);
+                 Util.spawnCommandLine("pumount " + _idVol);
+                 this.drivesRemovables.push(_volumen.get_mount());
+               /*  Main.notifyError("Device Eject");
+                 global.play_theme_sound(0, 'device-removed-media'); */
               }
               else
               {
@@ -833,22 +886,17 @@ MyDesklet.prototype = {
               try { 
                     if((this._pMountActive)&&(_volumen.can_eject()))
                     {
-                       let idVol = this._getIdentifier(_volumen);
-                       Util.spawnCommandLine("pmount " + idVol);
-                       Main.notifyError("Device Inject");
+                       let _idVol = this._getIdentifier(_volumen);
+                       Util.spawnCommandLine("pmount " + _idVol);
+                       this.drivesRemovables.push(_idVol);
                     }
                     else
                     {
+                       let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen);
                        if(_volumen.can_eject())
-                       {
-                          let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen);
                           _volumen.eject_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._remountFinish));  
-                       }
                        else
-                       {
-                          let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_volumen);
                           _volumen.mount(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onVolumeMountedFinish));
-                       }
                     }
               }
               catch(e) {
@@ -875,32 +923,88 @@ MyDesklet.prototype = {
            }
         },
 
-        _onVolumeMountedFinish: function(volume, result) {
+        _onVolumeMountedFinish: function(volumen, result) {
            try {
-              volume.mount_finish(result);
-              if(this._openConnect)
-              {
-                 let urlPath = this._drivePath(volume.get_mount());
-                 Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
-              }
+              volumen.mount_finish(result);
+              this._openVolumen(volumen);
               Main.notifyError("Device Inject");
     	   } catch (e) {
               this._reportFailure(e);
            }
         },
 
-        _onMountAdded: function(monit, mount) {
-           try {
-              if(this._openConnect)
-              {
-                 let urlPath = this._drivePath(mount);
-                 Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
-              }
-           } catch(e) {
-              this._reportFailure(e);
+        _openVolumen: function(volumenDevice) {
+           if(this._openConnect)
+           {
+              let urlPath = this._drivePath(volumenDevice.get_mount());
+              Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
            }
         },
 
+        _onMountAdded: function(monit, mount) {
+           try {
+              let _findVol = false;
+              for (let i = 0; i < this.drivesRemovables.length; i++)
+              {
+                 if(this.drivesRemovables[i] == this._getIdentifier(mount.get_volume()))
+                 {
+                    Main.notifyError("Device Inject");
+                    global.play_theme_sound(0, 'device-added-media');
+                    this._openVolumen(mount.get_volume());
+                    /*Remove Volumen on this.drivesRemovables */
+                    this.drivesRemovables.splice(i, 1);
+                    break;
+                 }
+              }
+              
+           } catch(e) {
+              this._reportFailure(e);
+           }
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+
+        _onMountRemeved: function(monit, mount) {
+           try {
+              let _findVol = false;
+              for (let i = 0; i < this.drivesRemovables.length; i++)
+              {
+                 if(this.drivesRemovables[i] == mount)
+                 {
+                    Main.notifyError("Device Eject");
+                    global.play_theme_sound(0, 'device-removed-media');
+                    /*Remove Volumen on this.drivesRemovables */
+                    this.drivesRemovables.splice(i, 1);
+                    break;
+                 }
+              }
+              
+           } catch(e) {
+              this._reportFailure(e);
+           }
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+
+        _onVolumeAdded: function(monit, volumen) {
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+
+        _onVolumeRemoved: function(monit, volumen) {
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+
+        _onDriveConnected: function(monit, drive) {
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+
+        _onDriveDisconnected: function(monit, drive) {
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+        },
+/*
+        _onDriveEjectButton: function(monit, drive) {
+           Main.notifyError("Entro");
+           //this._updateDate();
+        },
+*/
         _onDriveClicked: function(bt) {
            let _volumen = this._findDriveOfIcon(bt); //Posible Drive, not a Volumen...
            try {
@@ -920,19 +1024,6 @@ MyDesklet.prototype = {
            let urlPath = _hardDrive[5];
            this._animateIcon(bt);
            Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
-        },
-
-        _on_setting_changed: function() {
-           if(this._timeout > 0)
-              Mainloop.source_remove(this._timeout);
-           this._timeout = null;
-           this._deskletFrame.destroy();
-           this._addDrives();
-           this._updateDate();
-        },
-
-        _onTypeOpenChanged: function() {
-           GLib.spawn_command_line_async('gsettings set org.gnome.desktop.media-handling automount-open ' + this._openSystem);
         },
 
         _path: function() {
@@ -1051,7 +1142,7 @@ MyDesklet.prototype = {
         _detectMountDevice: function() {
            let [res, out, err, status] = GLib.spawn_command_line_sync('df');
            let mount_lines = out.toString().split("\n");
-           this.mountsHard = [];
+           let _currMountsHard = [];
            for(let mount_line in mount_lines) {
               let mount = mount_lines[mount_line].toString().split(/\s+/);
               if(mount[0].indexOf("/dev/") == 0) {
@@ -1065,9 +1156,10 @@ MyDesklet.prototype = {
                  for(let i = 6; i < mount.length; i++)
                    _mount[5] = _mount[5] + " " + mount[i];
  
-                 this.mountsHard.push(_mount);
+                 _currMountsHard.push(_mount);
               }
            }
+           return _currMountsHard;
         },
 
         _reportFailure: function(exception) {
@@ -1096,6 +1188,21 @@ MyDesklet.prototype = {
                onCompleteScope: this
            });
         },
+
+        _on_setting_changed: function() {
+           if(this._timeout > 0)
+              Mainloop.source_remove(this._timeout);
+           this._timeout = null;
+           this._deskletFrame.destroy();
+           //this._addDrives();
+           this._updateDate();
+           if((this._capacityDetect)||(this._advanceOpticalDetect))
+              this._checkUpdate();
+        },
+
+        _onTypeOpenChanged: function() {
+           GLib.spawn_command_line_async('gsettings set org.gnome.desktop.media-handling automount-open ' + this._openSystem);
+        },
         
         _initSettings: function(){
           try {
@@ -1118,6 +1225,7 @@ MyDesklet.prototype = {
             this.settings.bindProperty(Settings.BindingDirection.IN, "fontNameSize", "_nameSize", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "fontCapacitySize", "_capacitySize", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "advanceOpticalDetect", "_advanceOpticalDetect", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "pMount", "_pMountActive", this._on_setting_changed, null);
 

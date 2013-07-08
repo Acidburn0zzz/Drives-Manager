@@ -26,6 +26,9 @@ Issues and improvements:
 
 ChangeLog:
 
+0.4-Beta
+   - The code was optimized to use less CPU.
+   - Was added a new option. Now you can choose not to spend CPU and have the information capacity of the current mounted volumes.
 0.3-Beta
    - Now you can open mount point with space.
    - Fixed problem to open the mount point of volumen.

@@ -140,26 +140,32 @@
     },
     "openSystem": {
         "default": false,
-        "description": "Automatic Open Volume's On Connect",
+        "description": "Automount Open S.O.(Whoever controls is the S.O.)",
         "type": "checkbox",
-        "tooltip": "Check this to use automatic system volume's open when connect drive or not."
+        "tooltip": "Check this to use or not org.gnome.desktop.media-handling automount-open S.O. property."
     },
     "openConnect": {
         "default": false,
-        "description": "Open Volume's On Connect",
+        "description": "Automount Open(Whoever controls is the desklet).",
         "type": "checkbox",
-        "tooltip": "Check this to open volume's when connect drive."
+        "tooltip": "Check this to open the mountpoint or not, when the volumen was mounted."
+    },
+    "capacityDetect": {
+        "default": true,
+        "description": "Use Capacity Detection.",
+        "type": "checkbox",
+        "tooltip": "Check this to use or not Capacity Detection Option. When enabled using more CPU, but capacity changes are detected in the volumens mounted"
     },
     "advanceOpticalDetect": {
         "default": false,
-        "description": "Use Advance Optical Detect Beta:to slow and incomplete.",
+        "description": "Use Advanced Option Status Detection Optical Drives. Beta:It's Slow And Incomplete.",
         "type": "checkbox",
-        "tooltip": "Check this to use Advance Optical Detect option's. It's in Beta, slow and incomplete."
+        "tooltip": "Check this to use or not Advanced Option Status Detection Optical Drives. It's in Beta state, is slow and incomplete."
     },
     "pMount": {
         "default": false,
-        "description": "Use pmount package to mount and umount removable drives.",
+        "description": "Use The Package pmount To Mount And Unmount Removable Drives.",
         "type": "checkbox",
-        "tooltip": "Check this to use pmount package to mount and umount removable drives."
+        "tooltip": "Check this to use or not the package pmount, in the mount and unmount of removable drives."
     }
 }
