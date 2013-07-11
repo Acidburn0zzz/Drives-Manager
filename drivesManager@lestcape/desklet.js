@@ -36,9 +36,15 @@ const Util = imports.misc.util;
 const Settings = imports.ui.settings;
 const Tweener = imports.ui.tweener;
 const CinnamonMountOperation = imports.ui.cinnamonMountOperation;
-const Cinnamon = imports.gi.Cinnamon;
 const Main = imports.ui.main;
-const GUdev = imports.gi.GUdev;
+//const Cinnamon = imports.gi.Cinnamon;
+//const GUdev = imports.gi.GUdev;
+
+/****Import File****/
+//const AppletDir = imports.ui.appletManager.applets['drivesManager@lestcape'];
+const DeskletDir = imports.ui.deskletManager.desklets['drivesManager@lestcape'];
+const Translate = DeskletDir.translate;
+/****Import File****/
 
 function MyDesklet(metadata){
     this._init(metadata);
@@ -54,6 +60,10 @@ MyDesklet.prototype = {
        	   this.uuid = this.metadata["uuid"];
 
 	   this.setHeader(_("Drives Manager"));
+
+           let translator = new Translate.Translator(this.uuid);
+           this.lang = translator._getLanguage();
+//           Main.notifyError(this.lang["key1"]);
 	
            //this.configFile = this._pathToComponent("metadata.json", "");
            //global.log("Config file " + this.configFile);
@@ -65,7 +75,7 @@ MyDesklet.prototype = {
               Util.spawn(['cinnamon-settings', 'desklets', this.uuid]);
 	   }));
 	
-	   this._menu.addAction(_("Help"), Lang.bind(this, function() {
+	   this._menu.addAction(_(this.lang["help"]), Lang.bind(this, function() {
 	      Util.spawnCommandLine("xdg-open " + this.helpFile);
 	   }));
 
@@ -94,7 +104,7 @@ MyDesklet.prototype = {
            }*/
            this._optionInstall = -1;
            this._updateDate();
-           if((this._capacityDetect)||(this._advanceOpticalDetect))
+           if((this._pMountActive)||(this._capacityDetect)||(this._advanceOpticalDetect))
               this._checkUpdate();
 	},
 
@@ -104,71 +114,73 @@ MyDesklet.prototype = {
 	},
 
         _checkPackage: function() {
-           if((this._pMountActive)&&(!this._isPackageInstall()))
+           if(this._pMountActive)
            {
-              let _rootContainer = this._createFrame();
-              let _information = new St.Label();
-              _information.style="font-size: " + this._nameSize + "pt";
+              if(!this._isPackageInstall())
+              {
+                 let _rootContainer = this._createFrame();
+                 let _information = new St.Label();
+                 _information.style="font-size: " + this._nameSize + "pt";
               
-              if(this._optionInstall == -1) 
-              {
-                 let _ask = new St.Label();
-                 _ask.style="font-size: " + this._nameSize + "pt";
-                 _information.set_text("Devices Manager Desklet need pmount pakage to use advance function.");
-                 _ask.set_text("Do you like to install?");
-                 let _buttonContainer = new St.BoxLayout({vertical:false});
+                 if(this._optionInstall == -1) 
+                 {
+                    let _ask = new St.Label();
+                    _ask.style="font-size: " + this._nameSize + "pt";
+                    _information.set_text(this.lang["pMountInfo"]);
+                    _ask.set_text(this.lang["installAsk"]);
+                    let _buttonContainer = new St.BoxLayout({vertical:false});
 
-                 let _yesLabel = new St.Label();
-                 _yesLabel.style="font-size: " + this._nameSize + "pt";
-                 _yesLabel.set_text("    Yes    ");
-                 let _yesButton = new St.Button();
-                 _yesButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                 _yesButton.set_child(_yesLabel);
-                 _yesButton.connect('clicked', Lang.bind(this, function() {
-                    Util.spawnCommandLine("gksu apt-get install pmount");
-                    this._optionInstall = 1;
-                 }));
+                    let _yesLabel = new St.Label();
+                    _yesLabel.style="font-size: " + this._nameSize + "pt";
+                    _yesLabel.set_text("    Yes    ");
+                    let _yesButton = new St.Button();
+                    _yesButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
+                    _yesButton.set_child(_yesLabel);
+                    _yesButton.connect('clicked', Lang.bind(this, function() {
+                       Util.spawnCommandLine("gksu apt-get install pmount");
+                       this._optionInstall = 0;
+                    }));
 
-                 let _noLabel = new St.Label();
-                 _noLabel.style="font-size: " + this._nameSize + "pt";
-                 _noLabel.set_text("    No    ");
-                 let _noButton = new St.Button();
-                 _noButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                 _noButton.set_child(_noLabel);
-                 _noButton.connect('clicked', Lang.bind(this, function() {
-                    this._optionInstall = 2;
-                 }));
+                    let _noLabel = new St.Label();
+                    _noLabel.style="font-size: " + this._nameSize + "pt";
+                    _noLabel.set_text("    No    ");
+                    let _noButton = new St.Button();
+                    _noButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
+                    _noButton.set_child(_noLabel);
+                    _noButton.connect('clicked', Lang.bind(this, function() {
+                       this._optionInstall = -1;
+                       this._pMountActive = false;
+                    }));
 
-                 _buttonContainer.add(_yesButton, {x_fill: true, x_align: St.Align.END});
-                 _buttonContainer.add(_noButton, {x_fill: true, x_align: St.Align.END});
-                 _rootContainer.add(_information, {x_fill: true, x_align: St.Align.START});
-                 _rootContainer.add(_ask, {x_fill: true, x_align: St.Align.START});
-                 _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
-              }
-              else if(this._optionInstall == 1)
-              {
-                 _information.set_text("Please wait to install pmount...");
+                    _buttonContainer.add(_yesButton, {x_fill: true, x_align: St.Align.END});
+                    _buttonContainer.add(_noButton, {x_fill: true, x_align: St.Align.END});
+                    _rootContainer.add(_information, {x_fill: true, x_align: St.Align.START});
+                    _rootContainer.add(_ask, {x_fill: true, x_align: St.Align.START});
+                    _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
+                 }
+                 else if(this._optionInstall == 0)
+                 {
+                    _information.set_text(this.lang["pMountWait"]);
                  
-                 let _buttonContainer = new St.BoxLayout({vertical:false}); 
-                 let _cancelLabel = new St.Label();
-                 _cancelLabel.style="font-size: " + this._nameSize + "pt";
-                 _cancelLabel.set_text("    Cancel    ");
-                 let _cancelButton = new St.Button();
-                 _cancelButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                 _cancelButton.set_child(_cancelLabel);
-                 _cancelButton.connect('clicked', Lang.bind(this, function() {
-                    this._optionInstall = 2;
-                 }));
-                 _buttonContainer.add(_cancelButton, {x_fill: true, x_align: St.Align.END});
-                 _rootContainer.add(_information, {x_fill: true, expand: true, x_align: St.Align.START});
-                 _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
+                    let _buttonContainer = new St.BoxLayout({vertical:false}); 
+                    let _cancelLabel = new St.Label();
+                    _cancelLabel.style="font-size: " + this._nameSize + "pt";
+                    _cancelLabel.set_text("    Cancel    ");
+                    let _cancelButton = new St.Button();
+                    _cancelButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
+                    _cancelButton.set_child(_cancelLabel);
+                    _cancelButton.connect('clicked', Lang.bind(this, function() {
+                       this._optionInstall = -1;
+                       this._pMountActive = false;
+                    }));
+                    _buttonContainer.add(_cancelButton, {x_fill: true, x_align: St.Align.END});
+                    _rootContainer.add(_information, {x_fill: true, expand: true, x_align: St.Align.START});
+                    _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
+                 }
+                 return false;
               }
-              else if(this._optionInstall == 2)
-              {
+              else
                  this._optionInstall == -1;
-                 this._pMountActive = false;
-              }
-              return false;
            }
            return true;
         },
@@ -205,23 +217,25 @@ MyDesklet.prototype = {
                  }
               }
            }
+           let _checkP = this._checkPackage();
+           if(_checkP)
+              _updateNeeded = true;
 
            if(_updateNeeded)
               this._updateDate();
-           this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._checkUpdate));
+
+           if((!_checkP)||(this._capacityDetect)||(this._advanceOpticalDetect))
+              this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._checkUpdate));
 	},
 
 	_updateDate: function() {
-           if(this._checkPackage())
-           {
-              this.opticalDrives = [];
-              this.mountsHard = this._detectMountDevice();
-              this._addDrives();
-              if((this._advanceOpticalDetect)&&(this._firstTime)) {
-                // this._detectOptical();
-                // this._upDateOptical();
-                this._firstTime = false;
-              }
+           this.opticalDrives = [];
+           this.mountsHard = this._detectMountDevice();
+           this._addDrives();
+           if((this._advanceOpticalDetect)&&(this._firstTime)) {
+             // this._detectOptical();
+             // this._upDateOptical();
+             this._firstTime = false;
            }
            //this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._updateDate));
 	},
@@ -231,7 +245,7 @@ MyDesklet.prototype = {
            if(this._showMainBox)
            {
               let _color = (this._boxColor.replace(")",","+this._transparency+")")).replace('rgb','rgba');
-              this._deskletFrame.set_style('padding: 4px; border:' + this._borderBoxWidth + 'px solid #ffffff; background-color: ' + _color + '; border-radius: 12px;');
+              this._deskletFrame.set_style('padding: 4px; border:' + this._borderBoxWidth + 'px solid '+this._borderBoxColor+'; background-color: ' + _color + '; border-radius: 12px;');
            }
            let _rootContainer = new St.BoxLayout({vertical:true});
            _rootContainer.set_style('color:'+ this._fontColor + '; text-shadow: 1px 1px 2px #000;');
@@ -247,7 +261,7 @@ MyDesklet.prototype = {
            if(this._showDriveBox)
            {
               let _color = (this._boxColor.replace(")",","+this._transparency+")")).replace('rgb','rgba');
-              _driveContainer.set_style('padding: 0px 6px 0px 0px; border:'+ this._borderBoxWidth + 'px solid #ffffff; background-color: ' + _color + '; border-radius: 12px;');
+              _driveContainer.set_style('padding: 0px 6px 0px 0px; border:'+ this._borderBoxWidth + 'px solid '+this._borderBoxColor+'; background-color: ' + _color + '; border-radius: 12px;');
            }
            return _driveContainer;
         },
@@ -841,7 +855,7 @@ MyDesklet.prototype = {
            if(_drive)
            {
               this._injectByCommand(_drive);
-              Main.notifyError("Optical Inject");
+              Main.notifyError(this.lang["injectDevice"]);
            }
         },
 
@@ -850,7 +864,7 @@ MyDesklet.prototype = {
            if(_drive)
            {
               this._ejectByCommand(_drive);
-              Main.notifyError("Optical Eject");
+              Main.notifyError(this.lang["ejectDevice"]);
            }
         },
 
@@ -900,7 +914,7 @@ MyDesklet.prototype = {
                     }
               }
               catch(e) {
-                 Main.notifyError("Drives failed:", e.message);
+                 Main.notifyError(this.lang["fail"], e.message);
               }
            }
         },
@@ -908,7 +922,7 @@ MyDesklet.prototype = {
         _onUnmountFinish: function(mount, result) {
            try {
               mount.unmount_with_operation_finish(result);
-              Main.notifyError("Device Eject");
+              Main.notifyError(this.lang["ejectDevice"]);
            } catch(e) {
               this._reportFailure(e);
            }
@@ -917,7 +931,7 @@ MyDesklet.prototype = {
         _onEjectFinish: function(mount, result) {
            try {
              mount.eject_with_operation_finish(result);
-             Main.notifyError("Device Eject");
+             Main.notifyError(this.lang["ejectDevice"]);
            } catch(e) {
              this._reportFailure(e);
            }
@@ -927,7 +941,7 @@ MyDesklet.prototype = {
            try {
               volumen.mount_finish(result);
               this._openVolumen(volumen);
-              Main.notifyError("Device Inject");
+              Main.notifyError(this.lang["injectDevice"]);
     	   } catch (e) {
               this._reportFailure(e);
            }
@@ -948,7 +962,7 @@ MyDesklet.prototype = {
               {
                  if(this.drivesRemovables[i] == this._getIdentifier(mount.get_volume()))
                  {
-                    Main.notifyError("Device Inject");
+                    Main.notifyError(this.lang["injectDevice"]);
                     global.play_theme_sound(0, 'device-added-media');
                     this._openVolumen(mount.get_volume());
                     /*Remove Volumen on this.drivesRemovables */
@@ -970,7 +984,7 @@ MyDesklet.prototype = {
               {
                  if(this.drivesRemovables[i] == mount)
                  {
-                    Main.notifyError("Device Eject");
+                    Main.notifyError(this.lang["ejectDevice"]);
                     global.play_theme_sound(0, 'device-removed-media');
                     /*Remove Volumen on this.drivesRemovables */
                     this.drivesRemovables.splice(i, 1);
@@ -1139,6 +1153,45 @@ MyDesklet.prototype = {
         },
 */
 /*****Optical Device*******/
+
+        _updateDisk: function() {
+           let _fileDiskstats = GLib.file_get_contents("/proc/diskstats");
+           let _linesDiskstats = ("" + _fileDiskstats[1]).split("\n");
+
+           let _diskReadTotal = 0;
+           let _diskWriteTotal = 0;
+           let _diskIdle = new Date().getTime()/1000;
+
+           for (let i = 0; i < _linesDiskstats.length; i++)
+           {
+              let _values;
+
+              if (_linesDiskstats[i].match(/^\s*\d+\s*\d+\s[a-z]+\s/))
+              {
+                 let _values = _linesDiskstats[i].match(/^\s*\d+\s*\d+\s[a-z]+\s(.*)$/)[1].split(" ");
+
+                 _diskReadTotal += parseInt(_values[2]);
+                 _diskWriteTotal += parseInt(_values[6]);
+              }
+           }
+         
+           if ((this.diskReadTotalOld == null && this.diskWriteTotalOld == null && this.diskIdleOld == null) || (this.diskIdleOld == _diskIdle))
+           {
+              this.diskReadTotalOld = _diskReadTotal;
+              this.diskWriteTotalOld = _diskWriteTotal;
+              this.diskIdleOld = _diskIdle - 1;
+           }
+
+           let _diskRead = Math.round((this.diskReadTotalOld - _diskReadTotal)/(this.diskIdleOld - _diskIdle)/2/1024);
+           let _diskWrite = Math.round((this.diskWriteTotalOld - _diskWriteTotal)/(this.diskIdleOld - _diskIdle)/2/1024);
+
+           this.diskReadTotalOld = _diskReadTotal;
+           this.diskWriteTotalOld = _diskWriteTotal;
+           this.diskIdleOld = _diskIdle;
+
+           //Main.notifyError(_diskRead.toString() + " / " + _diskWrite.toString());
+        },
+
         _detectMountDevice: function() {
            let [res, out, err, status] = GLib.spawn_command_line_sync('df');
            let mount_lines = out.toString().split("\n");
@@ -1163,7 +1216,7 @@ MyDesklet.prototype = {
         },
 
         _reportFailure: function(exception) {
-	   Main.notifyError("Drives failed:", exception.message);
+	   Main.notifyError(this.lang["fail"], exception.message);
         },
 
         _animateIcon: function(animeIcon, step){
@@ -1196,7 +1249,7 @@ MyDesklet.prototype = {
            this._deskletFrame.destroy();
            //this._addDrives();
            this._updateDate();
-           if((this._capacityDetect)||(this._advanceOpticalDetect))
+           if((this._pMountActive)||(this._capacityDetect)||(this._advanceOpticalDetect))
               this._checkUpdate();
         },
 
@@ -1220,6 +1273,7 @@ MyDesklet.prototype = {
             this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fixWidth", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "fontNameSize", "_nameSize", this._on_setting_changed, null);

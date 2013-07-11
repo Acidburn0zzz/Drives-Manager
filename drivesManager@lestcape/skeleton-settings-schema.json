@@ -1,0 +1,177 @@
+{
+    "theme": {
+        "type": "combobox",
+        "description": "$themeDesc$",
+        "default": "mind",
+        "tooltip": "$themeTool$",
+        "options": {
+            "Mind": "mind",
+            "Ubuntu": "ubuntu",
+            "Linux": "linux",
+            "Comic": "comic",
+            "Windows": "windows",
+            "Blue": "blue",
+            "Metalic": "metalic",
+            "Black": "black",
+            "Orange": "orange",
+            "Pink": "pink"
+        }
+    },
+    "mainBox": {
+        "default": true,
+        "description": "$mainBoxDesc$",
+        "type": "checkbox",
+        "tooltip": "$mainBoxTool$"
+    },
+    "driveBox": {
+        "default": true,
+        "description": "$driveBoxDesc$",
+        "type": "checkbox",
+        "tooltip": "$driveBoxTool$"
+    },
+    "borderBoxWidth": {
+        "default": 1,
+        "type": "spinbutton",
+        "min": 0,
+        "max": 4,
+        "description": "$borderBoxWidthDesc$",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "$borderBoxWidthTool$"
+    },
+    "borderBoxColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "$borderBoxColorDesc$",
+        "tooltip": "$borderBoxColorTool$"
+    },
+    "boxColor": {
+        "type": "colorchooser",
+        "default": "rgb(0,0,0)",
+        "description": "$boxColorDesc$",
+        "tooltip": "$boxColorTool$"
+    },
+    "fixWidth": {
+        "default": true,
+        "description": "$fixWidthDesc$",
+        "type": "checkbox",
+        "tooltip": "$fixWidthTool$"
+    },
+    "width": {
+        "default": 170,
+        "type": "spinbutton",
+        "min": 100,
+        "max": 1600,
+        "description": "$widthDesc$",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixWidth",
+        "tooltip": "$widthTool$"
+    },
+    "fontColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "$fontColorDesc$",
+        "tooltip": "$fontColorTool$"
+    },
+    "fontNameSize": {
+        "default": 9,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "$fontNameSizeDesc$",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "$fontNameSizeTool$"
+    },
+    "fontCapacitySize": {
+        "default": 7,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "$fontCapacitySizeDesc$",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "$fontCapacitySizeTool$"
+    },
+    "transparency": {
+        "type": "scale",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05,
+        "description": "$transparencyDesc$",
+        "tooltip": "$transparencyTool$"
+    },
+    "hardDrives": {
+        "default": true,
+        "description": "$hardDrivesDesc$",
+        "type": "checkbox",
+        "tooltip": "$hardDrivesTool$"
+    },
+    "opticalDrives": {
+        "default": true,
+        "description": "$opticalDrivesDesc$",
+        "type": "checkbox",
+        "tooltip": "$opticalDrivesTool$"
+    },
+    "removableDrives": {
+        "default": true,
+        "description": "$removableDrivesDesc$",
+        "type": "checkbox",
+        "tooltip": "$removableDrivesTool$"
+    },
+    "fixedDrives": {
+        "default": true,
+        "description": "$fixedDrivesDesc$",
+        "type": "checkbox",
+        "tooltip": "$fixedDrivesTool$"
+    },
+    "emptyDrives": {
+        "default": false,
+        "description": "$emptyDrivesDesc$",
+        "type": "checkbox",
+        "tooltip": "$emptyDrivesTool$"
+    },
+    "openWith": {
+        "type": "combobox",
+        "description": "$openWithDesc$",
+        "default": "nemo",
+        "tooltip": "$openWithTool$",
+        "options": {
+            "Nemo": "nemo",
+            "Nautilus": "nautilus"
+        }
+    },
+    "openSystem": {
+        "default": false,
+        "description": "$openSystemDesc$",
+        "type": "checkbox",
+        "tooltip": "$openSystemTool$"
+    },
+    "openConnect": {
+        "default": false,
+        "description": "$openConnectDesc$",
+        "type": "checkbox",
+        "tooltip": "$openConnectTool$"
+    },
+    "capacityDetect": {
+        "default": true,
+        "description": "$capacityDetectDesc$",
+        "type": "checkbox",
+        "tooltip": "$capacityDetectTool$"
+    },
+    "advanceOpticalDetect": {
+        "default": false,
+        "description": "$advanceOpticalDetectDesc$",
+        "type": "checkbox",
+        "tooltip": "$advanceOpticalDetectTool$"
+    },
+    "pMount": {
+        "default": false,
+        "description": "$pMountDesc$",
+        "type": "checkbox",
+        "tooltip": "$pMountTool$"
+    }
+}

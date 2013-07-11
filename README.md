@@ -4,7 +4,7 @@ Drives-Manager v0.4-Beta
 A Drives Manager Desklet for Cinnamon - v0.4-Beta 07 July 2013.
 Author: Lester Carballo Pérez <lestcape@gmail.com>
 
-This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in shema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
+This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in schema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -21,7 +21,7 @@ Instalation Instructions:
 3- Enable a Desklet in Cinnamon Settings and use.
 
 Issues and improvements:
-
+- Warning! cinnamon has a bug in the handling of special characters, such as accents or ñ. This is only for users who do not use the English language. To use the language, number is required to activate the desklet (nothing will be displayed for the above problem), turn it off and back on again. The language of your system will be recognized and if there is translation to be displayed in that language. You need access to the command iconv. This command is the one who helps solve the problem of cinnamon. Help for quickly problem resolved by participating in a discussion on the issue at this url: https://github.com/linuxmint/Cinnamon/issues/2245
 - Advanced Option for Optical devices, need packages "cdrecord" and "wodim" to detect status(open/closed) of the CD/DVD. The command cdrecord depends on wodim, and when the optical drive has a disk, wodim sometimes fail to properly access the device.
 -  Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
 - The Hard drive and optical option need the "coreutils" package, for use the command df.
@@ -29,6 +29,9 @@ Issues and improvements:
 - The "use pmount package" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
 
 ChangeLog:
+0.5-Beta
+   - The automatic installation of pmount was fixed.
+   - Added support for languages. The file settings-schema.json was eliminated, it will be generated automatically based on the language of the system, from the new file included "skeleton-settings-schema.json". Also was included the new file "translate.js" for translation automation.
 
 0.4-Beta
    - The code was optimized to use less CPU.

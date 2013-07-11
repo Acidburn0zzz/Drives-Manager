@@ -1,7 +1,7 @@
 {
-    "description": "A desklet to manager drive's.", 
+    "last-edited": "1373241925", 
     "prevent-decorations": false, 
-    "uuid": "drivesManager@lestcape", 
+    "description": "A desklet to manager drive's.", 
     "name": "Drives Desklet", 
-    "last-edited": "1373134625"
+    "uuid": "drivesManager@lestcape"
 }
