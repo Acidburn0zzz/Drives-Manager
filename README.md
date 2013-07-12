@@ -48,16 +48,22 @@ LC_IDENTIFICATION="es_MX.UTF-8"
 LC_ALL=
 
 In this example the first row "LANG=es_MX.UTF-8" is mark that  system language it's in spanish. Look "es" it's the key to determine the language.
-2- Go to /home/User/.local/share/cinnamon/desklets/drivesManager@lestcape
+
+2- Go to /home/User/.local/share/cinnamon/desklets/drivesManager@lestcape.
+
 3- In the lang folder make a copy of file "en" and change the name of file copy to the key name was obtained in step 1.
+
 4- Open the copy of file, in the contents of this, exist some lines with a "key=value" format. You can't change the key. You can only change the value, translate the present value in english language to your language.
+
 5- Save your file.
+
 6- Close the desklet and the system settings, if it's open.
+
 7- Delete the file settings-schema.json in folder  /home/User/.local/share/cinnamon/desklets/drivesManager@lestcape. Please take warning, don't delete the file skeleton-settings-schema.json or some another one.
+
 8- Open the desklet, it's now in your language.
+
 9- Please send your file by email lestcape@gmail.com. It's will be putting in the official web page of cinnamon, with your nick name or name depending on your preference.
-
-
 
 ChangeLog:
 
