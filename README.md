@@ -31,20 +31,35 @@ Issues and improvements:
 How to add a new language:
 
 1- Open terminal and write "locale", the output is some things like this:
+
 LANG=es_MX.UTF-8
+
 LANGUAGE=es_MX:es
+
 LC_CTYPE="es_MX.UTF-8"
+
 LC_NUMERIC="es_MX.UTF-8"
+
 LC_TIME="es_MX.UTF-8"
+
 LC_COLLATE="es_MX.UTF-8"
+
 LC_MONETARY="es_MX.UTF-8"
+
 LC_MESSAGES="es_MX.UTF-8"
+
 LC_PAPER="es_MX.UTF-8"
+
 LC_NAME="es_MX.UTF-8"
+
 LC_ADDRESS="es_MX.UTF-8"
+
 LC_TELEPHONE="es_MX.UTF-8"
+
 LC_MEASUREMENT="es_MX.UTF-8"
+
 LC_IDENTIFICATION="es_MX.UTF-8"
+
 LC_ALL=
 
 In this example the first row "LANG=es_MX.UTF-8" is mark that  system language it's in spanish. Look "es" it's the key to determine the language.
