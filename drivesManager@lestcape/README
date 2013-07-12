@@ -24,7 +24,37 @@ Issues and improvements:
 - Sometimes auto mount points open devices may fail and open more than once the same volume. This is because the volume was removed using an alternative mode not recognized by the operating system, and when this reconnect may appear doubled.
 - The "use pmount package" option requires package "pmount". The pmount command does not need superuser permissions to process the operation mount and unmount, which is why the operation can not be performed with protocols support operating system. Visit: http://pmount.alioth.debian.org/, for more details on this package.
 
+How to add a new language:
+
+1-Open terminal and write "locale", the output is some things like this:
+LANG=es_MX.UTF-8
+LANGUAGE=es_MX:es
+LC_CTYPE="es_MX.UTF-8"
+LC_NUMERIC="es_MX.UTF-8"
+LC_TIME="es_MX.UTF-8"
+LC_COLLATE="es_MX.UTF-8"
+LC_MONETARY="es_MX.UTF-8"
+LC_MESSAGES="es_MX.UTF-8"
+LC_PAPER="es_MX.UTF-8"
+LC_NAME="es_MX.UTF-8"
+LC_ADDRESS="es_MX.UTF-8"
+LC_TELEPHONE="es_MX.UTF-8"
+LC_MEASUREMENT="es_MX.UTF-8"
+LC_IDENTIFICATION="es_MX.UTF-8"
+LC_ALL=
+
+In this example the first row "LANG=es_MX.UTF-8" is mark that  system language it's in spanish. Look "es" it's the key to determine the language.
+2-Go to /home/User/.local/share/cinnamon/desklets/drivesManager@lestcape
+3-In the lang folder make a copy of file "en" and change the name of file copy to the key name was obtained in step 1.
+4-Open the copy of file, in the contents of this, exist some lines with a "key=value" format. You can't change the key. You can only change the value, translate the present value in english language to your language.
+5-Save your file.
+6-Close the desklet and the system settings, if it's open.
+7-Delete the file settings-schema.json in folder  /home/User/.local/share/cinnamon/desklets/drivesManager@lestcape. Please take warning, don't delete the file skeleton-settings-schema.json or some another one.
+8-Open the desklet, it's now in your language.
+9-Please send your file by email lestcape@gmail.com. It's will be putting in the official web page of cinnamon, with your nick name or name depending on your preference.
+
 ChangeLog:
+
 0.5-Beta
    - The automatic installation of pmount was fixed.
    - Added support for languages. The file settings-schema.json was eliminated, it will be generated automatically based on the language of the system, from the new file included "skeleton-settings-schema.json". Also was included the new file "translate.js" for translation automation.
