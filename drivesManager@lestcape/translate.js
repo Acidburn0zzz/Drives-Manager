@@ -1,7 +1,6 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Main = imports.ui.main;
-//const Encoding = imports.encoding;
 
 function Translator(uuid) {
 	this._init(uuid);
@@ -30,7 +29,6 @@ Translator.prototype = {
            if(_file.query_exists(null))
            {
               let _text = this._readFile(_file);
-             // let _text = this._utfToUnicode(this._readFile(_file));
               let _lines = _text.split("\n");
               for (let _curr in _lines)
               {
@@ -44,9 +42,6 @@ Translator.prototype = {
            else
              Main.notifyError("File not exist");
            this._generateSettings(token);
-           if(_defaultLang != "en")
-              this._configReplace();
-           //global.reexec_self();
            return token;
         },
 
@@ -65,28 +60,12 @@ Translator.prototype = {
                           _infoSkeleton = _infoSkeleton.replace("$"+key+"$", token[key]);
                     }
                     this._writeFile(_fileSettings, _infoSkeleton);
+                    this._configReplace();
                  } catch(e) {
                     Main.notifyError("Error: "+ e.message);
                  }
               }
            }
-        },
-
-        _configReplace: function(token) {
-           try {
-              let _pathToConfig = GLib.get_home_dir()+ "/.cinnamon/configs/" + this.uuid + "/" + this.uuid + ".json";
-              GLib.spawn_command_line_sync("iconv -f iso-8859-1 -t utf-8 '" + _pathToConfig + "' -o '" + _pathToConfig + "'");
-           }
-           catch(e) {
-             Main.notifyError("Error:", e.message);
-           }
-         /*  let _fileConfig = Gio.file_new_for_path(_pathToConfig);
-           if(_fileConfig.query_exists(null))
-           {
-              let _infoConfig = _infoConfig = this._readFile(_fileConfig).substring(0, _infoSkeleton.length-5);
-              _infoConfig =  this._utfToUnicode(_infoConfig);
-              this._writeFile(_fileConfig+".bak", _infoConfig);
-           }*/
         },
 
         _readFile: function(file) {
@@ -117,33 +96,16 @@ Translator.prototype = {
 
         _path: function() {
            return GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this.uuid + "/";
-        }
-/* Meaby needed for only some characters unsoported by utf-8
-        _utfToUnicode: function(utf) {
-           let _unicode = utf;
-           try {
-              let character = [];
-              character["\u00e1"] = "\\u00e1"; //á
-              character["\u00e9"] = "\\u00e9"; //é
-              character["\u00ed"] = "\\u00ed"; //í
-              character["\u00f3"] = "\\u00f3"; //ó
-              character["\u00fa"] = "\\u00fa"; //ú
-              character["\u00c1"] = "\\u00c1"; //Á
-              character["\u00c9"] = "\\u00c9"; //É
-              character["\u00cd"] = "\\u00cd"; //Í
-              character["\u00d3"] = "\\u00d3"; //Ó
-              character["\u00da"] = "\\u00da"; //Ú
-              character["\u00f1"] = "\\u00f1"; //ñ
-              character["\u00d1"] = "\\u00d1"; //Ñ
+        },
 
-              for (key in character) {
-                 while(_unicode.indexOf(key) != -1)
-                    _unicode = _unicode.replace(key, character[key]);
-              }
-           } catch(e) {
-              Main.notifyError("Error: ", e.message);
+       _configReplace: function() {
+           try {
+              let _pathToConfig = GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this.uuid + "/settings-schema.json";
+              GLib.spawn_command_line_sync("iconv -f iso-8859-1 -t utf-8 '" + _pathToConfig + "' -o '" + _pathToConfig + "'");
+              //global.reexec_self();
            }
-           return _unicode;
+           catch(e) {
+             Main.notifyError("Error:", e.message);
+           }
         }
-*/
 };

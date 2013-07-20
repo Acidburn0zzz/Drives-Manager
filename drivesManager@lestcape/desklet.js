@@ -37,7 +37,7 @@ const Settings = imports.ui.settings;
 const Tweener = imports.ui.tweener;
 const CinnamonMountOperation = imports.ui.cinnamonMountOperation;
 const Main = imports.ui.main;
-//const Cinnamon = imports.gi.Cinnamon;
+const Cinnamon = imports.gi.Cinnamon;
 //const GUdev = imports.gi.GUdev;
 
 /****Import File****/
@@ -80,11 +80,12 @@ MyDesklet.prototype = {
 	   }));
 
            this.drives = [];
-           this.mountsHard = [];
+           this.mountsHard = null;
            this.drivesRemovables = [];
            this.namesRemovables = [];
            this.opticalDrives = [];
            this._firstTime = true;
+           this._hddTempSoundNotify = false; 
            this._initSettings();		
            this.monitor = Gio.VolumeMonitor.get();
            this.monitor.connect('mount-added', Lang.bind(this, this._onMountAdded));
@@ -103,9 +104,7 @@ MyDesklet.prototype = {
               this._reportFailure(e);
            }*/
            this._optionInstall = -1;
-           this._updateDate();
-           if((this._pMountActive)||(this._capacityDetect)||(this._advanceOpticalDetect))
-              this._checkUpdate();
+           this._checkUpdate();
 	},
 
 	on_desklet_removed: function() {
@@ -113,134 +112,203 @@ MyDesklet.prototype = {
 	      Mainloop.source_remove(this._timeout);
 	},
 
-        _checkPackage: function() {
-           if(this._pMountActive)
+        _checkPackage: function(packageName) {
+           if(!this._isPackageInstall(packageName))
            {
-              if(!this._isPackageInstall())
+              let _rootContainer = this._createFrame(false);
+              let _information = new St.Label();
+              let _back = new St.Label();
+              _information.style="font-size: " + this._nameSize + "pt";
+              _back.style="font-size: " + this._nameSize + "pt";
+              if(this._optionInstall == -1) 
               {
-                 let _rootContainer = this._createFrame();
-                 let _information = new St.Label();
-                 _information.style="font-size: " + this._nameSize + "pt";
-              
-                 if(this._optionInstall == -1) 
-                 {
-                    let _ask = new St.Label();
-                    _ask.style="font-size: " + this._nameSize + "pt";
-                    _information.set_text(this.lang["pMountInfo"]);
-                    _ask.set_text(this.lang["installAsk"]);
-                    let _buttonContainer = new St.BoxLayout({vertical:false});
+                 let _ask = new St.Label();
+                 _ask.style="font-size: " + this._nameSize + "pt";
+                 _information.set_text(this.lang["installInfo"]);
+                 _back.set_text(this.lang["installBack"]);
+                 _ask.set_text(this.lang["installAsk"]);
+                 let _buttonContainer = new St.BoxLayout({vertical:false});
 
-                    let _yesLabel = new St.Label();
-                    _yesLabel.style="font-size: " + this._nameSize + "pt";
-                    _yesLabel.set_text("    Yes    ");
-                    let _yesButton = new St.Button();
-                    _yesButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                    _yesButton.set_child(_yesLabel);
-                    _yesButton.connect('clicked', Lang.bind(this, function() {
-                       Util.spawnCommandLine("gksu apt-get install pmount");
-                       this._optionInstall = 0;
-                    }));
+                 let _yesLabel = new St.Label();
+                 _yesLabel.style="font-size: " + this._nameSize + "pt";
+                 _yesLabel.set_text("    " + this.lang["yesButton"] + "    ");
+                 let _yesButton = new St.Button();
+                 _yesButton.connect('notify::hover', Lang.bind(this, this._onHover));
+                 _yesButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
+                 _yesButton.set_child(_yesLabel);
+                 _yesButton.connect('clicked', Lang.bind(this, function() {
+                    Util.spawnCommandLine("gksu \"sh -c 'sudo apt-get install -y "+ packageName + "'\"");
+                    this._optionInstall = 0;
+                 }));
 
-                    let _noLabel = new St.Label();
-                    _noLabel.style="font-size: " + this._nameSize + "pt";
-                    _noLabel.set_text("    No    ");
-                    let _noButton = new St.Button();
-                    _noButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                    _noButton.set_child(_noLabel);
-                    _noButton.connect('clicked', Lang.bind(this, function() {
-                       this._optionInstall = -1;
-                       this._pMountActive = false;
-                    }));
-
-                    _buttonContainer.add(_yesButton, {x_fill: true, x_align: St.Align.END});
-                    _buttonContainer.add(_noButton, {x_fill: true, x_align: St.Align.END});
-                    _rootContainer.add(_information, {x_fill: true, x_align: St.Align.START});
-                    _rootContainer.add(_ask, {x_fill: true, x_align: St.Align.START});
-                    _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
-                 }
-                 else if(this._optionInstall == 0)
-                 {
-                    _information.set_text(this.lang["pMountWait"]);
-                 
-                    let _buttonContainer = new St.BoxLayout({vertical:false}); 
-                    let _cancelLabel = new St.Label();
-                    _cancelLabel.style="font-size: " + this._nameSize + "pt";
-                    _cancelLabel.set_text("    Cancel    ");
-                    let _cancelButton = new St.Button();
-                    _cancelButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
-                    _cancelButton.set_child(_cancelLabel);
-                    _cancelButton.connect('clicked', Lang.bind(this, function() {
-                       this._optionInstall = -1;
-                       this._pMountActive = false;
-                    }));
-                    _buttonContainer.add(_cancelButton, {x_fill: true, x_align: St.Align.END});
-                    _rootContainer.add(_information, {x_fill: true, expand: true, x_align: St.Align.START});
-                    _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
-                 }
-                 return false;
+                 _buttonContainer.add(_yesButton, {x_fill: true, x_align: St.Align.END});
+                 _rootContainer.add(_information, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_back, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_ask, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
               }
-              else
-                 this._optionInstall == -1;
+              else if(this._optionInstall == 0)
+              {
+                 _information.set_text(this.lang["installWait"]);
+                 _back.set_text(this.lang["installBack"]);
+                 _rootContainer.add(_back, {x_fill: true, expand: true, x_align: St.Align.START});
+                 _rootContainer.add(_information, {x_fill: true, expand: true, x_align: St.Align.START});
+              }
+              return false;
            }
+           this._optionInstall = -1;
            return true;
         },
 
-        _isPackageInstall: function() {
-           let [res, out, err, status] = GLib.spawn_command_line_sync('dpkg -s pmount');
+       _checkPermissions: function(folder, permissions, commandLine) {
+           let [res, out, err, status] = GLib.spawn_command_line_sync('ls -l ' + folder);
+           let out_lines = out.toString().split(" ");
+           if(out_lines[0] != permissions)
+           {
+              let _rootContainer = this._createFrame(false);
+              let _information = new St.Label();
+              let _back = new St.Label();
+              _information.style="font-size: " + this._nameSize + "pt";
+              _back.style="font-size: " + this._nameSize + "pt";
+              if(this._optionInstall == -1) 
+              {
+                 let _ask = new St.Label();
+                 _ask.style="font-size: " + this._nameSize + "pt";
+                 _information.set_text(this.lang["permissionsInfo"]);
+                 _back.set_text(this.lang["permissionsBack"]);
+                 _ask.set_text(this.lang["permissionsAsk"]);
+                 let _buttonContainer = new St.BoxLayout({vertical:false});
+
+                 let _yesLabel = new St.Label();
+                 _yesLabel.style="font-size: " + this._nameSize + "pt";
+                 _yesLabel.set_text("    " + this.lang["yesButton"] + "    ");
+                 let _yesButton = new St.Button();
+                 _yesButton.connect('notify::hover', Lang.bind(this, this._onHover));
+                 _yesButton.set_style('border:1px solid #ffffff; border-radius: 12px;');
+                 _yesButton.set_child(_yesLabel);
+                 _yesButton.connect('clicked', Lang.bind(this, function() {
+                    Util.spawnCommandLine("gksu \"sh -c 'sudo chown root:root " + folder +" && sudo chmod " + commandLine + " "+ folder+"'\"");
+                    this._optionInstall = 0;
+                 }));
+
+                 _buttonContainer.add(_yesButton, {x_fill: true, x_align: St.Align.END});
+                 _rootContainer.add(_information, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_back, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_ask, {x_fill: true, x_align: St.Align.START});
+                 _rootContainer.add(_buttonContainer, {x_fill: true, x_align: St.Align.END});
+              }
+              else if(this._optionInstall == 0)
+              {
+                 _information.set_text(this.lang["permissionsWait"]);
+                 _back.set_text(this.lang["permissionsBack"]);
+                 _rootContainer.add(_back, {x_fill: true, expand: true, x_align: St.Align.START});
+                 _rootContainer.add(_information, {x_fill: true, expand: true, x_align: St.Align.START});
+              }
+              return false;
+           }
+           this._optionInstall = -1;
+           return true;
+        },
+
+        _isPackageInstall: function(packageName) {
+           let [res, out, err, status] = GLib.spawn_command_line_sync('dpkg -s ' + packageName);
            let out_lines = out.toString().split("\n");
-           if(out_lines[1] == "Status: install ok installed")
+           if(out_lines[0] == "Package: " + packageName)
               return true;
            return false;      
         },
 
-        _checkUpdate: function()  {
-           let _updateNeeded = false;
-           if(this._capacityDetect)
-           {
-              let _currMountsHard = this._detectMountDevice();
-              for (let _curr in _currMountsHard)
-              {
-                 if(_currMountsHard[_curr][2] != this.mountsHard[_curr][2])
-                    _updateNeeded = true;
-              }
-           }
+        _reUpdate: function()  {
+           this.mountsHard = this._detectMountDevice();
+           this._updateDate();
+        },
 
-           if((!_updateNeeded)&&(this._advanceOpticalDetect))
-           {
-              for (let _opt in this.opticalDrives)
+        _checkUpdate: function()  {
+           let _checkP = true;
+           let _updateNeeded = false;
+           if(this._hddTempActive)
+              _checkP = (this._checkPackage("hddtemp")) && (this._checkPermissions("/usr/sbin/hddtemp", "-rwsr-xr-x", "u+s"));
+           if(this._pMountActive)
+              _checkP = this._checkPackage("pmount") && _checkP;
+
+           if(_checkP) {
+              if(!this.mountsHard)
               {
-                 let _isOptClose = this._isOpticalClosed(this.opticalDrives[_opt][0]);
-                 if(this.opticalDrives[_opt][1] != _isOptClose)
-                 {
-                    this.opticalDrives[_opt][1] = _isOptClose;
-                    _updateNeeded = true;
+                 this.mountsHard = this._detectMountDevice();
+                 _updateNeeded = true;
+              }
+              if((!_updateNeeded)&&((this._capacityDetect)||(this._hddTempActive)))
+              {
+                 let _currMountsHard = this._detectMountDevice();
+                 if(this._hddTempActive) {
+                    if(!this.mountsHard[0][6]) {
+                       this.mountsHard = _currMountsHard;
+                       _updateNeeded = true;
+                    }
+                    else {
+                       for (let _curr in _currMountsHard)
+                       {
+                          if((this._hddTempActive)&&(_currMountsHard[_curr][6] != this.mountsHard[_curr][6])) {
+                             this.mountsHard = _currMountsHard;
+                             _updateNeeded = true;
+                             break;
+                          }
+                       }
+                    }
+                 }
+                 if((!_updateNeeded)&&(this._capacityDetect)) {   
+                    for (let _curr in _currMountsHard)
+                    {
+                       if(_currMountsHard[_curr][2] != this.mountsHard[_curr][2]) {
+                          this.mountsHard = _currMountsHard;
+                          _updateNeeded = true;
+                          break;
+                       }
+                    }
                  }
               }
+              if((!_updateNeeded)&&(this._advanceOpticalDetect))
+              {
+                 for (let _opt in this.opticalDrives)
+                 {
+                    let _isOptClose = this._isOpticalClosed(this.opticalDrives[_opt][0]);
+                    if(this.opticalDrives[_opt][1] != _isOptClose)
+                    {
+                       this.opticalDrives[_opt][1] = _isOptClose;
+                       _updateNeeded = true;
+                    }
+                 }
+              }
+              if((_updateNeeded)||(this._firstTime))
+              {
+                 this._updateDate();
+                 this._firstTime = false;
+              }
            }
-           let _checkP = this._checkPackage();
-           if(_checkP)
-              _updateNeeded = true;
 
-           if(_updateNeeded)
-              this._updateDate();
-
-           if((!_checkP)||(this._capacityDetect)||(this._advanceOpticalDetect))
+           if((!_checkP)||(this._capacityDetect)||(this._hddTempActive)||(this._advanceOpticalDetect))
+           {
+              this._firstTime = true;
               this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._checkUpdate));
+           }
 	},
 
 	_updateDate: function() {
            this.opticalDrives = [];
-           this.mountsHard = this._detectMountDevice();
+           //this.mountsHard = this._detectMountDevice();
+           this._playSoundHddTemp();
            this._addDrives();
-           if((this._advanceOpticalDetect)&&(this._firstTime)) {
+          // if((this._advanceOpticalDetect)&&(this._firstTime)) {
              // this._detectOptical();
              // this._upDateOptical();
-             this._firstTime = false;
-           }
+          //   this._firstTime = false;
+          // }
            //this._timeout = Mainloop.timeout_add_seconds(1, Lang.bind(this, this._updateDate));
 	},
 
-        _createFrame: function() {
+        _createFrame: function(fixWidth) {
+           if(this._deskletFrame)
+              this._deskletFrame.destroy();
            this._deskletFrame = new St.Bin({x_align: St.Align.START});
            if(this._showMainBox)
            {
@@ -249,7 +317,7 @@ MyDesklet.prototype = {
            }
            let _rootContainer = new St.BoxLayout({vertical:true});
            _rootContainer.set_style('color:'+ this._fontColor + '; text-shadow: 1px 1px 2px #000;');
-           if(this._fixWidth)
+           if(fixWidth)
              _rootContainer.set_width(this._width);
            this._deskletFrame.set_child(_rootContainer);
            this.setContent(this._deskletFrame);
@@ -267,8 +335,9 @@ MyDesklet.prototype = {
         },
 
         _addDrives: function() {
-           let _rootContainer = this._createFrame();
-            
+           let _rootContainer = this._createFrame(this._fixWidth);
+           if(this.drives)
+             
            this.drives = [];
            this.listButtonIcon = [];
            this.listButtonEject = [];
@@ -299,6 +368,7 @@ MyDesklet.prototype = {
               if(this.mountsHard[mount][5].substring(0,6) != "/media") {
                  let _driveIcon = this._getIconImage(this._pathToComponent("disk.png", "theme/" + this._theme + "/"));
                  let _driveButton = new St.Button({ child: _driveIcon });
+                 _driveButton.connect('notify::hover', Lang.bind(this, this._onHover));
                  _driveButton.connect('clicked', Lang.bind(this, this._onMountHardClicked));
                  let _iconContainer = new St.BoxLayout({vertical:true});
                  _iconContainer.add(_driveButton, {x_fill: true, x_align: St.Align.START});
@@ -313,18 +383,26 @@ MyDesklet.prototype = {
                  _nameContainer.add(_name, {x_fill: true, expand: true, x_align: St.Align.START});
                  _nameContainer.add(_mountPoint, {x_fill: true, x_align: St.Align.END});
 
-                 let _capacityContainer = new St.BoxLayout({vertical:true});
+                 let _capacityContainer = new St.BoxLayout({vertical:false});
                  let _percentContainer = new St.BoxLayout({vertical:true});
                  let _capacity = new St.Label();
                  _capacity.style="font-size: " + this._capacitySize + "pt";
                  let u = this.mountsHard[mount][2];
                  let s = this.mountsHard[mount][1];
                  _capacity.set_text("" + this._convertToString(u) + "/" + this._convertToString(s));
-                 _capacityContainer.add(_capacity, {x_fill: true, x_align: St.Align.MIDDLE});
+                 
+                 _capacityContainer.add(_capacity, {x_fill: true, expand: true, x_align: St.Align.START});
+                 if(this._hddTempActive) {
+                    let _temp = new St.Label();
+                    _temp.style="font-size: " + this._capacitySize + "pt; color:" + this._getHddTempColor(this.mountsHard[mount][6]) + "; text-shadow: 1px 1px 2px #000;";
+                    _temp.set_text("" + this.mountsHard[mount][6]);
+                    _capacityContainer.add(_temp, {x_fill: true, x_align: St.Align.END});
+                 }
                  let _meterIcon = this._getMeterImage(s, u);
                  _percentContainer.add(_meterIcon, {x_fill: true, x_align: St.Align.MIDDLE});
 
-                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                 _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                  let _ejectIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/"));
                  _ejectContainer.add(_ejectIcon, {x_fill: true, x_align: St.Align.END});
 
@@ -383,13 +461,16 @@ MyDesklet.prototype = {
 
                        let _driveButton = new St.Button({ child: _driveIcon });
                        _driveButton.connect('clicked', Lang.bind(this, this._onDriveClicked));
+                       _driveButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        let _iconContainer = new St.BoxLayout({vertical:true});
                        _iconContainer.add(_driveButton, {x_fill: true, x_align: St.Align.START});
 
-                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                       _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                        let _ejectIcon = this._getIconImage(this._pathToComponent("eject.png", "theme/" + this._theme + "/"));
                        let _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onOpticalEject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.END});
 
                        let _infoContainer = new St.BoxLayout({vertical:true});
@@ -439,7 +520,8 @@ MyDesklet.prototype = {
                  let _infoContainer = new St.BoxLayout({vertical:true});
                  _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
 
-                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                 _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                  let _ejectIcon;
                  let _ejectButton;
                  //if((this._advanceOpticalDetect)&&(!this._firstTime)) {
@@ -451,6 +533,7 @@ MyDesklet.prototype = {
                        _ejectIcon = this._getIconImage(this._pathToComponent("eject.png", "theme/" + this._theme + "/"));
                        _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onOpticalEject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _optCurrent.push(true);
                     }
                     else
@@ -458,6 +541,7 @@ MyDesklet.prototype = {
                        _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
                        _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onOpticalInject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _optCurrent.push(false);
                     }
                     this.opticalDrives.push(_optCurrent);
@@ -516,13 +600,16 @@ MyDesklet.prototype = {
                           
                        let _driveButton = new St.Button({ child: _driveIcon });
                        _driveButton.connect('clicked', Lang.bind(this, this._onDriveClicked));
+                       _driveButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        let _iconContainer = new St.BoxLayout({vertical:true});
                        _iconContainer.add(_driveButton, {x_fill: true, x_align: St.Align.START});
 
-                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                       _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                        let _ejectIcon = this._getIconImage(this._pathToComponent("eject.png", "theme/" + this._theme + "/"));
                        let _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onDriveEject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.END});
 
                        let _infoContainer = new St.BoxLayout({vertical:true});
@@ -567,10 +654,12 @@ MyDesklet.prototype = {
                        _name.set_text(_listVols[j].get_name());
                        _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
 
-                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                       _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                        let _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
                        let _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onDriveInject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.START});
 
                        let _infoContainer = new St.BoxLayout({vertical:true});
@@ -625,13 +714,16 @@ MyDesklet.prototype = {
                        let _driveIcon = this._getIconImage(this._pathToComponent("drive.png", "theme/" + this._theme + "/"));
                        let _driveButton = new St.Button({ child: _driveIcon });
                        _driveButton.connect('clicked', Lang.bind(this, this._onDriveClicked));
+                       _driveButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        let _iconContainer = new St.BoxLayout({vertical:true});
                        _iconContainer.add(_driveButton, {x_fill: true, x_align: St.Align.START});
 
-                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                       _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                        let _ejectIcon = this._getIconImage(this._pathToComponent("eject.png", "theme/" + this._theme + "/"));
                        let _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onDriveEject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.END});
 
                        let _infoContainer = new St.BoxLayout({vertical:true});
@@ -677,10 +769,12 @@ MyDesklet.prototype = {
                        _name.set_text(_listVols[j].get_name());
                        _nameContainer.add(_name, {x_fill: true, x_align: St.Align.START});
 
-                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                       let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                       _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                        let _ejectIcon = this._getIconImage(this._pathToComponent("inject.png", "theme/" + this._theme + "/"));
                        let _ejectButton = new St.Button({ child: _ejectIcon });
                        _ejectButton.connect('clicked', Lang.bind(this, this._onDriveInject));
+                       _ejectButton.connect('notify::hover', Lang.bind(this, this._onHover));
                        _ejectContainer.add(_ejectButton, {x_fill: true, x_align: St.Align.START});
 
                        let _infoContainer = new St.BoxLayout({vertical:true});
@@ -721,7 +815,8 @@ MyDesklet.prototype = {
                  let _infoContainer = new St.BoxLayout({vertical:true});
                  _infoContainer.add(_nameContainer, {x_fill: true, expand: true, x_align: St.Align.MIDDLE});
 
-                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END, style_class: 'eject-container'});
+                 let _ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
+                 _ejectContainer.set_style('padding: 8px 0px 0px 4px;');
                  let _ejectIcon = this._getIconImage(this._pathToComponent("empty.png", "theme/"));
                  _ejectContainer.add(_ejectIcon, {x_fill: true, x_align: St.Align.END});
 
@@ -974,7 +1069,7 @@ MyDesklet.prototype = {
            } catch(e) {
               this._reportFailure(e);
            }
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 
         _onMountRemeved: function(monit, mount) {
@@ -995,28 +1090,28 @@ MyDesklet.prototype = {
            } catch(e) {
               this._reportFailure(e);
            }
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 
         _onVolumeAdded: function(monit, volumen) {
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 
         _onVolumeRemoved: function(monit, volumen) {
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 
         _onDriveConnected: function(monit, drive) {
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 
         _onDriveDisconnected: function(monit, drive) {
-           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._updateDate));
+           Mainloop.timeout_add_seconds(0.1, Lang.bind(this, this._reUpdate));
         },
 /*
         _onDriveEjectButton: function(monit, drive) {
            Main.notifyError("Entro");
-           //this._updateDate();
+           //this._reUpdate();
         },
 */
         _onDriveClicked: function(bt) {
@@ -1038,6 +1133,14 @@ MyDesklet.prototype = {
            let urlPath = _hardDrive[5];
            this._animateIcon(bt);
            Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
+        },
+
+        _onHover: function (actor) {
+           if (actor.get_hover())
+               global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
+           else
+              global.unset_cursor();
+           //global.set_cursor(Cinnamon.Cursor.DND_IN_DRAG);
         },
 
         _path: function() {
@@ -1153,7 +1256,7 @@ MyDesklet.prototype = {
         },
 */
 /*****Optical Device*******/
-
+        //Find speed read and write
         _updateDisk: function() {
            let _fileDiskstats = GLib.file_get_contents("/proc/diskstats");
            let _linesDiskstats = ("" + _fileDiskstats[1]).split("\n");
@@ -1192,12 +1295,122 @@ MyDesklet.prototype = {
            //Main.notifyError(_diskRead.toString() + " / " + _diskWrite.toString());
         },
 
+        _writeMountDevice: function() {
+           try {
+              this.fileDataDevice = this._path() + "datadevice";
+              GLib.spawn_command_line_async("sh -c 'df > " + this.fileDataDevice + "'");
+           } catch(e) {
+              this._reportFailure(e);
+           }
+        },
+
+        _writeHDDTemp: function() {
+           try {
+             // GLib.spawn_command_line_async("sh -c 'export varLester=Lester'");
+              this.fileDataHDDTemp = this._path() + "datahddtemp";
+              if((this._hddTempActive)&&(this.mountsHard)) {
+                 let deviceList = "";
+                 for(let currDevice in this.mountsHard) {
+                    if((this.mountsHard[currDevice])&&(this.mountsHard[currDevice][0].indexOf("/dev/") != -1))
+                       deviceList = deviceList + " " + this.mountsHard[currDevice][0];
+                 }
+                 GLib.spawn_command_line_async("sh -c 'hddtemp " + deviceList + " > " + this.fileDataHDDTemp + "'");
+              }
+           } catch(e) {
+              this._reportFailure(e);
+           }
+        },
+
         _detectMountDevice: function() {
+           try {
+              if(!this.mountsHard)
+              {
+                 //this._writeMountDevice();
+                 this._writeHDDTemp();
+                 return this._intHDDTemp(this._intMountDevice());
+              }
+              //let _currMountsHard = this._readHDDTemp(this._readMountDevice());
+              let _currMountsHard = this._readHDDTemp(this._intMountDevice());
+              //Main.notifyError(_currMountsHard[0][0]);
+              this._writeHDDTemp();
+              if(_currMountsHard[0])
+                 return _currMountsHard;
+           } catch (e) {
+              Main.notifyError("Error:", e.message);
+           }
+           return this.mountsHard;
+        },
+
+        _readMountDevice: function() {
+           try {
+              if(!this.mountsHard)
+                 return this._intMountDevice();
+              let mount_lines = this._readFile(this.fileDataDevice).split("\n");
+              let _currMountsHard = [];
+              let lineMount;
+              let mount;
+              let pos;
+              for(let mount_line in mount_lines) {
+                 lineMount = mount_lines[mount_line].toString();
+                 mount = lineMount.split(/\s+/);
+                 if(mount[0].indexOf("/dev/") == 0) {
+                    if(mount[0].indexOf(":") != -1)
+                        break;
+                    let _mount = [];
+                    _mount.push(mount[0]);
+                    _mount.push(1024*mount[1]);
+                    _mount.push(1024*mount[2]);
+                    _mount.push(1024*mount[3]);
+                    _mount.push(mount[4]);
+                    pos = lineMount.indexOf(mount[5]);
+                    _mount.push(lineMount.substring(pos, lineMount.length));
+                    _mount.push("");
+                    _currMountsHard.push(_mount);
+                 }
+              }
+              if(_currMountsHard[0])
+                 return _currMountsHard;
+           } catch (e) {
+              Main.notifyError("Error:", e.message);
+           }
+           return this.mountsHard;
+        },
+
+        _readHDDTemp: function(currMountsHard) {
+           try {
+              //let [res, out, err, status] = GLib.spawn_command_line_sync("sh -c 'echo $varLester'");
+              ///Main.notifyError("Es: " + out.toString());
+              if(currMountsHard[0]) {
+                 if(this._hddTempActive) {
+                    mount_lines = this._readFile(this.fileDataHDDTemp).split("\n");
+                    // Main.notifyError(currMountsHard[0][0]);
+                    for(let mount_line in mount_lines) {
+                       lineMount = mount_lines[mount_line].toString();
+                       mount = lineMount.split(": ");
+                       if((mount[2])&&(currMountsHard[mount_line])) {
+                          //Main.notifyError(mount[0]);
+                          currMountsHard[mount_line][6] = mount[2];
+                       }
+                    }
+                 }
+              }
+              return currMountsHard;
+           } catch (e) {
+              Main.notifyError("Error:", e.message);
+           }
+           return this.mountsHard;
+        },
+
+        _intMountDevice: function() {
            let [res, out, err, status] = GLib.spawn_command_line_sync('df');
            let mount_lines = out.toString().split("\n");
            let _currMountsHard = [];
+           let lineMount;
+           let mount;
+           let pos;
            for(let mount_line in mount_lines) {
-              let mount = mount_lines[mount_line].toString().split(/\s+/);
+              lineMount = mount_lines[mount_line].toString();
+              mount = lineMount.split(/\s+/);
               if(mount[0].indexOf("/dev/") == 0) {
                  let _mount = [];
                  _mount.push(mount[0]);
@@ -1205,21 +1418,99 @@ MyDesklet.prototype = {
                  _mount.push(1024*mount[2]);
                  _mount.push(1024*mount[3]);
                  _mount.push(mount[4]);
-                 _mount.push(mount[5]);
-                 for(let i = 6; i < mount.length; i++)
-                   _mount[5] = _mount[5] + " " + mount[i];
- 
+                 pos = lineMount.indexOf(mount[5]);
+                 _mount.push(lineMount.substring(pos, lineMount.length));
+                 _mount.push("");
                  _currMountsHard.push(_mount);
               }
            }
            return _currMountsHard;
         },
 
+        _intHDDTemp: function(currMountsHard) {
+           if((this._hddTempActive)&&(currMountsHard)) {
+              for(let _currMount in currMountsHard) {
+                 if(currMountsHard[_currMount]) {
+                    let [res, out, err, status] = GLib.spawn_command_line_sync('hddtemp ' + currMountsHard[_currMount][0]);
+                    let mount_lines = out.toString().split("\n");
+                    if(mount_lines[0]) {
+                       let _lines = mount_lines[0].split(": ");
+                       if(_lines[2])
+                          currMountsHard[_currMount][6] = _lines[2];
+                    }
+                 }
+              }
+           }
+           return currMountsHard;
+        },
+
         _reportFailure: function(exception) {
 	   Main.notifyError(this.lang["fail"], exception.message);
         },
 
-        _animateIcon: function(animeIcon, step){
+        _playSoundHddTemp: function() {
+           if((this._hddTempActive)&&(this._hddTempSound)) {
+              try {
+                 let _tempValue;
+                 let _playSound = false; 
+                 let regE = new RegExp('[0-9]+', 'g');
+                 for(let _currMount in this.mountsHard) {
+                    if((this.mountsHard[_currMount])&&(this.mountsHard[_currMount][6]))
+                    {
+                       _tempValue = this.mountsHard[_currMount][6].match(regE);
+                       if((_tempValue)&&(_tempValue[0])&&(_tempValue[0] >= this._criticalHddTemp))
+                       {
+                          _playSound = true;
+                          break;
+                       }
+                    }
+                 }
+                 if(_playSound)
+                 {
+                    if(!this._hddTempSoundNotify)
+                    {
+                       this._hddTempSoundNotify = true;
+                       global.play_theme_sound(0, 'suspend-error');
+                    }
+                 }
+                 else
+                    this._hddTempSoundNotify = false;
+              } catch(e) {
+                  Main.notifyError("Error:", e.message);
+              }
+           }
+        },
+
+        _getHddTempColor: function(tempString) {
+           let _tempValue = tempString.match(new RegExp('[0-9]+', 'g'));
+           if((_tempValue)&&(_tempValue[0])) {
+              if(_tempValue[0] >= this._criticalHddTemp)
+                 return this._critialHddColor;
+              if(_tempValue[0] >= this._warningHddTemp)
+                 return this._warningHddColor; 
+           }
+           return this._normalHddColor;
+        },
+
+        _readFile: function(path) {
+          try {
+             let file = Gio.file_new_for_path(path);
+             if(file.query_exists(null))
+             {
+                let fstream = file.read(null);
+                let dstream = new Gio.DataInputStream.new(fstream);
+                let data = dstream.read_until("", null);
+                fstream.close(null);
+                return data.toString();
+             }
+             return "";
+          }
+          catch(e) {
+             Main.notifyError("Error:", e.message);
+          }
+       },
+
+        _animateIcon: function(animeIcon, step) {
            if (step>=3) return;
            Tweener.addTween(animeIcon,
            {   width: 40,
@@ -1247,10 +1538,11 @@ MyDesklet.prototype = {
               Mainloop.source_remove(this._timeout);
            this._timeout = null;
            this._deskletFrame.destroy();
-           //this._addDrives();
-           this._updateDate();
-           if((this._pMountActive)||(this._capacityDetect)||(this._advanceOpticalDetect))
-              this._checkUpdate();
+           this._optionInstall = -1;
+           this._firstTime = true;
+           this._checkUpdate();
+           //  this._addDrives();
+           //this._updateDate();   
         },
 
         _onTypeOpenChanged: function() {
@@ -1281,7 +1573,14 @@ MyDesklet.prototype = {
             this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._on_setting_changed, null);
             this.settings.bindProperty(Settings.BindingDirection.IN, "advanceOpticalDetect", "_advanceOpticalDetect", this._on_setting_changed, null);
-            this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "pMount", "_pMountActive", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "hddTempSound", "_hddTempSound", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "normalHddColor", "_normalHddColor", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "warningHddColor", "_warningHddColor", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "critialHddColor", "_critialHddColor", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "warningHddTemp", "_warningHddTemp", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "criticalHddTemp", "_criticalHddTemp", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "pMount", "_pMountActive", this._on_setting_changed, null);
+            this.settings.bindProperty(Settings.BindingDirection.IN, "hddTemp", "_hddTempActive", this._on_setting_changed, null);
 
             this.settings.bindProperty(Settings.BindingDirection.IN, "openSystem", "_openSystem", this._onTypeOpenChanged, null);
 

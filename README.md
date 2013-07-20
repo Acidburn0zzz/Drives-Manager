@@ -1,7 +1,7 @@
-Drives-Manager v0.5-Beta
+Drives-Manager v0.6-Beta
 ==============
 
-A Drives Manager Desklet for Cinnamon - v0.5-Beta 11 July 2013.
+A Drives Manager Desklet for Cinnamon - v0.6-Beta 20 July 2013.
 Author: Lester Carballo Pérez <lestcape@gmail.com>
 
 This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in schema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
@@ -20,8 +20,12 @@ Instalation Instructions:
 
 3- Enable a Desklet in Cinnamon Settings and use.
 
+
+
 Issues and improvements:
-- Warning! Cinnamon has a bug in the handling of special characters, such as accents or ñ. This is only for users who do not use the english language. To use a non english language, required activate repeatedly the desklet (nothing will be displayed on the first attempt), turn it off and on again. The system language will be recognized and if a translation into your language exist, will be displayed. You need access to the iconv command. This command is the one that helps solve the problem of Cinnamon. It helps that the problem is quickly solved, participating in the following url: https://github.com/linuxmint/Cinnamon/issues/2245
+- Warning! This desklet need gksu package is installed to activate advanced options.The pkexec package cannot be added at this time.
+- hddtemp is too slow to run it directly on the console. This is why it generates a temporary file called datahddtemp, with the output of this command, which will be read when needed.
+- Iconv command is needed in order to automatically update the translation file when this has special characters. View: https://github.com/linuxmint/Cinnamon/issues/2245
 - Advanced Option for Optical devices, need packages "cdrecord" and "wodim" to detect status(open/closed) of the CD/DVD. The command cdrecord depends on wodim, and when the optical drive has a disk, wodim sometimes fail to properly access the device.
 - Optical option, only detect as a CD/DVD drives, the device id match with "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". If you have other id for some optical device, please let me know, to update.
 - The Hard drive and optical option need the "coreutils" package, for use the command df.
@@ -80,7 +84,12 @@ In this example the first row "LANG=es_MX.UTF-8" is mark that  system language i
 
 9- Please send your file by email lestcape@gmail.com. It's will be putting in the official web page of cinnamon, with your nick name or name depending on your preference.
 
+Warning! Cinnamon has a bug in the handling of special characters, such as accents or ñ. This is only for users who do not use the english language. All translation files need to be in UTF-8 encoding. Different encodings to UTF-8 are not admitted, even are compatible with UTF-8. You can help that the problem is quickly solved, participating in the discussion of the following url: https://github.com/linuxmint/Cinnamon/issues/2245
+
 ChangeLog:
+
+0.6-Beta
+   - Added the hddtemp tool to measure the temperature of hard disks.
 
 0.5-Beta
    - The automatic installation of pmount was fixed.

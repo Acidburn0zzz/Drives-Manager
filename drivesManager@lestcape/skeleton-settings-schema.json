@@ -162,6 +162,68 @@
         "type": "checkbox",
         "tooltip": "$capacityDetectTool$"
     },
+    "hddTemp": {
+        "default": false,
+        "description": "$hDDTempDesc$",
+        "type": "checkbox",
+        "tooltip": "$hDDTempTool$"
+    },
+    "hddTempSound": {
+        "default": false,
+        "description": "$hDDTempSoundDesc$",
+        "type": "checkbox",
+        "tooltip": "$hDDTempSoundTool$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "normalHddColor": {
+        "type": "colorchooser",
+        "default": "green",
+        "description": "$hDDTempNormalColorDesc$",
+        "tooltip": "$hDDTempNormalColorTool$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "warningHddColor": {
+        "type": "colorchooser",
+        "default": "orange",
+        "description": "$hDDTempWarningColorDesc$",
+        "tooltip": "$hDDTempWarningColorTool$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "critialHddColor": {
+        "type": "colorchooser",
+        "default": "red",
+        "description": "$hDDTempCriticalColorDesc$",
+        "tooltip": "$hDDTempCriticalColorDesc$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "warningHddTemp": {
+        "default": 38,
+        "type": "spinbutton",
+        "min": 10,
+        "max": 100,
+        "description": "$warningHddTempDesc$",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "$warningHddTempTool$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "criticalHddTemp": {
+        "default": 45,
+        "type": "spinbutton",
+        "min": 10,
+        "max": 100,
+        "description": "$criticalHddTempDesc$",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "$criticalHddTempTool$",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
     "advanceOpticalDetect": {
         "default": false,
         "description": "$advanceOpticalDetectDesc$",
