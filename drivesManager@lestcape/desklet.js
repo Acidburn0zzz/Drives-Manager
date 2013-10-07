@@ -1,5 +1,5 @@
 
-// A Drives Manager Desklet for Cinnamon - v0.1-Beta 28 June 2013.
+// A Drives Manager Desklet for Cinnamon -  v0.6-Beta-2, 07 Oct 2013.
 // Author: Lester Carballo Pérez lestcape@gmail.com
 //
 // This is a desklet to display the current drives plugged to the computer. 
@@ -1362,7 +1362,7 @@ MyDesklet.prototype = {
                     _mount.push(1024*mount[2]);
                     _mount.push(1024*mount[3]);
                     _mount.push(mount[4]);
-                    pos = lineMount.indexOf(mount[5]);
+                    pos = lineMount.lastIndexOf(mount[5]);
                     _mount.push(lineMount.substring(pos, lineMount.length));
                     _mount.push("");
                     _currMountsHard.push(_mount);
@@ -1418,7 +1418,7 @@ MyDesklet.prototype = {
                  _mount.push(1024*mount[2]);
                  _mount.push(1024*mount[3]);
                  _mount.push(mount[4]);
-                 pos = lineMount.indexOf(mount[5]);
+                 pos = lineMount.lastIndexOf(mount[5]);
                  _mount.push(lineMount.substring(pos, lineMount.length));
                  _mount.push("");
                  _currMountsHard.push(_mount);

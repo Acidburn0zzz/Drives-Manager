@@ -1,7 +1,7 @@
-Drives-Manager v0.6-Beta
+Drives-Manager v0.6-Beta-2
 ==============
 
-A Drives Manager Desklet for Cinnamon - v0.6-Beta 20 July 2013.
+A Drives Manager Desklet for Cinnamon - v0.6-Beta-2, 07 Oct 2013.
 Author: Lester Carballo Pérez <lestcape@gmail.com>
 
 This is a desklet to display the current drives plugged to the computer. We can used the ability to show the volumens of the drive, also indicate if the volumen is mounted. When plugged a removable volumen, you can mount and unmount the volumen. If the volumen is mount, you can access directly with left click in to the icon of drive. The configuration for all option it is in schema format, and is accesible for the cinnamon settings, or directly with right click in the desklet.
