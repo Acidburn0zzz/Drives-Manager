@@ -11,6 +11,15 @@ Author: Lester Carballo Pérez
 
 Email: lestcape@gmail.com
 
+Special thanks to:
+
+    The Cinnamon programmers.
+    mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
+    KZom in https://github.com/KZom
+    duncannz in https://github.com/duncannz
+    nimdahk in https://github.com/nimdahk
+
+
 Website: https://github.com/lestcape/Drives-Manager
 
 --------------
