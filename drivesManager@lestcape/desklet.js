@@ -765,7 +765,7 @@ DriveContainer.prototype = {
       this._iconDriveName = iconName;
       if(this._driveButton)
          this._iconContainer.remove_actor(this._driveButton);
-      let _driveIcon = this._getIconImage(this._pathToIcon(themeName, iconName));
+      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName + ".png");
       this._driveButton = new St.Button({ child: _driveIcon });
       this._iconContainer.add_actor(this._driveButton, {x_fill: true, x_align: St.Align.START});
       if(this._callDriveClicked) {
@@ -779,7 +779,11 @@ DriveContainer.prototype = {
       this._iconEjectName = iconName;
       if(this._ejectButton)
          this._ejectContainer.remove_actor(this._ejectButton);
-      let _ejectIcon = this._getIconImage(this._pathToIcon(themeName, iconName));
+      let _ejectIcon;
+      if(iconName == "empty")
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName + ".png");
+      else
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName + ".png");
       this._ejectButton = new St.Button({ child: _ejectIcon });
       this._ejectContainer.add_actor(this._ejectButton);
       if(this._callEjectClicked) {
@@ -898,10 +902,6 @@ DriveContainer.prototype = {
    _path: function() {
       //this._parent._parent._uuid
       return GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this._parent.getUUID() + "/";//+ this.uuid + "/";
-   },
-
-   _pathToIcon: function(themeName, iconName) {
-      return this._path() + "theme/" + themeName + "/" + iconName + ".png";
    },
 
    _findIndexMeterImage: function(currValue, totalValue) {

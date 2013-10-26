@@ -2,12 +2,14 @@ Drives-Manager v1.0-RTM
 ==============
 
 Desklet : Drives Manager         Version      : v1.0-RTM
+
 O.S.    : Cinnamon               Release Date : 25 October 2013.
+
 Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 
 Website : https://github.com/lestcape/Drives-Manager
 
-TThis is a desklet to show devices connected to the computer and interact with them.
+This is a desklet to show devices connected to the computer and interact with them.
 
 
 Skills including:
