@@ -17,6 +17,8 @@ Website: https://github.com/lestcape/Drives-Manager
 
 This is a desklet to show devices connected to the computer and interact with them.
 
+![Alt text](/drivesManager@lestcape/Capture.png)
+
 
 Skills including:
 --------------
