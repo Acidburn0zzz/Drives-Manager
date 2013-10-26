@@ -1,0 +1,10 @@
+<interface name="org.gnome.gjs.spawAsync">
+<method name="spawCommandLine">
+    <arg type="s" direction="in"/>
+    <arg type="s" direction="in"/>
+    <arg type="s" direction="out"/>
+    <arg type="b" direction="out"/>
+    <arg type="s" direction="out"/>
+</method>
+<method name="stop"/>
+</interface>
