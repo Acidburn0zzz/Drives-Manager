@@ -1,3 +1,4 @@
+#!/usr/bin/gjs
 
 // Desklet : Drives Manager         Version      : v1.0-RTM
 // O.S.    : Cinnamon               Release Date : 25 October 2013.
@@ -42,8 +43,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-#!/usr/bin/gjs
 
 const Mainloop = imports.mainloop;
 const Lang = imports.lang;
