@@ -93,6 +93,7 @@ Change Log:
 1.1-RTM
   - Added parameter, was missing in CriticalNotify .
   - The gjs daemon for obtain temp with hddtemp was removed, depend of gjs, and maybe it's not installed, was replaced by spaw with pipes.
+
 1.0-RTM
   - Everything has been reimplemented. Now the execution of desklet, don't delays the main thread of Cinnamon. The code was optimized to use less CPU.
   - Internally we support several alternative programs for tasks that require elevated privileges like: pkexec, gksu or kdesu.
