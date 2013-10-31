@@ -1,6 +1,6 @@
 
-// Desklet : Drives Manager         Version      : v1.0-RTM
-// O.S.    : Cinnamon               Release Date : 25 October 2013.
+// Desklet : Drives Manager         Version      : v1.1-RTM
+// O.S.    : Cinnamon               Release Date : 30 October 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
@@ -172,10 +172,6 @@ HDDTempMonitor.prototype = {
 
    enableMonitor: function(active) {
       this._active = active;
-      if(this._active)
-         this._system.startProxyCommandLine();
-      else
-         this._system.stopProxyCommandLine();
       this._emitAll();
    },
  
@@ -191,12 +187,12 @@ HDDTempMonitor.prototype = {
 
    update: function() {
       try {
-         if((this._active)&&(this._system.isProxyRuning())) {
+         if(this._active) {
             let deviceListString = "";
             for(let currDevice in this.deviceList) {
                deviceListString = deviceListString + " " + currDevice;
             }
-            this._system.execCommandAsync("sh -c 'hddtemp " + deviceListString + "'", Lang.bind(this, this._hDDTempResult));
+            this._system.execCommandSyncPipe("hddtemp " + deviceListString, Lang.bind(this, this._hDDTempResult));
          }
       } catch(e) {
          Main.notify(_("Failed of Drives Manager:"), e.message);
@@ -2088,6 +2084,11 @@ MyDesklet.prototype = {
       this.uuid = this.metadata["uuid"];
 
       this.sys = new SystemClass.System(this.uuid);
+      //this.sys.execCommandSyncPipe("hddtemp /dev/sda", Lang.bind(this, this._callBackFunction));
+      //this._client = new GUdev.Client({subsystems: ["Drive.Ata"]});
+      //this.sys.print_all_device();
+
+
       this.sys.execInstallLanguage();
       _ = imports.gettext.domain(this.uuid).gettext;
       imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");

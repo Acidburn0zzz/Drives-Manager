@@ -1,11 +1,11 @@
-Drives-Manager v1.0-RTM
+Drives-Manager v1.1-RTM
 ==============
 
-Desklet: Drives Manager Version: v1.0-RTM
+Desklet: Drives Manager Version: v1.1-RTM
 
 O.S.: Cinnamon 
 
-Release Date: 25 October 2013
+Release Date: 30 October 2013
 
 Author: Lester Carballo Pérez
 
@@ -90,6 +90,9 @@ Known bugs and requirements:
 
 Change Log:
 ==============
+1.1-RTM
+  - Added parameter, was missing in CriticalNotify .
+  - The gjs daemon for obtain temp with hddtemp was removed, depend of gjs, and maybe it's not installed, was replaced by spaw with pipes.
 1.0-RTM
   - Everything has been reimplemented. Now the execution of desklet, don't delays the main thread of Cinnamon. The code was optimized to use less CPU.
   - Internally we support several alternative programs for tasks that require elevated privileges like: pkexec, gksu or kdesu.

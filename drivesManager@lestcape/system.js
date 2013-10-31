@@ -1,6 +1,6 @@
 
-// Desklet : Drives Manager         Version      : v1.0-RTM
-// O.S.    : Cinnamon               Release Date : 25 October 2013.
+// Desklet : Drives Manager         Version      : v1.1-RTM
+// O.S.    : Cinnamon               Release Date : 30 October 2013.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
@@ -49,164 +49,7 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Main = imports.ui.main;
 const St = imports.gi.St;
-
-function CinnamonSpawAsyncProxy() {
-   this._init();
-}
-
-CinnamonSpawAsyncProxy.prototype = {
-
-   _init: function() {
-      let _file;
-      try {
-        _file = this._getCurrentFile();
-      } catch(e) {
-         let icon = new St.Icon({ icon_name: 'error',
-                               icon_type: St.IconType.FULLCOLOR,
-                               icon_size: 36 });
-         Main.criticalNotify(_("The communication can't be established:") + e.message, icon);
-      }
-      this._quickTasks = new Array();
-      this.daemonBaseUrl = _file.get_parent().get_path() + "/daemon/";
-      this.daemonName = 'cinnamon-spaw-async-daemon';
-      GLib.spawn_command_line_async("sh -c 'chmod 755 \""+ this.daemonBaseUrl + this.daemonName + ".js\"'");
-   },
-
-   start: function() {
-      try {
-         this._startDaemon();
-         this._beginComunicate();
-         return true;
-      } catch (e) {
-         let icon = new St.Icon({ icon_name: 'error',
-                               icon_type: St.IconType.FULLCOLOR,
-                               icon_size: 36 });
-         Main.criticalNotify(_("The communication can't be established:") + e.message, icon);
-      }
-      return false;
-   },
-
-   stop: function() {
-      if(this.proxy) {
-         let theResult, theExcp;
-         this.proxy.stopRemote(function(result, excp) {
-            //theResult = result;
-            theExcp = excp;
-            Mainloop.quit('stop-GDBus');
-            });
-
-        Mainloop.run('stop-GDBus');
-        this.proxy = null;
-      } else
-         Main.notifyError(_("Error:"), _("The communication need to be established first."));
-   },
-
-   isRuning: function() {
-      return (this.proxy != null);
-   },
-
-   spawCommandLineAsync: function(command, callBackMethod) {
-      if(this.proxy) {
-         callBackIdentifier = new Date().getTime().toString();
-         this._quickTasks.push([command, callBackMethod, callBackIdentifier]);
-         this.proxy.spawCommandLineRemote(command, callBackIdentifier, Lang.bind(this, this._captureSignal));
-      } else
-         Main.notifyError(_("Error:"), _("The communication need to be established first."));
-   },
-
-   _captureSignal: function(result, excp) {
-      if(result)  {
-         let task = this._searchTaskByIdentifire(result[0]);
-         if(task)
-            task[1](task[0], result[1], result[2]);
-         else
-            Main.notifyError(_("Error:"), _("Can't localizing task."));
-      }
-      else {
-        excp.message = excp.message.replace(/.*\((.+)\)/, '$1');
-        Main.notifyError(_("Result is undefined:"), excp.message);
-      }
-   },
- 
-   _searchTaskByIdentifire: function(id) {
-      let currTask;
-      for(taskIndex in this._quickTasks) {
-         currTask = this._quickTasks[taskIndex];
-         if(currTask[2] == id) {
-            this._quickTasks.splice(taskIndex, 1);
-            return currTask;
-         }
-      }
-      return null;
-   },
-
-   _startDaemon: function() {
-      try { 
-         let [success, argv] = GLib.shell_parse_argv(this.daemonBaseUrl + this.daemonName + ".js");
-         this._trySpawn(argv);
-      } catch (e) {
-         e.message = _("The communication can't be established:") + e.message;
-         throw e;
-      }
-   },
-
-   _trySpawn: function(argv) {
-      try {   
-         GLib.spawn_async(null, argv, null,
-            GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.STDOUT_TO_DEV_NULL  | GLib.SpawnFlags.STDERR_TO_DEV_NULL,
-            null, null);
-      } catch (err) {
-         if (err.code == GLib.SpawnError.G_SPAWN_ERROR_NOENT) {
-            err.message = _("Command not found.");
-         } else {
-            // The exception from gjs contains an error string like:
-            //   Error invoking GLib.spawn_command_line_async: Failed to
-            //   execute child process "foo" (No such file or directory)
-            // We are only interested in the part in the parentheses. (And
-            // we can't pattern match the text, since it gets localized.)
-            err.message = err.message.replace(/.*\((.+)\)/, '$1');
-         }
-         throw err;
-      }
-   },
-
-   _beginComunicate: function() {
-      try {
-         let xmlDaemon = eval(GLib.file_get_contents(this.daemonBaseUrl + this.daemonName + '.xml')[1].toString());
-         let ProxyClass = Gio.DBusProxy.makeProxyWrapper(xmlDaemon);
-         let err;
-         this.proxy = new ProxyClass(Gio.DBus.session, 'org.gnome.gjs.spawAsync', '/org/gnome/gjs/spawAsync',
-            function (obj, error) {
-               err = error;
-               this.proxy = obj;
-               Mainloop.quit('start-comunications-GDBus');
-            });
-
-         Mainloop.run('start-comunications-GDBus');
-         if(!this.proxy)
-            throw err;
-
-      } catch (e) {
-        e.message = e.message.replace(/.*\((.+)\)/, '$1');
-        throw e;
-      }
-   },
-
-   _getCurrentFile: function() {
-      let stack = (new Error()).stack;
-
-      let stackLine = stack.split('\n')[1];
-      if (!stackLine)
-         throw new Error('Could not find current file');
-
-      let match = new RegExp('@(.+):\\d+').exec(stackLine);
-      if (!match)
-         throw new Error('Could not find current file');
-
-      let path = match[1];
-      return Gio.File.new_for_path(path);
-   }
-};
+const GUdev = imports.gi.GUdev;
 
 function System(uuid) {
    this._init(uuid);
@@ -221,7 +64,6 @@ System.prototype = {
       this._initChecker();
       this._timeout = -1;
       this._commadReading = new Array();
-      this.spawProxy = new CinnamonSpawAsyncProxy();
    },
 
    _initInstaller: function()  {
@@ -280,7 +122,7 @@ System.prototype = {
       let icon = new St.Icon({ icon_name: 'error',
                                icon_type: St.IconType.FULLCOLOR,
                                icon_size: 36 });
-      Main.criticalNotify(_("Can't be found appropriate installer program. The Automatic installation can't be performed."), icon);
+      Main.criticalNotify(_("Failed of Drives Manager:"), _("Can't be found appropriate installer program. The Automatic installation can't be performed."), icon);
    },
 
    _getChecker: function() {
@@ -291,7 +133,7 @@ System.prototype = {
       let icon = new St.Icon({ icon_name: 'error',
                                icon_type: St.IconType.FULLCOLOR,
                                icon_size: 36 });
-      Main.criticalNotify(_("Can't be found an appropriate packages check program. The automatic installation cannot be performed."), icon);
+      Main.criticalNotify(_("Failed of Drives Manager:"), _("Can't be found an appropriate packages check program. The automatic installation cannot be performed."), icon);
    },
 
    _readCommandLine: function() {
@@ -359,31 +201,93 @@ System.prototype = {
          throw err;
       }
    },
- 
 
-   destroy: function()  {
-      this.stopProxyCommandLine();
-   },
-
-   startProxyCommandLine: function() {
+   _trySpawnAsyncPipe: function(command, callback) {
       try {
-         if(!this.spawProxy.isRuning())  
-            this.spawProxy.start();
-      } catch(e) {
-         let icon = new St.Icon({ icon_name: 'error',
-                               icon_type: St.IconType.FULLCOLOR,
-                               icon_size: 36 });
-         Main.criticalNotify(_("The communication can't be established:") + e.message, icon);
+         let [success, argv] = GLib.shell_parse_argv("sh -c '" + command + "'");
+         if(success) {
+            this._callbackPipe = callback;
+            this._commandPipe = command;
+            let [exit, pid, stdin, stdout, stderr] =
+                 GLib.spawn_async_with_pipes(null, /* cwd */
+                                          argv, /* args */
+                                          null, /* env */
+                                          GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD, /*Use env path and no repet*/
+                                          null /* child_setup */);
+
+            this._childPid = pid;
+            this._stdin = new Gio.UnixOutputStream({ fd: stdin, close_fd: true });
+            this._stdout = new Gio.UnixInputStream({ fd: stdout, close_fd: true });
+            this._stderr = new Gio.UnixInputStream({ fd: stderr, close_fd: true });
+         
+            // We need this one too, even if don't actually care of what the process
+            // has to say on stderr, because otherwise the fd opened by g_spawn_async_with_pipes
+            // is kept open indefinitely
+            this._stderrStream = new Gio.DataInputStream({ base_stream: this._stderr });
+            this._dataStdout = new Gio.DataInputStream({ base_stream: this._stdout });
+
+            this._readStdout();
+
+            this._childWatch = GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, Lang.bind(this, function(pid, status, requestObj) {
+               GLib.source_remove(this._childWatch);
+               this._stdin.close(null);
+            }));
+         }
+         //throw
+      } catch(err) {
+         if (err.code == GLib.SpawnError.G_SPAWN_ERROR_NOENT) {
+            err.message = _("Command not found.");
+         } else {
+            // The exception from gjs contains an error string like:
+            //   Error invoking GLib.spawn_command_line_async: Failed to
+            //   execute child process "foo" (No such file or directory)
+            // We are only interested in the part in the parentheses. (And
+            // we can't pattern match the text, since it gets localized.)
+            err.message = err.message.replace(/.*\((.+)\)/, '$1');
+         }
+         throw err;
       }
    },
 
-   stopProxyCommandLine: function()  {
-     if(this.spawProxy.isRuning())
-        this.spawProxy.stop();
+   _readStdout: function() {
+      this._dataStdout.fill_async(-1, GLib.PRIORITY_DEFAULT, null, Lang.bind(this, function(stream, result) {
+         if(this._dataStdout.fill_finish(result) == 0) { // end of file
+            try {
+               let val = stream.peek_buffer().toString();
+               if(val != "")
+                  this._callbackPipe(this._commandPipe, true, val);
+            } catch(e) {
+               global.log(e.toString());
+            }
+            this._stdout.close(null);
+            return;
+         }
+
+         // Try to read more
+         this._dataStdout.set_buffer_size(2 * this._dataStdout.get_buffer_size());
+         this._readStdout();
+      }));
+
+      this._stderrStream.fill_async(-1, GLib.PRIORITY_DEFAULT, null, Lang.bind(this, function(stream, result) {
+         if(this._stderrStream.fill_finish(result) == 0) { // end of file
+            try {
+               let val = stream.peek_buffer().toString();
+               if(val != "")
+                  this._callbackPipe(this._commandPipe, false, val);
+            } catch(e) {
+               global.log(e.toString());
+            }
+            this._stderr.close(null);
+            return;
+         }
+
+         // Try to read more
+         this._stderrStream.set_buffer_size(2 * this._stderrStream.get_buffer_size());
+         this._readStdout();
+      }));
    },
 
-   isProxyRuning: function() {
-      return this.spawProxy.isRuning(); 
+   destroy: function() {
    },
 
    findDistroName: function() {
@@ -554,7 +458,7 @@ System.prototype = {
          let icon = new St.Icon({ icon_name: 'error',
                                   icon_type: St.IconType.FULLCOLOR,
                                   icon_size: 36 });
-         Main.criticalNotify(_("You don't have any GUI program to get root permissions."), icon);
+         Main.criticalNotify(_("Failed of Drives Manager:"), _("You don't have any GUI program to get root permissions."), icon);
       }
       return false;
    },
@@ -583,12 +487,12 @@ System.prototype = {
       return null;
    },
 
-   execCommandAsync: function(command, callBackMethod) {
-      if(this.spawProxy.isRuning())
-         this.spawProxy.spawCommandLineAsync(command, callBackMethod);
-      else {
+   execCommandSyncPipe: function(command, callBackFunction) {
+      try {
+         this._trySpawnAsyncPipe(command, callBackFunction);
+      } catch (e) {
          let title = _("Execution of '%s' failed:").format(command);
-         Main.notifyError(_("The communication can't be established:"), title);
+         Main.notifyError(title, e.message);
       }
    },
 
@@ -632,11 +536,11 @@ System.prototype = {
       let [res, out, err, status] = this.execCommandSync('ls -l ' + folder);
       let out_lines = out.toString().split(" ");
       return out_lines[0] == permissionNeeded;
-   }
+   },
 
 /*
    print_device: function(device) {
-      if(device.get_name() == "sr0") {
+      //if(device.get_name() == "sda") {
          let info = "";
          info = info + "initialized:            " + device.get_is_initialized() + "\n";
          info = info + "usec since initialized: " + device.get_usec_since_initialized() + "\n";
@@ -657,13 +561,14 @@ System.prototype = {
          for(let n = 0; n < keys.length; n++) {
             info = info + "    " + keys[n] + "=" + device.get_property(keys[n]) + "\n";
          }
-         this.write_to_file(info);
-      }
+         this.write_to_file(info, device.get_subsystem(), device.get_name());
+    //  }
    },
         
-   write_to_file: function (text_line) {
+   write_to_file: function (text_line, folderName, fileName) {
       try {
-         let output_file = Gio.file_new_for_path("/home/lester/.local/share/cinnamon/desklets/drivesManager@lestcape/temp.txt");
+         this.makeDirectoy("/home/lester/.local/share/cinnamon/desklets/drivesManager@lestcape/txt/" + folderName);
+         let output_file = Gio.file_new_for_path("/home/lester/.local/share/cinnamon/desklets/drivesManager@lestcape/txt/" + folderName + "/" + fileName + ".txt");
          let fstream = output_file.replace("", false, Gio.FileCreateFlags.NONE, null);
          let dstream = new Gio.DataOutputStream.new(fstream);   
 
@@ -676,9 +581,9 @@ System.prototype = {
 
    print_all_device: function() {
       try {
-         let client = new GUdev.Client({subsystems: []});
+         let client = new GUdev.Client({subsystems: ["Drive.Ata"]});
          let enumerator = new GUdev.Enumerator({client: client});
-         enumerator.add_match_subsystem('b*');
+         enumerator.add_match_subsystem('*');
 
          let devices = enumerator.execute();
 
@@ -689,6 +594,6 @@ System.prototype = {
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
-   },
+   }
 */
 };
