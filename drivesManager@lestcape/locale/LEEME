@@ -62,6 +62,10 @@ Errores conocidos y requerimientos:
 
 Registro de cambios:
 
+1.1-RTM
+  - Añadido un parámetro omitido en CriticalNotify.
+  - El proceso gjs para obtener la temperatura fue eliminado, dependia de gjs y quizas no estuviese instalado, fue remplazado por spaw con pipes.
+
 1.0-RTM
    - Todo a sido reimplementado. Ahora el funcionamiento no retrasa el hilo principal de Cinnamon. El código fue optimizado para usar menos CPU.
    - Internamente se soportan varios programas alternativos para tareas que requieren privilegios elevados: pkexec, gksu o kdesu.
