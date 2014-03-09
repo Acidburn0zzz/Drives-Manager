@@ -48,6 +48,10 @@ Skills including:
 
 8.	If you have a CD-ROM disc tray, you can opened/closed it with a single click, even if a disc is present (Unfortunately, this skill requires that you have installed eject and cdrecord programs).
 
+This applet not longer has support for Arch Linux.
+--------------
+The comunity of Arch Linux do not want that I or other Cinnamon developer, publish about Cinnamon, and receive the users feedback (necessary on the developing any app). When the comunity of Arch Linux, want to be open to the free software world, sure that I want to support Arch Linux again...
+
 
 This program is free software:
 --------------
