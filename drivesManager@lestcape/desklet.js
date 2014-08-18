@@ -396,7 +396,8 @@ GlobalContainer.prototype = {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
          let _indexConnect = 0;
          let currCat = 0;
-         while(this._listCategoryContainer[currCat] != this._listCategoryContainer[index]) {
+         let catContainer = this._listCategoryContainer[index];
+         while(this._listCategoryContainer[currCat] != catContainer) {
             if(currCat >= this._listCategoryContainer.length)
                break;
             if(this._listCategoryConnected[currCat])
@@ -404,7 +405,10 @@ GlobalContainer.prototype = {
             currCat = currCat + 1;
          }
          this._listCategoryConnected[index] = true;
-         this._rootBox.insert_actor(this._listCategoryContainer[index].getContainerBox(), _indexConnect);
+         let parentContainer = catContainer.getContainerBox().get_parent();
+         if(parentContainer)
+            parentContainer.remove_actor(catContainer.getContainerBox());
+         this._rootBox.insert_actor(catContainer.getContainerBox(), _indexConnect);
          //this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
       }
    },
@@ -475,7 +479,7 @@ GlobalContainer.prototype = {
                                  'px solid ' + this._borderBoxColor + '; background-color: ' +
                                   _color + '; border-radius: 12px;');
       } else
-         this._mainBox.set_style('');
+         this._mainBox.set_style(' ');
    }
 };
 
@@ -868,7 +872,7 @@ DriveContainer.prototype = {
          this._driveBox.set_style('padding: 0px 6px 0px 0px; border:' + this._borderBoxWidth + 'px solid ' +
                                  this._borderBoxColor +'; background-color: ' + _color + '; border-radius: 12px;');
       } else {
-         this._driveBox.set_style('');
+         this._driveBox.set_style(' ');
       }
    },
 
@@ -2054,12 +2058,10 @@ MyDesklet.prototype = {
          this._onShowHardDisk();
 
          this.volumeMonitor = new VolumeMonitor(this.globalContainer);
-
          this._onShowOpticalDrives();
          this._onShowRemovableDrives();
          this._onShowFixedDrives();
          this._onShowEmptyDrives();
-
          this._onMeterTimeDelay();
          this._onShowMainBox();
          this._onShowDriveBox();
