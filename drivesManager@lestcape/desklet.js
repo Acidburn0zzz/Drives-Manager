@@ -68,6 +68,7 @@ const DeskletDir = imports.ui.deskletManager.desklets['drivesManager@lestcape'];
 const SystemClass = DeskletDir.system;
 /****Import File****/
 
+
 function HDDTempMonitor(system) {
     this._init(system);
 }
@@ -84,36 +85,36 @@ HDDTempMonitor.prototype = {
       this._criticalTempColor = "red";
       this._activeAlarm = false;
       this.deviceList = new Array();
+      this._hddtempProxy = this._system.createHDDTempProxy();
+      this._client = new GUdev.Client ({subsystems: ["block"]});
    },
 
    addDevice: function(device) {
-      this.deviceList[device] = "0\u00B0C";//\u00B0 = °
+      let deviceUdev = this._client.query_by_device_file(device);
+      this.deviceList[device] = [];
+      this.deviceList[device]["id"] = device;
+      if(deviceUdev)
+         this.deviceList[device]["label"] = deviceUdev.get_property("ID_MODEL");
+      this.deviceList[device]["temp"] = "?\u00B0C";//\u00B0 = °
    },
 
    getDeviceTemp: function(device) {
-      return this.deviceList[device];
+      return this.deviceList[device]["temp"];
    },
 
-   _hDDTempResult: function(command, res, out) {
-      if(res) {
-         let mount_lines = out.split("\n");
-         for(let currLine in mount_lines) {
-            lineMount = mount_lines[currLine].toString();
-            mountToken = lineMount.split(": ");
-            if(mountToken[2]) {
-              if(this.deviceList[mountToken[0]] != mountToken[2]) {
-                 if(mountToken[2].indexOf("S.M.A.R.T.") == -1)
-                    this.deviceList[mountToken[0]] = mountToken[2];
-                 else
-                    this.deviceList[mountToken[0]] = "?";
-                 this.emit('temp-changed', mountToken[0], mountToken[2]);
-                 this._playSoundHddTemp(mountToken[2]);
-              }
+   _hDDTempResultProxy: function(info) {
+      for(let device in this.deviceList) {
+         for(let pos in info) {
+            if(this.deviceList[device]["label"] == info[pos]["label"].replace(' ','_')) {
+               let newTemp = Math.floor(info[pos]["temp"]) + "\u00B0C";
+               if(this.deviceList[device]["temp"] != newTemp) {
+                 this.deviceList[device]["temp"] = newTemp;
+                 this.emit('temp-changed', device, newTemp);
+                 this._playSoundHddTemp(newTemp);
+               }
+               break;
             }
-         } 
-      } else{
-         let title = _("Execution of '%s' failed:").format(command);
-         Main.notify(title, out);
+         }
       }
    },
 
@@ -178,7 +179,7 @@ HDDTempMonitor.prototype = {
    _emitAll: function() {
       if(this._active) {
          for(let dev in this.deviceList)
-            this.emit('temp-changed', dev, this.deviceList[dev]);
+            this.emit('temp-changed', dev, this.deviceList[dev]["temp"]);
       } else {
          for(let dev in this.deviceList)
             this.emit('temp-changed', dev, null);
@@ -188,11 +189,7 @@ HDDTempMonitor.prototype = {
    update: function() {
       try {
          if(this._active) {
-            let deviceListString = "";
-            for(let currDevice in this.deviceList) {
-               deviceListString = deviceListString + " " + currDevice;
-            }
-            this._system.execCommandSyncPipe("hddtemp " + deviceListString, Lang.bind(this, this._hDDTempResult));
+            this._hDDTempResultProxy(this._hddtempProxy.get_temp_info());
          }
       } catch(e) {
          Main.notify(_("Failed of Drives Manager:"), e.message);
@@ -291,7 +288,7 @@ GlobalContainer.prototype = {
       this._messageID = null;
    },
 
-/*Child property*/
+//Child property
    showDriveBox: function(show) {
       this._showDriveBox = show;
       for(let index in this._listCategoryContainer)
@@ -437,7 +434,7 @@ GlobalContainer.prototype = {
             this._listCategoryContainer[index].update();
       }
    },
-/*Child property*/
+//Child property
    getContentBox: function() {
       return this._mainBox;
    },
@@ -514,7 +511,7 @@ CategoryContainer.prototype = {
       return this._parent._uuid;
    },
 
-/*Child property*/
+//Child property
    addDriveContainer: function() {
       let _driveContainer = new DriveContainer(this);
       this.applyDriveStyle(_driveContainer);
@@ -611,7 +608,7 @@ CategoryContainer.prototype = {
       driveContainer.setButtonTextSize(this._buttonTextSize);
       driveContainer.setTransparency(this._transparency);
    },
-/*Child property*/
+//Child property
    update: function() {
    },
 
@@ -761,7 +758,7 @@ DriveContainer.prototype = {
       this._iconDriveName = iconName;
       if(this._driveButton)
          this._iconContainer.remove_actor(this._driveButton);
-      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName + ".png");
+      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName);
       this._driveButton = new St.Button({ child: _driveIcon });
       this._iconContainer.add_actor(this._driveButton, {x_fill: true, x_align: St.Align.START});
       if(this._callDriveClicked) {
@@ -777,9 +774,9 @@ DriveContainer.prototype = {
          this._ejectContainer.remove_actor(this._ejectButton);
       let _ejectIcon;
       if(iconName == "empty")
-         _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName + ".png");
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName);
       else
-         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName + ".png");
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName);
       this._ejectButton = new St.Button({ child: _ejectIcon });
       this._ejectContainer.add_actor(this._ejectButton);
       if(this._callEjectClicked) {
@@ -911,18 +908,21 @@ DriveContainer.prototype = {
    },
 
    _getMeterImage: function(imageNumber) {
-      return this._getIconImage(this._path() + "meter/meter" + imageNumber + ".png");
+      return this._getIconImage(this._path() + "meter/meter" + imageNumber);
    },
 
    _getIconImage: function(pathC) {
       try {
-         let file = Gio.file_new_for_path(pathC);
+         let file = Gio.file_new_for_path(pathC + ".png");
+         if(!file.query_exists(null))
+            file = Gio.file_new_for_path(pathC + ".svg");
          let icon_uri = file.get_uri();
          //return St.TextureCache.get_default().load_uri_sync(1, icon_uri, 1064, 1064);
          return St.TextureCache.get_default().load_uri_async(icon_uri, 1064, 1064);
       }catch(e) {
          //this._reportFailure(e);
-      }        
+      }
+      return null;      
    },
 
    _animateIcon: function(animeIcon, step) {
@@ -1101,7 +1101,7 @@ HardDiskContainer.prototype = {
       while(this._listDriveContainer.length > 0)
          this.removeDriver(0);
       let _dr;
-      for (let _pos in this.mountsHard) {
+      for(let _pos in this.mountsHard) {
           _dr = this.addDriveContainer();
           _dr.setDriveIcon(this._theme, "disk", Lang.bind(this, this._onDriveClicked));
           _dr.setEjectIcon(this._theme, "empty", null);
@@ -1127,7 +1127,7 @@ HardDiskContainer.prototype = {
          //Real Update.
          let _sizeStatus;
          let _capacityStatus;
-         for (let _pos in this.mountsHard) {
+         for(let _pos in this.mountsHard) {
              _sizeStatus = this._getDriveSize(this.mountsHard[_pos][1]);
              _capacityStatus = this._getDriveUsedSpace(this.mountsHard[_pos][1]);
              this._listDriveContainer[_pos].setLeftButtonText(this.convertToString(_capacityStatus) + "/" + this.convertToString(_sizeStatus));
@@ -1184,7 +1184,7 @@ HardDiskContainer.prototype = {
    _checkChange: function(currMountsHard) {
       if(this.mountsHard.length != currMountsHard.length)
          return true;
-      for(p in this.mountsHard) {
+      for(let p in this.mountsHard) {
          if(this.mountsHard[p][0] != currMountsHard[p][0])
             return true;
       }
@@ -1197,7 +1197,7 @@ HardDiskContainer.prototype = {
           let _linesMtab = this._parent._sys.readFile("/etc/mtab").split("\n");
           let _tokens;
 
-          for (let i = 0; i < _linesMtab.length; i++)
+          for(let i = 0; i < _linesMtab.length; i++)
           {
               _tokens = _linesMtab[i].split(" ");
               if((_tokens[0].indexOf("/dev/") != -1) && (_tokens[1].indexOf("/media/") == -1))
@@ -1296,14 +1296,14 @@ DeviceContainer.prototype = {
    },
 
    indexOfDevice: function(device) {
-     /* let currDevice;
-      for(currIndexDevice in this._listDevices)
-      {
-         currDevice = this._listDevices[currIndexDevice];  
-         if(currDevice == device)
-            return currIndexDevice;
-      }
-      return -1;*/
+     // let currDevice;
+     // for(let currIndexDevice in this._listDevices)
+     // {
+     //    currDevice = this._listDevices[currIndexDevice];  
+     //    if(currDevice == device)
+     //       return currIndexDevice;
+     // }
+     // return -1;
       return this._listDevices.indexOf(device);
    },
 
@@ -1327,7 +1327,7 @@ DeviceContainer.prototype = {
          let _linesPartitions = this._parent._sys.readFile("/proc/partitions").split("\n");
          let _partitionsArray = new Array();
          let _token;
-         for (let i = 0; i < _linesPartitions.length; i++)
+         for(let i = 0; i < _linesPartitions.length; i++)
          {
             if(_linesPartitions[i].length > 0) {
                _token = _linesPartitions[i].split(/\s+/);
@@ -1406,7 +1406,7 @@ DeviceContainer.prototype = {
 
    getIndexOfDeviceByIdentifier: function(deviceId) {
       let _currDevice;
-      for(_currIndexDevice in this._listDevices)
+      for(let _currIndexDevice in this._listDevices)
       {
          _currDevice = this._listDevices[_currIndexDevice];  
          if(this._getIdentifier(_currDevice) == deviceId)
@@ -1658,6 +1658,7 @@ VolumeMonitor.prototype = {
       this._globalContainer = globalContainer;
       this._monitor = Gio.VolumeMonitor.get();
       this._client = new GUdev.Client ({subsystems: ["block"]});
+      //this._client
       this._volumeMonitorSignals = [];
       this._idGuDev;
       this.connect();
@@ -1684,7 +1685,8 @@ VolumeMonitor.prototype = {
      //this._volumeMonitorSignals.push(id);
 
      this._idGuDev = this._client.connect('uevent', Lang.bind(this, this.on_uevent));
-     //let d = this._client.query_by_device_file ("/dev/sr0");
+     //let enumerator = new GUdev.Enumerator({client: client});
+     //let d = this._client.query_by_device_file ("/dev/sda1");
      //this.print_device(d);
    },
 
@@ -1710,7 +1712,7 @@ VolumeMonitor.prototype = {
       Main.notifyError ("  device file symlinks:  " + device.get_device_file_symlinks ());
       Main.notifyError ("  foo: " + device.get_sysfs_attr_as_strv ("stat"));
       let keys = device.get_property_keys ();
-      for (let n = 0; n < keys.length; n++) {
+      for(let n = 0; n < keys.length; n++) {
          Main.notifyError ("    " + keys[n] + "=" + device.get_property (keys[n]));
       }
    },
@@ -1730,15 +1732,15 @@ VolumeMonitor.prototype = {
    _onDriveDisconnected: function() {
        this._createCategory();
    },
-/*
-   _onDriveChange: function() {
-       Main.notifyError("changed");
-   },
 
-   _onDriveEjectButton: function() {
-       Main.notifyError("Eject Button");
-   },
-*/
+//   _onDriveChange: function() {
+//       Main.notifyError("changed");
+//   },
+
+//   _onDriveEjectButton: function() {
+//       Main.notifyError("Eject Button");
+//   },
+
    disconnect: function() {
       for(let i = 0; i < this._volumeMonitorSignals.length; i++)
          this._monitor.disconnect(this._volumeMonitorSignals[i]);
@@ -1828,9 +1830,8 @@ VolumeMonitor.prototype = {
    },
 
    _removeDevice: function(device) {
-      let _categoryIndex;
       if(device) {   
-         for(_categoryIndex in this._listCategory)
+         for(let _categoryIndex in this._listCategory)
          {
             if(this.getCategory(_categoryIndex).removeDevice(device))
                return true;
@@ -1841,25 +1842,25 @@ VolumeMonitor.prototype = {
 
    setCapacityDetect: function(capacityDetect) {
       this._capacityDetect = capacityDetect;
-      for(category in this._listCategory)
+      for(let category in this._listCategory)
          this._listCategory[category].setCapacityDetect(capacityDetect);
    },
 
    setDefaultBrowser: function(browser) {
       this._browser = browser;
-      for(category in this._listCategory)
+      for(let category in this._listCategory)
          this._listCategory[category].setDefaultBrowser(browser);
    },
 
    openOnConnect: function(open) {
       this._openConnect = open;
-      for(category in this._listCategory)
+      for(let category in this._listCategory)
          this._listCategory[category].openOnConnect(open);
    },
 
    unEjecting: function(unEjecting) {
       this._unEjecting = unEjecting;
-      for(category in this._listCategory)
+      for(let category in this._listCategory)
          this._listCategory[category].unEjecting(unEjecting);
    },
 
@@ -1897,20 +1898,21 @@ VolumeMonitor.prototype = {
       {
         // if((this._advanceOpticalDetect)&&(!this._firstTime))
         //    return (this._findOpticalByDeviceName(_deviceName) != null);
-       /* let client = new GUdev.Client({subsystems: ['block']});
-        let enumerator = new GUdev.Enumerator({client: client});
-        enumerator.add_match_subsystem('b*');
 
-        let devices = enumerator.execute();
-        for (let n=0; n < devices.length; n++) 
-        {
-            let device = devices[n];
-            Main.notifyError(device.get_property("DEVNAME"));
-            if(device.get_property("ID_CDROM") != null)
-            {
-               Main.notifyError(device.get_property("DEVNAME"));
-            }
-        }*/
+       // let client = new GUdev.Client({subsystems: ['block']});
+       // let enumerator = new GUdev.Enumerator({client: client});
+       // enumerator.add_match_subsystem('b*');
+
+       // let devices = enumerator.execute();
+       // for(let n=0; n < devices.length; n++) 
+       // {
+       //     let device = devices[n];
+       //     Main.notifyError(device.get_property("DEVNAME"));
+       //     if(device.get_property("ID_CDROM") != null)
+       //     {
+       //        Main.notifyError(device.get_property("DEVNAME"));
+       //     }
+       // }
         return true;
       }	
       return false;
@@ -1932,12 +1934,12 @@ VolumeMonitor.prototype = {
             }
          } 
        
-       /* let listMount = this._monitor.get_mounts();
-         let valIndex = listMount.indexOf(mount);
-         if(this._isOptical(mount.get_volume()))
-            this._listCategory[0].addDevice(listMount[valIndex]);
-         else
-            this._listCategory[2].addDevice(listMount[valIndex]);*/
+       // let listMount = this._monitor.get_mounts();
+       //  let valIndex = listMount.indexOf(mount);
+       //  if(this._isOptical(mount.get_volume()))
+       //     this._listCategory[0].addDevice(listMount[valIndex]);
+       //  else
+       //     this._listCategory[2].addDevice(listMount[valIndex]);
       
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
@@ -1971,101 +1973,6 @@ VolumeMonitor.prototype = {
    }
 };
 
-function Installer(desklet, globalContainer, system) {
-    this._init(desklet, globalContainer, system);
-}
-
-Installer.prototype = {
-   _init: function(desklet, globalContainer, system) {
-      this._desklet = desklet;
-      this._system = system;
-      this._globalContainer = globalContainer;
-      this._usability = false;
-   },
-
-   setUsable: function(usability) {
-      this._usability = usability;
-   },
-
-   checkUsability: function(hddTempActive) {
-     if(hddTempActive) {
-        if(this._usability)
-           return true;
-        this._usability = (this._checkPackage("hddtemp")) && (this._checkPermissions("/usr/sbin/hddtemp", "-rwsr-xr-x", "u+s"));
-        if(this._usability)
-           this._globalContainer.removeMessage();
-        return this._usability;
-     }
-     this._globalContainer.removeMessage();
-     this._usability = false;
-     return true;
-   },
-
-   _checkPackage: function(packageName) {
-      if(!this._isPackageInstall(packageName))
-      {
-         this._packageName = packageName;
-         if(this._globalContainer.diplayedMesageID() == null)
-            this._mesageIDPackage = this._globalContainer.displayMessage(_("Drives Manager need a pakage to use advance function.") + "\n" + _("If you do not want to install the package uncheck the option in the settings.") + "\n" + _("Do you want to install?"), [_("Yes"), _("No")], Lang.bind(this, this._installPackage));
-         return false;
-      }
-      if(this._globalContainer.diplayedMesageID() == this._mesageIDPackage)
-         this._globalContainer.removeMessage();
-      return true;
-   },
-
-   _checkPermissions: function(folder, permissionsNeed, permissions) {
-      if(!this._system.havePermission(folder, permissionsNeed))
-      {
-         this._folder = folder;
-         this._permissions = permissions;
-         if(this._globalContainer.diplayedMesageID() == null)
-            this._mesageIDPermissions = this._globalContainer.displayMessage(_("Drives Manager requires that your account has permission to use advanced function.") + "\n" + _("If you do not want to grant permissions uncheck the option in the settings.") + "\n" + _("Do you want to grant permissions?"), [_("Yes"), _("No")], Lang.bind(this, this._pushPermissions));
-         return false;
-      }
-      if(this._globalContainer.diplayedMesageID() == this._mesageIDPermissions)
-         this._globalContainer.removeMessage();
-      return true;
-   },
-
-   _installPackage: function(buttonPressed) {
-      if(buttonPressed == _("Yes")) {
-        this._globalContainer.removeMessage();
-        this._mesageIDPackage = this._globalContainer.displayMessage(_("Please wait while installing pakage...") + "\n" + _("If you do not want to install the package uncheck the option in the settings."), [_("Cancel")], Lang.bind(this, this._backAction));
-        this._system.execInstall(this._packageName);
-      } else if(buttonPressed == _("No")) {
-         this._globalContainer.removeMessage();
-         this._desklet._hddTempActive = false;
-         this._desklet._onHddTempChanged();
-      }
-   },
-
-   _pushPermissions: function(buttonPressed) {
-      if(buttonPressed == _("Yes")) {
-        this._globalContainer.removeMessage();
-        this._mesageIDPermissions = this._globalContainer.displayMessage(_("If you do not want to grant permissions uncheck the option in the settings."), [_("Cancel")], Lang.bind(this, this._backAction));
-        this._system.execChmod(this._folder, this._permissions);
-      } else if(buttonPressed == _("No")) {
-         this._globalContainer.removeMessage();
-         this._desklet._hddTempActive = false;
-         this._desklet._onHddTempChanged();
-      }
-   },
-
-   _backAction: function(buttonPressed) {
-      if(buttonPressed == _("Cancel")) {
-        //return variable to original state-
-        this._globalContainer.removeMessage();
-        this._desklet._hddTempActive = false;
-        this._desklet._onHddTempChanged();
-      }
-   },
-
-   _isPackageInstall: function(packageName) {
-      return this._system.isPackageInstall(packageName);      
-   }
-};
-
 function _(str) {
    return Gettext.dgettext("drivesManager@lestcape", str);
 }
@@ -2084,10 +1991,7 @@ MyDesklet.prototype = {
       this.uuid = this.metadata["uuid"];
 
       this.sys = new SystemClass.System(this.uuid);
-      //this.sys.execCommandSyncPipe("hddtemp /dev/sda", Lang.bind(this, this._callBackFunction));
-      //this._client = new GUdev.Client({subsystems: ["Drive.Ata"]});
       //this.sys.print_all_device();
-
 
       this.sys.execInstallLanguage();
       _ = imports.gettext.domain(this.uuid).gettext;
@@ -2124,10 +2028,8 @@ MyDesklet.prototype = {
       if (this.updateInProgress) return;
       this.updateInProgress = true;
       try {
-         if(this.installer.checkUsability(this._hddTempActive)) {
-            this.globalContainer.update();
-            this.hddTempMonitor.update();
-         }
+         this.globalContainer.update();
+         this.hddTempMonitor.update();
       } catch(e) {
          /*do nothing*/
       } finally {
@@ -2142,10 +2044,6 @@ MyDesklet.prototype = {
          this.setContent(this.globalContainer.getContentBox());
 
          this.hddTempMonitor = new HDDTempMonitor(this.sys);
-        // this.hddTempMonitor.addDevice("/dev/sda");
-        // this.hddTempMonitor.addDevice("/dev/sdb");
-
-         this.installer = new Installer(this, this.globalContainer, this.sys);
 
          this.speedDisk = new SpeedDiskContainer(this.globalContainer);
          this.globalContainer.addCategoryContainer(this.speedDisk);
@@ -2189,12 +2087,6 @@ MyDesklet.prototype = {
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
-   },
-
-   _on_setting_changed: function() {
-      /*if(this._timeout > 0)
-         Mainloop.source_remove(this._timeout);
-      this._timeout = null;*/
    },
 
    _onShowMainBox: function() {
@@ -2388,7 +2280,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unEjecting", "_unEjecting", this._onUnEjecting, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "hddTemp", "_hddTempActive", this._onHddTempChanged, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "hddTemp", "_hddTempActive", this._onHddTempChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hddTempSound", "_hddTempSound", this._onHddTempPlaySoundChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "normalHddColor", "_normalHddColor", this._onHddTempNormalColorChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "warningHddColor", "_warningHddColor", this._onHddTempWarningColorChanged, null);

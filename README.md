@@ -1,30 +1,28 @@
-Drives-Manager v1.1-RTM
-==============
+Cinnamon Desklet: Drives Manager Version: v1.2-RTM
 
-Desklet: Drives Manager Version: v1.1-RTM
-
-O.S.: Cinnamon 
-
-Release Date: 30 October 2013
-
-Author: Lester Carballo Pérez
-
-Email: lestcape@gmail.com
-
-Special thanks to:
-
-    The Cinnamon programmers.
-    mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
-    KZom in https://github.com/KZom
-    duncannz in https://github.com/duncannz
-    nimdahk in https://github.com/nimdahk
-
-
+Last version release date: 15 August 2014
+***
+Authors: Lester Carballo Pérez (https://github.com/lestcape)
+Contact: lestcape@gmail.com
 Website: https://github.com/lestcape/Drives-Manager
+***
 
 --------------
+Special thanks to:
+--------------
+ - The Cinnamon programmers.
+ - mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
+ - KZom in https://github.com/KZom
+ - duncannz in https://github.com/duncannz
+ - nimdahk in https://github.com/nimdahk
 
-This is a desklet to show devices connected to the computer and interact with them.
+--------------
+Author of language translation:
+--------------
+ - Czech(Cs_Cz):     Kuba Vaněk(vanek.jakub4@seznam.cz)
+ - Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
+ - English(En):      Lester Carballo Pérez(lestcape@gmail.com)
+
 
 ![Alt text](/drivesManager@lestcape/Capture.png)
 
@@ -47,10 +45,6 @@ Skills including:
 7.	You can also monitor the speed of read/write files on your system.
 
 8.	If you have a CD-ROM disc tray, you can opened/closed it with a single click, even if a disc is present (Unfortunately, this skill requires that you have installed eject and cdrecord programs).
-
-This applet not longer has support for Arch Linux.
---------------
-The comunity of Arch Linux do not want that I or other Cinnamon developer, publish about Cinnamon, and receive the users feedback (necessary on the developing any app). When the comunity of Arch Linux, want to be open to the free software world, sure that I want to support Arch Linux again...
 
 
 This program is free software:

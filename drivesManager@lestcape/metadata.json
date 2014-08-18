@@ -2,6 +2,6 @@
     "last-edited": "1383180728", 
     "prevent-decorations": false, 
     "description": "A desklet to manager drive's.", 
-    "name": "Drives Desklet", 
+    "name": "Drives Manager", 
     "uuid": "drivesManager@lestcape"
 }

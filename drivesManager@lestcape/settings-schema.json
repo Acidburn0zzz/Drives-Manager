@@ -1,250 +1,290 @@
 {
-   "theme": {
-      "type": "combobox",
-      "description": "Selected theme:",
-      "default": "mind",
-      "tooltip": "Select a theme to show icons.",
-      "options": {
-         "Mind": "mind",
-         "Ubuntu": "ubuntu",
-         "Linux": "linux",
-         "Comic": "comic",
-         "Windows": "windows",
-         "Blue": "blue",
-         "Metalic": "metalic",
-         "Black": "black",
-         "Orange": "orange",
-         "Pink": "pink"
-      }
-   },
-   "mainBox": {
-      "default": true,
-      "description": "Show the main box.",
-      "type": "checkbox",
-      "tooltip": "Check this to make the main box visible/invisible."
-   },
-   "driveBox": {
-      "default": true,
-      "description": "Show the drive box.",
-      "type": "checkbox",
-      "tooltip": "Check this to make the drive box visible/invisible."
-   },
-   "borderBoxWidth": {
-      "default": 1,
-      "type": "spinbutton",
-      "min": 0,
-      "max": 4,
-      "description": "Border's box width:",
-      "units": "pixels",
-      "step": 1,
-      "tooltip": "Increase or decrease the border's box width."
-   },
-   "borderBoxColor": {
-      "type": "colorchooser",
-      "default": "white",
-      "description": "Border's box color:",
-      "tooltip": "Set the custom border box's color."
-   },
-   "boxColor": {
-      "type": "colorchooser",
-      "default": "rgb(0,0,0)",
-      "description": "Box color:",
-      "tooltip": "Set the custom box's color."
-   },
-   "fixWidth": {
-      "default": true,
-      "description": "Fixed width.",
-      "type": "checkbox",
-      "tooltip": "Check this if you want to control the width of desklet."
-   },
-   "width": {
-      "default": 170,
-      "type": "spinbutton",
-      "min": 100,
-      "max": 1600,
-      "description": "Width:",
-      "units": "pixels",
-      "step": 10,
-      "indent": true,
-      "dependency": "fixWidth",
-      "tooltip": "Increase or decrease the desklet width."
-   },
-   "fontColor": {
-      "type": "colorchooser",
-      "default": "white",
-      "description": "Font color:",
-      "tooltip": "Set the custom text color."
-   },
-   "textTopSize": {
-      "default": 9,
-      "type": "spinbutton",
-      "min": 2,
-      "max": 14,
-      "description": "Upper text font size:",
-      "units": "pixels",
-      "step": 1,
-      "tooltip": "Increase or decrease the upper text font size."
-   },
-   "textButtonSize": {
-      "default": 7,
-      "type": "spinbutton",
-      "min": 2,
-      "max": 14,
-      "description": "Button text font size:",
-      "units": "pixels",
-      "step": 1,
-      "tooltip": "Increase or decrease the button text font size."
-   },
-   "transparency": {
-      "type": "scale",
-      "default": 0.5,
-      "min": 0.0,
-      "max": 1.0,
-      "step": 0.05,
-      "description": "Opacity:",
-      "tooltip": "Select a opacity percent."
-   },
-   "speedMeter": {
-      "default": false,
-      "description": "Show the Speed Meter.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Speed Meter or not."
-   },
-   "hardDrives": {
-      "default": true,
-      "description": "Show the Hard Drives.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Hard Drives or not."
-   },
-   "opticalDrives": {
-      "default": true,
-      "description": "Show the Optical Drives.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Optical Drives or not."
-   },
-   "removableDrives": {
-      "default": true,
-      "description": "Show the Removable Drives.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Removable Drives or not."
-   },
-   "fixedDrives": {
-      "default": true,
-      "description": "Show the Fixed Drives.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Fixed Drives or not."
-   },
-   "emptyDrives": {
-      "default": false,
-      "description": "Show the Empty Drives.",
-      "type": "checkbox",
-      "tooltip": "Check this to show the Empty Drives or not."
-   },
-   "meterTimeDelay": {
-      "default": 2,
-      "type": "spinbutton",
-      "min": 1,
-      "max": 5,
-      "description": "File time transfer(Longer time means more precision):",
-      "units": "seconds",
-      "step": 1,
-      "tooltip": "Increase or decrease the time between measurements file transfer speed."
-   },
-   "openSystem": {
-      "default": false,
-      "description": "Auto open mount points by the O.S.",
-      "type": "checkbox",
-      "tooltip": "Check this to use or not org.gnome.desktop.media-handling automount-open O.S. property."
-   },
-   "openConnect": {
-      "default": false,
-      "description": "Auto open mount points by the Drives Manager.",
-      "type": "checkbox",
-      "tooltip": "Check this to mount points auto open or not  when the volumen was mounted."
-   },
-   "openWith": {
-      "type": "combobox",
-      "description": "Open with:",
-      "default": "nemo",
-      "tooltip": "Select the default browser.",
-      "indent": true,
-      "options": {
-         "Nemo": "nemo",
-         "Nautilus": "nautilus"
-      }
-   },
-   "capacityDetect": {
-      "default": true,
-      "description": "Use the capacity detection.",
-      "type": "checkbox",
-      "tooltip": "Check this to use or not the capacity detection. When enabled using more CPU, but capacity changes are detected in the volumens mounted."
-   },
-   "unEjecting": {
-      "default": false,
-      "description": "Don't eject Removable Drive (they can be reconnected without need to pull out of the connector).",
-      "type": "checkbox",
-      "tooltip": "Check this to use or not the option of don't eject Removable Drive. They can be reconnected without need to pull out of the connector if you this option is active."
-   },
-   "hddTemp": {
-      "default": false,
-      "description": "Use the temperature detection in the Hard drives (needs the hddTemp package).",
-      "type": "checkbox",
-      "tooltip": "Check this to use or not the temperature detection in the hard drives."
-   },
-   "hddTempSound": {
-      "default": false,
-      "description": "Activate the temperature alarm sound.",
-      "type": "checkbox",
-      "tooltip": "Enabling this property activate a alarm sound when temperature reaches alarming levels.",
-      "indent": true,
-      "dependency": "hddTemp"
-   },
-   "normalHddColor": {
-      "type": "colorchooser",
-      "default": "green",
-      "description": "Color to show warning when the temperature is Normal:",
-      "tooltip": "Set the custom color of Normal temperature warning.",
-      "indent": true,
-      "dependency": "hddTemp"
-   },
-   "warningHddColor": {
-      "type": "colorchooser",
-      "default": "orange",
-      "description": "Color to show warning when the temperature is High:",
-      "tooltip": "Set the custom color of High temperature warning.",
-      "indent": true,
-      "dependency": "hddTemp"
-   },
-   "critialHddColor": {
-      "type": "colorchooser",
-      "default": "red",
-      "description": "Color to show warning when the temperature is Alarming:",
-      "tooltip": "Set the custom color of Alarming temperature warning.",
-      "indent": true,
-      "dependency": "hddTemp"
-   },
-   "warningHddTemp": {
-      "default": 38,
-      "type": "spinbutton",
-      "min": 10,
-      "max": 100,
-      "description": "Value of High temperature to display a warning:",
-      "units": "celsius",
-      "step": 1,
-      "tooltip": "Set the custom High temperature value to display a warning.",
-      "indent": true,
-      "dependency": "hddTemp"
-   },
-   "criticalHddTemp": {
-      "default": 45,
-      "type": "spinbutton",
-      "min": 10,
-      "max": 100,
-      "description": "Value of Alarming temperature to display a alarm:",
-      "units": "celsius",
-      "step": 1,
-      "tooltip": "Set the custom Alarming temperature value to display a alarm.",
-      "indent": true,
-      "dependency": "hddTemp"
-   }
+    "separator-apparience-top": {
+        "type": "separator"
+    },
+    "header-apparience": {
+        "type": "header",
+        "description": "Apparience:"
+    },
+    "separator-apparience-bottom": {
+        "type": "separator"
+    },
+    "theme": {
+        "type": "combobox",
+        "description": "Selected theme:",
+        "default": "mind",
+        "tooltip": "Select a theme to show icons.",
+        "options": {
+            "Mind": "mind",
+            "Ubuntu": "ubuntu",
+            "Linux": "linux",
+            "Comic": "comic",
+            "Windows": "windows",
+            "Blue": "blue",
+            "Metalic": "metalic",
+            "Black": "black",
+            "Orange": "orange",
+            "Pink": "pink"
+        }
+    },
+    "mainBox": {
+        "default": true,
+        "description": "Show the main box.",
+        "type": "checkbox",
+        "tooltip": "Check this to make the main box visible/invisible."
+    },
+    "driveBox": {
+        "default": true,
+        "description": "Show the drive box.",
+        "type": "checkbox",
+        "tooltip": "Check this to make the drive box visible/invisible."
+    },
+    "borderBoxWidth": {
+        "default": 1,
+        "type": "spinbutton",
+        "min": 0,
+        "max": 4,
+        "description": "Border's box width:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the border's box width."
+    },
+    "borderBoxColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "Border's box color:",
+        "tooltip": "Set the custom border box's color."
+    },
+    "boxColor": {
+        "type": "colorchooser",
+        "default": "rgb(0,0,0)",
+        "description": "Box color:",
+        "tooltip": "Set the custom box's color."
+    },
+    "fixWidth": {
+        "default": true,
+        "description": "Fixed width.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the width of desklet."
+    },
+    "width": {
+        "default": 170,
+        "type": "spinbutton",
+        "min": 100,
+        "max": 1600,
+        "description": "Width:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixWidth",
+        "tooltip": "Increase or decrease the desklet width."
+    },
+    "fontColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "description": "Font color:",
+        "tooltip": "Set the custom text color."
+    },
+    "textTopSize": {
+        "default": 9,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "Upper text font size:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the upper text font size."
+    },
+    "textButtonSize": {
+        "default": 7,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "description": "Button text font size:",
+        "units": "pixels",
+        "step": 1,
+        "tooltip": "Increase or decrease the button text font size."
+    },
+    "transparency": {
+        "type": "scale",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05,
+        "description": "Opacity:",
+        "tooltip": "Select a opacity percent."
+    },
+    "separator-categories-top": {
+       "type": "separator"
+    },
+    "header-categories": {
+        "type": "header",
+        "description": "Categories:"
+    },
+    "separator-categories-bottom": {
+       "type": "separator"
+    },
+    "speedMeter": {
+        "default": false,
+        "description": "Show the Speed Meter.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Speed Meter or not."
+    },
+    "hardDrives": {
+        "default": true,
+        "description": "Show the Hard Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Hard Drives or not."
+    },
+    "opticalDrives": {
+        "default": true,
+        "description": "Show the Optical Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Optical Drives or not."
+    },
+    "removableDrives": {
+        "default": true,
+        "description": "Show the Removable Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Removable Drives or not."
+    },
+    "fixedDrives": {
+        "default": true,
+        "description": "Show the Fixed Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Fixed Drives or not."
+    },
+    "emptyDrives": {
+        "default": false,
+        "description": "Show the Empty Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Empty Drives or not."
+    },
+    "meterTimeDelay": {
+        "default": 2,
+        "type": "spinbutton",
+        "min": 1,
+        "max": 5,
+        "description": "File time transfer(Longer time means more precision):",
+        "units": "seconds",
+        "step": 1,
+        "tooltip": "Increase or decrease the time between measurements file transfer speed."
+    },
+    "capacityDetect": {
+        "default": true,
+        "description": "Use the capacity detection.",
+        "type": "checkbox",
+        "tooltip": "Check this to use or not the capacity detection. When enabled using more CPU, but capacity changes are detected in the volumens mounted."
+    },
+    "separator-tools-top": {
+        "type": "separator"
+    },
+    "header-tools": {
+        "type": "header",
+        "description": "Tools:"
+    },
+    "separator-tools-bottom": {
+        "type": "separator"
+    },
+    "openSystem": {
+        "default": false,
+        "description": "Auto open mount points by the O.S.",
+        "type": "checkbox",
+        "tooltip": "Check this to use or not org.gnome.desktop.media-handling automount-open O.S. property."
+    },
+    "openConnect": {
+        "default": false,
+        "description": "Auto open mount points by the Drives Manager.",
+        "type": "checkbox",
+        "tooltip": "Check this to mount points auto open or not  when the volumen was mounted."
+    },
+    "openWith": {
+        "type": "combobox",
+        "description": "Open with:",
+        "default": "nemo",
+        "tooltip": "Select the default browser.",
+        "indent": true,
+        "options": {
+           "Nemo": "nemo",
+           "Nautilus": "nautilus"
+        }
+    },
+    "unEjecting": {
+        "default": false,
+        "description": "Don't eject Removable Drive (they can be reconnected without need to pull out of the connector).",
+        "type": "checkbox",
+        "tooltip": "Check this to use or not the option of don't eject Removable Drive. They can be reconnected without need to pull out of the connector if you this option is active."
+    },
+    "separator-hdd-temp-top": {
+       "type": "separator"
+    },
+    "header-hdd-temp": {
+        "type": "header",
+        "description": "HDD Temp:"
+    },
+    "separator-hdd-temp-bottom": {
+       "type": "separator"
+    },
+    "hddTemp": {
+        "default": false,
+        "description": "Use the temperature detection in the Hard drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to use or not the temperature detection in the hard drives (needs Udisk2)."
+    },
+    "hddTempSound": {
+        "default": false,
+        "description": "Activate the temperature alarm sound.",
+        "type": "checkbox",
+        "tooltip": "Enabling this property activate a alarm sound when temperature reaches alarming levels.",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "normalHddColor": {
+        "type": "colorchooser",
+        "default": "green",
+        "description": "Color to show warning when the temperature is Normal:",
+        "tooltip": "Set the custom color of Normal temperature warning.",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "warningHddColor": {
+        "type": "colorchooser",
+        "default": "orange",
+        "description": "Color to show warning when the temperature is High:",
+        "tooltip": "Set the custom color of High temperature warning.",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "critialHddColor": {
+        "type": "colorchooser",
+        "default": "red",
+        "description": "Color to show warning when the temperature is Alarming:",
+        "tooltip": "Set the custom color of Alarming temperature warning.",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "warningHddTemp": {
+        "default": 38,
+        "type": "spinbutton",
+        "min": 10,
+        "max": 100,
+        "description": "Value of High temperature to display a warning:",
+        "units": "celsius",
+        "step": 1,
+        "tooltip": "Set the custom High temperature value to display a warning.",
+        "indent": true,
+        "dependency": "hddTemp"
+    },
+    "criticalHddTemp": {
+        "default": 45,
+        "type": "spinbutton",
+        "min": 10,
+        "max": 100,
+        "description": "Value of Alarming temperature to display a alarm:",
+        "units": "celsius",
+        "step": 1,
+        "tooltip": "Set the custom Alarming temperature value to display a alarm.",
+        "indent": true,
+        "dependency": "hddTemp"
+    }
 }

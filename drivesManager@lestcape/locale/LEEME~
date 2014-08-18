@@ -1,11 +1,17 @@
-Cinnamon Desklet: Drives Manager Version: v1.2-RTM
+Desklet   : Drives Manager         Versión              : v1.2-RTM
+O.S.      : Cinnamon               Fecha de lanzamiento : 18 de Agosto de 2014.
+Autor     : Lester Carballo Pérez  Correo electrónico   : lestcape@gmail.com
 
-Last version release date: 15 August 2014
-***
-Authors: Lester Carballo Pérez (https://github.com/lestcape)
-Contact: lestcape@gmail.com
-Website: https://github.com/lestcape/Drives-Manager
-***
+Sitio Web : https://github.com/lestcape/Drives-Manager
+
+Este es un desklet para mostrar los dispositivos conectados a la computadora e interactuar con ellos.
+
+--------------
+Autores de las traducciones a otros idiomas:
+--------------
+- Czech(Cs_Cz):     Kuba Vaněk(vanek.jakub4@seznam.cz)
+- Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
+- English(En):      Lester Carballo Pérez(lestcape@gmail.com)
 
 --------------
 Gracias especiales a:
@@ -15,13 +21,6 @@ Gracias especiales a:
  - KZom in https://github.com/KZom
  - duncannz in https://github.com/duncannz
  - nimdahk in https://github.com/nimdahk
-
---------------
-Autores de las traducciones a otros idiomas:
---------------
-- Czech(Cs_Cz):     Kuba Vaněk(vanek.jakub4@seznam.cz)
-- Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
-- English(En):      Lester Carballo Pérez(lestcape@gmail.com)
 
 --------------
 Habilidades incluidas:
