@@ -3,18 +3,20 @@ Cinnamon Desklet: Drives Manager Version: v1.2-RTM
 Last version release date: 15 August 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
+
 Contact: lestcape@gmail.com
+
 Website: https://github.com/lestcape/Drives-Manager
-***
 
 --------------
 Special thanks to:
 --------------
  - The Cinnamon programmers.
- - mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
- - KZom in https://github.com/KZom
- - duncannz in https://github.com/duncannz
- - nimdahk in https://github.com/nimdahk
+ - mtwebster http://cinnamon-spices.linuxmint.com/users/view/339
+ - rgcjonas https://github.com/rgcjonas
+ - KZom https://github.com/KZom
+ - duncannz https://github.com/duncannz
+ - nimdahk https://github.com/nimdahk
 
 --------------
 Author of language translation:
@@ -88,6 +90,11 @@ Known bugs and requirements:
 
 Change Log:
 ==============
+1.2-RTM
+  - Added Czech language(thanks vanek.jakub4).
+  - The hddtemp program was replaced by Udisk2(thanks rgcjonas).
+  - We are changing the icons to svg.
+
 1.1-RTM
   - Added parameter, was missing in CriticalNotify .
   - The gjs daemon for obtain temp with hddtemp was removed, depend of gjs, and maybe it's not installed, was replaced by spaw with pipes.

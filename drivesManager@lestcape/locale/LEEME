@@ -11,10 +11,11 @@ Website: https://github.com/lestcape/Drives-Manager
 Gracias especiales a:
 --------------
  - The Cinnamon programmers.
- - mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
- - KZom in https://github.com/KZom
- - duncannz in https://github.com/duncannz
- - nimdahk in https://github.com/nimdahk
+ - mtwebster http://cinnamon-spices.linuxmint.com/users/view/339
+ - rgcjonas https://github.com/rgcjonas
+ - KZom https://github.com/KZom
+ - duncannz https://github.com/duncannz
+ - nimdahk https://github.com/nimdahk
 
 --------------
 Autores de las traducciones a otros idiomas:
@@ -81,7 +82,7 @@ Registro de cambios:
 --------------
 1.2-RTM
   - Añadido el idioma Checo(gracias a vanek.jakub4).
-  - El programa hddtemp fue reemplazado por Udisk2.
+  - El programa hddtemp fue reemplazado por Udisk2(gracias a rgcjonas).
   - Se están cambiando los iconos a svg.
 
 1.1-RTM
