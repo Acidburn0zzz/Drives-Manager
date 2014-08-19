@@ -219,7 +219,7 @@
         "tooltip": "Check this if you want to control the width of desklet."
     },
     "width": {
-        "default": 170,
+        "default": 200,
         "type": "spinbutton",
         "min": 100,
         "max": 1600,
@@ -230,7 +230,7 @@
         "dependency": "fixWidth",
         "tooltip": "Increase or decrease the desklet width."
     },
-    "transparency": {
+    "opacity": {
         "type": "scale",
         "default": 0.5,
         "min": 0.0,
@@ -303,7 +303,7 @@
         "description": "Upper text font size:",
         "tooltip": "Increase or decrease the upper text font size."
     },
-    "textButtonSize": {
+    "textBottomSize": {
         "default": 7,
         "type": "spinbutton",
         "min": 2,
@@ -312,7 +312,7 @@
         "step": 1,
         "indent": true,
         "dependency": "overrideTheme",
-        "description": "Button text font size:",
-        "tooltip": "Increase or decrease the button text font size."
+        "description": "Bottom text font size:",
+        "tooltip": "Increase or decrease the bottom text font size."
     }
 }

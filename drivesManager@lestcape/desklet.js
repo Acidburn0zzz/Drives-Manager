@@ -206,7 +206,8 @@ function GlobalContainer(uuid, system) {
 GlobalContainer.prototype = {
 
    _init: function(uuid, system) {
-      this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders' });
+      this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
+      this._mainBox.add_style_class_name('drives-main-box');
       this._rootBox = new St.BoxLayout({ vertical:true });
       this._mainBox.set_child(this._rootBox);
 
@@ -217,11 +218,11 @@ GlobalContainer.prototype = {
 
       this._overrideTheme = false;
       this._topTextSize = 9;
-      this._buttonTextSize = 7;
+      this._bottomTextSize = 7;
       this._showMainBox = true;
       this._showDriveBox = true;
       this._theme = "mind";
-      this._transparency = 50;
+      this._opacity = 50;
       this._boxColor = "rgb(0,0,0)";
       this._borderBoxWidth = 1;
       this._borderBoxColor = "white";
@@ -336,17 +337,17 @@ GlobalContainer.prototype = {
          this._listCategoryContainer[index].setTopTextSize(size);
    },
 
-   setButtonTextSize: function(size) {
-      this._buttonTextSize = size;
+   setBottomTextSize: function(size) {
+      this._bottomTextSize = size;
       for(let index in this._listCategoryContainer)
-         this._listCategoryContainer[index].setButtonTextSize(size);
+         this._listCategoryContainer[index].setBottomTextSize(size);
    },
 
-   setTransparency: function(transp) {
-      this._transparency = transp;
+   setOpacity: function(opacity) {
+      this._opacity = opacity;
       this._setStyle();
       for(let index in this._listCategoryContainer)
-         this._listCategoryContainer[index].setTransparency(transp);
+         this._listCategoryContainer[index].setOpacity(opacity);
    },
 
    applyDriveStyle: function(categoryContainer) {
@@ -356,8 +357,8 @@ GlobalContainer.prototype = {
       categoryContainer.setBorderBoxColor(this._borderBoxColor);
       categoryContainer.setBoxColor(this._boxColor);
       categoryContainer.setTopTextSize(this._topTextSize);
-      categoryContainer.setButtonTextSize(this._buttonTextSize);
-      categoryContainer.setTransparency(this._transparency);
+      categoryContainer.setBottomTextSize(this._bottomTextSize);
+      categoryContainer.setOpacity(this._opacity);
    },
 
    addCategoryContainer: function(categoryContainer) {
@@ -417,7 +418,7 @@ GlobalContainer.prototype = {
          if(parentContainer)
             parentContainer.remove_actor(catContainer.getContainerBox());
          this._rootBox.insert_actor(catContainer.getContainerBox(), _indexConnect);
-         //this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
+         catContainer.overrideTheme(this._overrideTheme);
       }
    },
 
@@ -428,7 +429,10 @@ GlobalContainer.prototype = {
    disconnectCategoryByIndex: function(index) {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
          this._listCategoryConnected[index] = false;
-         this._rootBox.remove_actor(this._listCategoryContainer[index].getContainerBox());
+         let containerBox = this._listCategoryContainer[index].getContainerBox();
+         let parentContainerBox = containerBox.get_parent();
+         if(parentContainerBox)
+            parentContainerBox.remove_actor(containerBox);
       }
    },
 
@@ -481,20 +485,63 @@ GlobalContainer.prototype = {
 
    _setStyle: function() {
       if(this._showMainBox) {
+         let newStyle = '';
+         let remplaceColor;
          if(this._overrideTheme) {
             this._mainBox.set_style_class_name(' ');
-            let _color = (this._boxColor.replace(")","," + this._transparency + ")")).replace('rgb','rgba');
-            this._mainBox.set_style('padding: 4px; border:'+this._borderBoxWidth +
-                                    'px solid ' + this._borderBoxColor + '; background-color: ' +
-                                     _color + '; border-radius: 12px;');
+            let remplaceColor = this._textRGBToRGBA(this._boxColor, this._opacity);
+            newStyle = 'padding: 4px; border:'+this._borderBoxWidth +
+                       'px solid ' + this._borderBoxColor + '; background-color: ' +
+                       remplaceColor + '; border-radius: 12px;';
+            this._mainBox.set_style(newStyle);
          } else {
-            this._mainBox.set_style(' ');
-            this._mainBox.set_style_class_name('desklet-with-borders');
+            if(this._mainBox.style_class != 'desklet-with-borders') {
+               this._mainBox.set_style(' ');
+               this._mainBox.set_style_class_name('desklet-with-borders');
+               this._mainBox.add_style_class_name('drives-main-box');
+            }
+            if((this._mainBox.visible)&&(this._mainBox.get_parent())) {
+               let themeNode = this._mainBox.get_theme_node();
+               let [have_color, box_color] = themeNode.lookup_color('background-color', false);
+               if(have_color) {
+                  remplaceColor = this._updateOpacityColor(box_color.to_string(), this._opacity);
+                  newStyle += 'background-color: ' + remplaceColor + ';';
+               }
+               let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
+               if(have_color_start) {
+                  remplaceColor = this._updateOpacityColor(box_color_start.to_string(), this._opacity);
+                  newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+               }
+               let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
+               if(have_color_end) {
+                  remplaceColor = this._updateOpacityColor(box_color_end.to_string(), this._opacity);
+                  newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+               }
+               if(newStyle != this._mainBox.get_style()) {
+                  this._mainBox.set_style(newStyle);
+               }
+            }
          }
       } else {
          this._mainBox.set_style(' ');
          this._mainBox.set_style_class_name(' ');
       }
+      return true;
+   },
+
+   _updateOpacityColor: function(color, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.01";
+      let r = parseInt(color.substring(1,3),16);
+      let g = parseInt(color.substring(3,5),16);
+      let b = parseInt(color.substring(5,7),16);
+      return "rgba("+r+","+g+","+b+","+opacity+")";
+   },
+
+   _textRGBToRGBA: function(textRGB, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.0";
+      return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    }
 };
 
@@ -515,8 +562,8 @@ CategoryContainer.prototype = {
       this._borderBoxColor  = "white";
       this._boxColor = "rgb(0,0,0)";
       this._topTextSize = 9;
-      this._buttonTextSize = 7;
-      this._transparency = 50;
+      this._bottomTextSize = 7;
+      this._opacity = 50;
    },
 
    setParentContainer: function(parent) {
@@ -612,16 +659,16 @@ CategoryContainer.prototype = {
          this._listDriveContainer[index].setTopTextSize(size);
    },
 
-   setButtonTextSize: function(size) {
-      this._buttonTextSize = size;
+   setBottomTextSize: function(size) {
+      this._bottomTextSize = size;
       for(let index in this._listDriveContainer)
-         this._listDriveContainer[index].setButtonTextSize(size);
+         this._listDriveContainer[index].setBottomTextSize(size);
    },
 
-   setTransparency: function(transp) {
-      this._transparency = transp;
+   setOpacity: function(opacity) {
+      this._opacity = opacity;
       for(let index in this._listDriveContainer)
-         this._listDriveContainer[index].setTransparency(transp);
+         this._listDriveContainer[index].setOpacity(opacity);
    },
 
    applyDriveStyle: function(driveContainer) {
@@ -632,8 +679,8 @@ CategoryContainer.prototype = {
       driveContainer.setBorderBoxColor(this._borderBoxColor);
       driveContainer.setBoxColor(this._boxColor);
       driveContainer.setTopTextSize(this._topTextSize);
-      driveContainer.setButtonTextSize(this._buttonTextSize);
-      driveContainer.setTransparency(this._transparency);
+      driveContainer.setBottomTextSize(this._bottomTextSize);
+      driveContainer.setOpacity(this._opacity);
    },
 //Child property
    update: function() {
@@ -676,43 +723,47 @@ DriveContainer.prototype = {
       this._overrideTheme = false;
       this._showDriveBox = true;
       this._boxColor = "rgb(0,0,0)";
-      this._transparency = 50;
+      this._opacity = 50;
       this._borderBoxWidth = 1;
       this._borderBoxColor = "white";
       this._fontFamily = ""; //Default Font family
       this._textTopSize = 9;
-      this._textButtonSize = 7;
+      this._textBottomSize = 7;
       this._clickedEject = false;
 
-      this._driveBox = new St.BoxLayout({ vertical:false, style_class: 'menu-favorites-box' });
-
-      this._iconContainer = new St.BoxLayout({vertical:true});
+      this._driveBox = new St.BoxLayout({ vertical:false, style_class: 'menu-favorites-box', reactive: true, track_hover: true });
+      this._driveBox.add_style_class_name('drives-drive-box');
+      this._iconContainer = new St.BoxLayout({ vertical:true, style_class: 'drives-icon-button-box'});
           
-      let _topTextContainer = new St.BoxLayout({vertical:false});
-      this._leftTopText = new St.Label();
-      this._rigthTopText = new St.Label();
-      _topTextContainer.add(this._leftTopText, {x_fill: true, expand: true, x_align: St.Align.START});
-      _topTextContainer.add(this._rigthTopText, {x_fill: true, x_align: St.Align.END});
+      this._topTextContainer = new St.BoxLayout({ vertical: false, style_class: 'drives-top-text-drive-box' });
+      this._leftTopText = new St.Label({ style_class: 'menu-selected-app-title' });
+      this._rightTopText = new St.Label({ style_class: 'menu-selected-app-title' });
+      this._leftTopText.add_style_class_name('drives-left-top-text');
+      this._rightTopText.add_style_class_name('drives-right-top-text');
+      this._topTextContainer.add(this._leftTopText, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._topTextContainer.add(this._rightTopText, {x_fill: true, x_align: St.Align.END});
 
-      let _buttonTextContainer = new St.BoxLayout({vertical:false});
-      this._leftButtonText = new St.Label();
-      this._rigthButtonText = new St.Label();
-      _buttonTextContainer.add(this._leftButtonText, {x_fill: true, expand: true, x_align: St.Align.START});
-      _buttonTextContainer.add(this._rigthButtonText, {x_fill: true, x_align: St.Align.END});
+      this._bottomTextContainer = new St.BoxLayout({ vertical: false, style_class: 'drives-bottom-text-drive-box' });
+      this._leftBottomText = new St.Label({ style_class: 'menu-selected-app-description' });
+      this._rightBottomText = new St.Label({ style_class: 'menu-selected-app-description' });
+      this._leftBottomText.add_style_class_name('drives-left-bottom-text');
+      this._rightBottomText.add_style_class_name('drives-right-bottom-text');
+      this._bottomTextContainer.add(this._leftBottomText, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._bottomTextContainer.add(this._rightBottomText, {x_fill: true, x_align: St.Align.END});
 
-      this.percentContainer = new St.BoxLayout({vertical:true});
+      this.percentContainer = new St.BoxLayout({ vertical:true, style_class: 'drives-percent-meter-box' });
 
-      this._ejectContainer = new St.BoxLayout({vertical:true, x_align: St.Align.END});
-      this._ejectContainer.set_style('padding: 8px 0px 0px 4px;');
+      this._ejectContainer = new St.BoxLayout({vertical:true, style_class: 'drives-eject-button-box' });
+      //this._ejectContainer.set_style('padding: 8px 0px 0px 4px;');
 
-      let _infoContainer = new St.BoxLayout({vertical:true});
-      _infoContainer.add(_topTextContainer, {x_fill: true, expand: true, x_align: St.Align.START});
-      _infoContainer.add(this.percentContainer, {x_fill: true, expand: true, x_align: St.Align.START});
-      _infoContainer.add(_buttonTextContainer, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._infoContainer = new St.BoxLayout({ vertical: true, style_class: 'drives-info-drive-box' });
+      this._infoContainer.add(this._topTextContainer, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._infoContainer.add(this.percentContainer, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._infoContainer.add(this._bottomTextContainer, {x_fill: true, expand: true, x_align: St.Align.START});
 
       this._driveBox.add(this._iconContainer, {x_fill: true, x_align: St.Align.START});
-      this._driveBox.add(_infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
-      this._driveBox.add(this._ejectContainer, {x_fill: true, x_align: St.Align.END});
+      this._driveBox.add(this._infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
+      this._driveBox.add(this._ejectContainer, { x_fill: true, x_align: St.Align.START });
       this._setStyleDrive();
       this._currentMeterImage = new Array();
       this._currentIndexMeterImage = new Array();
@@ -745,8 +796,8 @@ DriveContainer.prototype = {
       this._setStyleDrive();
    },
 
-   setTransparency: function(transp) {
-      this._transparency = transp;
+   setOpacity: function(opacity) {
+      this._opacity = opacity;
       this._setStyleDrive();
    },
 
@@ -845,8 +896,8 @@ DriveContainer.prototype = {
       this._setStyleText();
    },
 
-   setButtonTextSize: function(size) {
-      this._textButtonSize = size;
+   setBottomTextSize: function(size) {
+      this._textBottomSize = size;
       this._setStyleText();
    },
 
@@ -855,19 +906,19 @@ DriveContainer.prototype = {
       this._leftTopText.set_text(text);
    },
 
-   setRigthTopText: function(text) {
-      this._rigthTopFontColor = null;
-      this._rigthTopText.set_text(text);
+   setRightTopText: function(text) {
+      this._rightTopFontColor = null;
+      this._rightTopText.set_text(text);
    },
 
-   setLeftButtonText: function(text) {
-      this._leftButtonFontColor = null;
-      this._leftButtonText.set_text(text);
+   setLeftBottomText: function(text) {
+      this._leftBottomFontColor = null;
+      this._leftBottomText.set_text(text);
    },
 
-   setRigthButtonText: function(text) {
-      this._rigthButtonFontColor = null;
-      this._rigthButtonText.set_text(text);
+   setRightBottomText: function(text) {
+      this._rightBottomFontColor = null;
+      this._rightBottomText.set_text(text);
    },
 
    setLeftTopTextColor: function(text, color) {
@@ -876,60 +927,142 @@ DriveContainer.prototype = {
       this._setStyleText();
    },
 
-   setRigthTopTextColor: function(text, color) {
-      this.setRigthTopText(text);
-      this._rigthTopFontColor = color;
+   setRightTopTextColor: function(text, color) {
+      this.setRightTopText(text);
+      this._rightTopFontColor = color;
       this._setStyleText();
    },
 
-   setLeftButtonTextColor: function(text, color) {
-      this.setLeftButtonText(text);
-      this._leftButtonFontColor = color;
+   setLeftBottomTextColor: function(text, color) {
+      this.setLeftBottomText(text);
+      this._leftBottomFontColor = color;
       this._setStyleText();
    },
 
-   setRigthButtonTextColor: function(text, color) {
-      this.setRigthButtonText(text);
-      this._rigthButtonFontColor = color;
+   setRightBottomTextColor: function(text, color) {
+      this.setRightBottomText(text);
+      this._rightBottomFontColor = color;
       this._setStyleText();
    },
 
    _setStyleDrive: function() {
-      if(this._showDriveBox)
-      {
+      if(this._showDriveBox) {
+         let newStyle = '';
+         let remplaceColor;
          if(this._overrideTheme) {
+            this._infoContainer.set_style_class_name(' ');
+            this.percentContainer.set_style_class_name(' ');
+            this._iconContainer.set_style_class_name(' ');
+            this._ejectContainer.set_style_class_name(' ');
+            this._ejectContainer.style = 'padding: 8px 0px 0px 4px;';
+            this._topTextContainer.set_style_class_name(' ');
+            this._topTextContainer.style = 'spacing: 4px;';
+            this._bottomTextContainer.set_style_class_name(' ');
+            this._bottomTextContainer.style = 'spacing: 4px;';
+
             this._driveBox.set_style_class_name(' ');
-            let _color = (this._boxColor.replace(")",","+this._transparency+")")).replace('rgb','rgba');
-            this._driveBox.set_style('padding: 0px 6px 0px 0px; border:' + this._borderBoxWidth + 'px solid ' +
-                                     this._borderBoxColor +'; background-color: ' + _color + '; border-radius: 12px;');
+            let remplaceColor = this._textRGBToRGBA(this._boxColor, this._opacity);
+            newStyle = 'padding: 0px 6px 0px 0px; border:' + this._borderBoxWidth + 'px solid ' +
+                       this._borderBoxColor +'; background-color: ' + remplaceColor + '; border-radius: 12px;';
+            this._driveBox.set_style(newStyle);
          } else {
-            this._driveBox.set_style(' ');
-            this._driveBox.set_style_class_name('menu-favorites-box');
+            this._infoContainer.set_style_class_name('drives-info-drive-box');
+            this.percentContainer.set_style_class_name('drives-percent-meter-box');
+            this._iconContainer.set_style_class_name('drives-icon-button-box');
+            this._ejectContainer.set_style_class_name('drives-eject-button-box');
+            this._ejectContainer.style = ' ';
+            this._topTextContainer.set_style_class_name('drives-top-text-drive-box');
+            this._topTextContainer.style = ' ';
+            this._bottomTextContainer.set_style_class_name('drives-bottom-text-drive-box');
+            this._bottomTextContainer.style = ' ';
+            if(this._driveBox.style_class != 'menu-favorites-box') {
+               this._driveBox.set_style(' ');
+               this._driveBox.set_style_class_name('menu-favorites-box');
+               this._driveBox.add_style_class_name('drives-drive-box');
+            }
+            if((this._driveBox.get_parent())&&(this._driveBox.get_parent().get_parent())) {
+               let themeNode = this._driveBox.get_theme_node();
+               let [have_color, box_color] = themeNode.lookup_color('background-color', false);
+               if(have_color) {
+                  remplaceColor = this._updateOpacityColor(box_color.to_string(), this._opacity);
+                  newStyle += 'background-color: ' + remplaceColor + ';';
+               }
+               let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
+               if(have_color_start) {
+                  remplaceColor = this._updateOpacityColor(box_color_start.to_string(), this._opacity);
+                  newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+               }
+               let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
+               if(have_color_end) {
+                  remplaceColor = this._updateOpacityColor(box_color_end.to_string(), this._opacity);
+                  newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+               }
+               if(newStyle != this._driveBox.get_style()) {
+                  this._driveBox.set_style(newStyle);
+               }
+            }
          }
       } else {
          this._driveBox.set_style_class_name(' ');
          this._driveBox.set_style(' ');
       }
+      return true;
+   },
+
+   _updateOpacityColor: function(color, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.01";
+      let r = parseInt(color.substring(1,3),16);
+      let g = parseInt(color.substring(3,5),16);
+      let b = parseInt(color.substring(5,7),16);
+      return "rgba("+r+","+g+","+b+","+opacity+")";
+   },
+
+   _textRGBToRGBA: function(textRGB, opacity) {
+      if((!opacity)||(opacity == 0))
+         opacity = "0.0";
+      return (textRGB.replace(')',',' + opacity + ')')).replace('rgb','rgba');
    },
 
    _setStyleText: function() {
-      if(this._leftTopFontColor)
-         this._leftTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._leftTopFontColor + " " + this._fontFamily;
-      else
-         this._leftTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
-      if(this._rigthTopFontColor)
-         this._rigthTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._rigthTopFontColor + " " + this._fontFamily;
-      else
-         this._rigthTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
+      if(this._overrideTheme) {
+         this._leftTopText.set_style_class_name(' ');
+         this._rightTopText.set_style_class_name(' ');
+         this._leftBottomText.set_style_class_name(' ');
+         this._rightBottomText.set_style_class_name(' ');
+         if(this._leftTopFontColor)
+            this._leftTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._leftTopFontColor + " " + this._fontFamily;
+         else
+            this._leftTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
+         if(this._rightTopFontColor)
+            this._rightTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._rightTopFontColor + " " + this._fontFamily;
+         else
+            this._rightTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
 
-      if(this._leftButtonFontColor)
-         this._leftButtonText.style="font-size: " + this._textButtonSize + "pt; color:" + this._leftButtonFontColor + " " + this._fontFamily;
-      else
-         this._leftButtonText.style="font-size: " + this._textButtonSize + "pt; " + this._fontFamily;
-      if(this._rigthButtonFontColor)
-         this._rigthButtonText.style="font-size: " + this._textButtonSize + "pt; color:" + this._rigthButtonFontColor + " " + this._fontFamily;
-      else
-         this._rigthButtonText.style="font-size: " + this._textButtonSize + "pt; " + this._fontFamily;
+         if(this._leftBottomFontColor)
+            this._leftBottomText.style="font-size: " + this._textBottomSize + "pt; color:" + this._leftBottomFontColor + " " + this._fontFamily;
+         else
+            this._leftBottomText.style="font-size: " + this._textBottomSize + "pt; " + this._fontFamily;
+         if(this._rightBottomFontColor)
+            this._rightBottomText.style="font-size: " + this._textBottomSize + "pt; color:" + this._rightBottomFontColor + " " + this._fontFamily;
+         else
+            this._rightBottomText.style="font-size: " + this._textBottomSize + "pt; " + this._fontFamily;
+      } else {
+         this._leftTopText.set_style(' ');
+         this._rightTopText.set_style(' ');
+         this._leftBottomText.set_style(' ');
+         this._rightBottomText.set_style(' ');
+         if(this._rightBottomFontColor)
+            this._rightBottomText.style="color:" + this._rightBottomFontColor;
+         this._leftTopText.set_style_class_name('menu-selected-app-title');
+         this._rightTopText.set_style_class_name('menu-selected-app-title');
+         this._leftBottomText.set_style_class_name('menu-selected-app-description');
+         this._rightBottomText.set_style_class_name('menu-selected-app-description');
+         this._leftTopText.add_style_class_name('drives-left-top-text');
+         this._rightTopText.add_style_class_name('drives-right-top-text');
+         this._leftBottomText.add_style_class_name('drives-left-bottom-text');
+         this._rightBottomText.add_style_class_name('drives-right-bottom-text');
+      }
    },
 
    _path: function() {
@@ -1051,10 +1184,10 @@ SpeedDiskContainer.prototype = {
 
    setTopTextSize: function(size) {
       this._dr.setTopTextSize(size);
-      this._dr.setButtonTextSize(size);
+      this._dr.setBottomTextSize(size);
    },
 
-   setButtonTextSize: function(size) {
+   setBottomTextSize: function(size) {
       
    },
 
@@ -1066,9 +1199,9 @@ SpeedDiskContainer.prototype = {
       this._updateDiskData();
 
       this._dr.setLeftTopText("" + this.convertToString(this.diskReadSpeed) + "/s");
-      this._dr.setRigthTopText(" " + this.convertToString(this.diskReadMaxSpeed) + "/s");
-      this._dr.setLeftButtonText("" + this.convertToString(this.diskWriteSpeed) + "/s");
-      this._dr.setRigthButtonText(" " + this.convertToString(this.diskWriteMaxSpeed) + "/s");
+      this._dr.setRightTopText(" " + this.convertToString(this.diskReadMaxSpeed) + "/s");
+      this._dr.setLeftBottomText("" + this.convertToString(this.diskWriteSpeed) + "/s");
+      this._dr.setRightBottomText(" " + this.convertToString(this.diskWriteMaxSpeed) + "/s");
       this._dr.setMeterImage(0, this.diskReadSpeed, this.diskReadMaxSpeed);
       this._dr.setMeterImage(1, this.diskWriteSpeed, this.diskWriteMaxSpeed);
    },
@@ -1147,7 +1280,7 @@ HardDiskContainer.prototype = {
           _dr.setEjectIcon(this._theme, "empty", null);
           _dr.addMeter();
           _dr.setLeftTopText(this.mountsHard[_pos][1] + " ");
-          _dr.setRigthTopText(this.mountsHard[_pos][0]);
+          _dr.setRightTopText(this.mountsHard[_pos][0]);
           this._hddTempMonitor.addDevice(this.mountsHard[_pos][0]);
       }
    },
@@ -1170,7 +1303,7 @@ HardDiskContainer.prototype = {
          for(let _pos in this.mountsHard) {
              _sizeStatus = this._getDriveSize(this.mountsHard[_pos][1]);
              _capacityStatus = this._getDriveUsedSpace(this.mountsHard[_pos][1]);
-             this._listDriveContainer[_pos].setLeftButtonText(this.convertToString(_capacityStatus) + "/" + this.convertToString(_sizeStatus));
+             this._listDriveContainer[_pos].setLeftBottomText(this.convertToString(_capacityStatus) + "/" + this.convertToString(_sizeStatus));
              this._listDriveContainer[_pos].setMeterImage(0, _capacityStatus, _sizeStatus);
          }
       }
@@ -1188,10 +1321,10 @@ HardDiskContainer.prototype = {
          if(this.mountsHard[dev][0] == device) {
             if(value) {
                _color = this._hddTempMonitor.getHddTempColor(value);
-               this._listDriveContainer[dev].setRigthButtonTextColor(value, _color);
+               this._listDriveContainer[dev].setRightBottomTextColor(value, _color);
             }
             else
-               this._listDriveContainer[dev].setRigthButtonTextColor("");
+               this._listDriveContainer[dev].setRightBottomTextColor("");
          }
       }
    },
@@ -1385,7 +1518,7 @@ DeviceContainer.prototype = {
                   _usedDr = 0;
                else
                   _usedDr = _partitionsArray[i][3]*1024;
-               this._listDriveContainer[_current].setLeftButtonText("" + this.convertToString(_usedDr) + "/" + this.convertToString(_sizeDr));
+               this._listDriveContainer[_current].setLeftBottomText("" + this.convertToString(_usedDr) + "/" + this.convertToString(_sizeDr));
                this._listDriveContainer[_current].setMeterImage(0, _usedDr, _sizeDr);
             }
          }
@@ -1676,7 +1809,7 @@ DeviceContainer.prototype = {
             for(let i = 0; i < this._listDriveContainer.length; i++) {
                _sizeDr = this.getDriveSize(this._listDevices[i]);
                _usedDr = this.getDriveUsedSpace(this._listDevices[i]);
-               this._listDriveContainer[i].setLeftButtonText("" + this.convertToString(_usedDr) + "/" + this.convertToString(_sizeDr));
+               this._listDriveContainer[i].setLeftBottomText("" + this.convertToString(_usedDr) + "/" + this.convertToString(_sizeDr));
                this._listDriveContainer[i].setMeterImage(0, _usedDr, _sizeDr);
             }
          }
@@ -2029,6 +2162,9 @@ MyDesklet.prototype = {
       Desklet.Desklet.prototype._init.call(this, metadata);
       this.metadata = metadata;
       this.uuid = this.metadata["uuid"];
+      if(!Main.deskletContainer.contains(this.actor)) {
+         Main.deskletContainer.addDesklet(this.actor);
+      }
 
       this.sys = new SystemClass.System(this.uuid);
       //this.sys.print_all_device();
@@ -2110,8 +2246,8 @@ MyDesklet.prototype = {
          this._onBoxColor();
          this._onFontColor();
          this._onTextTopSize();
-         this._onTextButtonSize();
-         this._onTransparency();
+         this._onTextBottomSize();
+         this._onOpacity();
          this._onCapacityDetect();
          this._onOpenConnect();
          this._onDefaultBrowser();
@@ -2238,12 +2374,12 @@ MyDesklet.prototype = {
       this.globalContainer.setTopTextSize(this._textTopSize);
    },
 
-   _onTextButtonSize: function() {
-      this.globalContainer.setButtonTextSize(this._textButtonSize);
+   _onTextBottomSize: function() {
+      this.globalContainer.setBottomTextSize(this._textBottomSize);
    },
 
-   _onTransparency: function() {
-      this.globalContainer.setTransparency(this._transparency);
+   _onOpacity: function() {
+      this.globalContainer.setOpacity(this._opacity);
    },
 
    _onOpenConnect: function() {
@@ -2324,13 +2460,13 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "theme", "_theme", this._onThemeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fixWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._onTransparency, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "opacity", "_opacity", this._onOpacity, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "overrideTheme", "_overrideTheme", this._onOverrideTheme, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onBoxColor, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onFontColor, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "textTopSize", "_textTopSize", this._onTextTopSize, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "textButtonSize", "_textButtonSize", this._onTextButtonSize, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "textBottomSize", "_textBottomSize", this._onTextBottomSize, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onBorderBoxWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onBorderBoxColor, null);
       } catch (e) {

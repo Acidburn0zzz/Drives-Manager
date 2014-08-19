@@ -84,6 +84,7 @@ Registro de cambios:
   - Añadido el idioma Checo(gracias a vanek.jakub4).
   - El programa hddtemp fue reemplazado por Udisk2(gracias a rgcjonas).
   - Se están cambiando los iconos a svg.
+  - Añadido soporte para los temas de Cinnamon.
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.
