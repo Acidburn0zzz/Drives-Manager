@@ -299,6 +299,38 @@ msgstr ""
 msgid "Increase or decrease the desklet width."
 msgstr ""
 
+#. drivesManager@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of desklet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->description
+msgid "Enable autoscrolling."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->tooltip
+msgid "Choose whether or not to enable smooth autoscrolling on the menu."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->description
+msgid "Show the scrolling area."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Choose whether or not to show the scrolling area."
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->overrideTheme->description
 msgid "Override the Cinnamon theme properties."
 msgstr ""
@@ -497,6 +529,14 @@ msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->criticalHddTemp->tooltip
 msgid "Set the custom Alarming temperature value to display a alarm."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+msgid "Show Drives Manager as Applet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
 msgstr ""
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#

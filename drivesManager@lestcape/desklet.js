@@ -1,32 +1,12 @@
 
-// Desklet : Drives Manager         Version      : v1.1-RTM
-// O.S.    : Cinnamon               Release Date : 30 October 2013.
+// Desklet : Drives Manager         Version      : v1.2-RTM
+// O.S.    : Cinnamon               Release Date : 15 August 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
 //
 // This is a desklet to show devices connected to the computer and interact with them.
 //
-// Skills including:
-//
-// 1- Show different volumes containing a device, also if is not currently mounted.
-// 2- The volumes can be mounted and unmounted with a single click.
-// 3- If you have data volumes mounted, you can access the mount point with your favorite
-//    browser (Nemo or Nautilus) with a single click or automatically if desired when the
-//    volume is mounted.
-// 4- The desklet has a wide range of configuration options, allowing you to fit almost all
-//    themes desk.
-// 5- Through this desklet, you can monitor the temperatures of your hard disks and even
-//    activate an alarm when the disc temperature exceeds a value, that you consider unacceptable.
-//    To use this option, we required the installation and configuration of hddtemp program,
-//    but do not worry, simply activate the option and the desklet will installed and configured,
-//    without your intervention.
-// 6- You can enable the option to reconnect removable usb device, without the need to remove the
-//    device from the connector. Like USB Safely Removed works in Windows.
-// 7- You can also monitor the speed of read/write files on your system.
-// 8- If you have a CD-ROM disc tray, you can opened/closed it with a single click, even if a
-//    disc is present. Unfortunately, this skill requires that you have installed eject and
-//    cdrecord programs.
 //
 //    This program is free software:
 //
@@ -42,32 +22,346 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 const St = imports.gi.St;
-
-const Desklet = imports.ui.desklet;
+const Gtk = imports.gi.Gtk;
+const Cinnamon = imports.gi.Cinnamon;
+const GUdev = imports.gi.GUdev;
 
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
-const GLib = imports.gi.GLib;
+const Signals = imports.signals;
+
+const AppletManager = imports.ui.appletManager;
+const DeskletManager = imports.ui.deskletManager;
+const Extension = imports.ui.extension;
+const Applet = imports.ui.applet;
+const Desklet = imports.ui.desklet;
 const PopupMenu = imports.ui.popupMenu;
-const Util = imports.misc.util;
 const Settings = imports.ui.settings;
 const Tweener = imports.ui.tweener;
 const CinnamonMountOperation = imports.ui.cinnamonMountOperation;
 const Main = imports.ui.main;
-const Cinnamon = imports.gi.Cinnamon;
-const GUdev = imports.gi.GUdev;
-const Signals = imports.signals;
+const Util = imports.misc.util;
 
 /****Import File****/
-//const AppletDir = imports.ui.appletManager.applets['drivesManager@lestcape'];
-const DeskletDir = imports.ui.deskletManager.desklets['drivesManager@lestcape'];
+//const AppletDir = AppletManager.applets['drivesManager@lestcape'];
+const DeskletDir = DeskletManager.desklets['drivesManager@lestcape'];
 //const Translate = DeskletDir.translate;
 const SystemClass = DeskletDir.system;
 /****Import File****/
 
+function ExtensionExtended(dir, type) {
+   this._init(dir, type);
+}
+
+ExtensionExtended.prototype = {
+   __proto__: Extension.Extension.prototype,
+   _init: function(dir, type) {
+      this.uuid = dir.get_basename();
+      this.dir = dir;
+      this.type = type;
+      this.lowerType = type.name.toLowerCase();
+      this.theme = null;
+      this.stylesheet = null;
+      this.meta = Extension.createMetaDummy(this.uuid, dir.get_path(), Extension.State.INITIALIZING);
+      this.startTime = new Date().getTime();
+
+      this.loadMetaData(dir.get_child('metadata.json'));
+      this.validateMetaData();
+
+      this.ensureFileExists(dir.get_child(this.lowerType + '.js'));
+      this.loadStylesheet(dir.get_child('stylesheet.css'));
+        
+      if(this.stylesheet) {
+         Main.themeManager.connect('theme-set', Lang.bind(this, function() {
+            this.loadStylesheet(this.dir.get_child('stylesheet.css'));
+         }));
+      }
+
+      try {
+         if(global.add_extension_importer)
+            global.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
+         else {
+            imports.gi.CinnamonJS.add_extension_importer('imports.ui.extension.importObjects', this.uuid, this.meta.path);
+         }
+      } catch (e) {
+         throw this.logError('Error importing extension ' + this.uuid + ' from path ' + this.meta.path, e);
+      }
+
+      try {
+         this.module = Extension.importObjects[this.uuid][this.lowerType]; // get [extension/applet/desklet].js
+      } catch (e) {
+         throw this.logError('Error importing ' + this.lowerType + '.js from ' + this.uuid, e);
+      }
+
+      for(let i = 0; i < this.type.requiredFunctions.length; i++) {
+         let func = this.type.requiredFunctions[i];
+         if(!this.module[func]) {
+            throw this.logError('Function "' + func + '" is missing');
+         }
+      }
+      //objects[this.uuid] = this;
+   }
+};
+
+function DeskletAppletManager(desklet) {
+    this._init(desklet);
+}
+
+DeskletAppletManager.prototype = {
+   _init: function(desklet) {
+      this.desklet = desklet;
+      this.applet = null;
+   },
+
+   createAppletInstance: function() {
+      if(!this.applet) {
+         try {
+            global.settings.connect('changed::enabled-applets', Lang.bind(this, this._onEnabledAppletsChanged));
+            let uuid = this.desklet.metadata["uuid"];
+            let newAppletID = global.settings.get_int("next-applet-id");
+            global.settings.set_int("next-applet-id", newAppletID + 1);
+            let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/"+uuid);
+            let extCreate = new ExtensionExtended(dir, Extension.Type.APPLET);
+            let appletDef = ('%s:%s:%s').format(this.desklet._appletManagerOrder, uuid, newAppletID);
+            let appletDefinition = AppletManager.getAppletDefinition(appletDef);
+            AppletManager.addAppletToPanels(extCreate, appletDefinition);
+            this.applet = AppletManager.appletObj[newAppletID];
+            this.applet.setParentDesklet(this.desklet);
+         } catch (e) {
+            Main.notify("error", e.message);
+         }
+      }
+   },
+
+   _onEnabledAppletsChanged: function() {
+      if(this.applet) {
+         let pName = this.applet._panelLocation.get_name();
+         let zone_string = this.applet._panelLocation.get_name().substring(5, pName.length).toLowerCase();
+         let panel_string = "panel1";
+         if((Main.panel2)&&(Main.panel2["_"+zone_string+"Box"] == this.applet._panelLocation))
+            panel_string = "panel2";
+         this.desklet._appletManagerOrder = panel_string+":"+zone_string+":"+this.applet._order;
+      }
+   },
+
+   destroyAppletInstance: function() {
+      if(this.applet) {
+         try {
+            try {
+               this.applet._onAppletRemovedFromPanel();
+            } catch (e) {
+               global.logError("Error during on_applet_removed_from_panel() call on applet: " + this.applet._uuid + "/" + this.applet.instance_id, e);
+            }
+            if(this.applet._panelLocation != null) {
+               this.applet._panelLocation.remove_actor(this.applet.actor);
+               this.applet._panelLocation = null;
+            }
+            delete this.applet._extension._loadedDefinitions[this.applet.instance_id];
+            delete AppletManager.appletObj[this.applet.instance_id];
+            this.applet = null; 
+         } catch (e) {
+            Main.notify("error", e.message);
+         }
+      }
+   }
+};
+
+function ScrollItemsBox(parent, panelToScroll, vertical, align) {
+   this._init(parent, panelToScroll, vertical, align);
+}
+
+ScrollItemsBox.prototype = {
+   _init: function(parent, panelToScroll, vertical, align) {
+      this.parent = parent;
+      this.idSignalAlloc = 0;
+      this._timeOutScroll = 0;
+      this.panelToScroll = panelToScroll;
+      this.vertical = vertical;
+      this.actor = new St.BoxLayout({ vertical: this.vertical });
+      this.panelWrapper = new St.BoxLayout({ vertical: this.vertical });
+      this.panelWrapper.add(this.panelToScroll, { x_fill: true, y_fill: false, x_align: align, y_align: St.Align.START, expand: true });
+
+      this.scroll = this._createScroll(this.vertical);
+      this.scroll.add_actor(this.panelWrapper);
+
+      this.actor.add(this.scroll, { x_fill: true, y_fill: true, expand: true });
+   },
+
+   _createScroll: function(vertical) {
+      let scrollBox;
+      if(vertical) {
+         scrollBox = new St.ScrollView({ x_fill: true, y_fill: false, y_align: St.Align.START, style_class: 'vfade menu-applications-scrollbox' });
+         scrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+         let vscroll = scrollBox.get_vscroll_bar();
+         vscroll.connect('scroll-start',
+                          Lang.bind(this, function() {
+                          if(this.parent.menu)
+                             this.parent.menu.passEvents = true;
+                       }));
+         vscroll.connect('scroll-stop',
+                          Lang.bind(this, function() {
+                          if(this.parent.menu)
+                             this.parent.menu.passEvents = false;
+                       }));
+      } else {
+         scrollBox = new St.ScrollView({ x_fill: false, y_fill: true, x_align: St.Align.START, style_class: 'hfade menu-applications-scrollbox' });
+         scrollBox.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+         let hscroll = scrollBox.get_hscroll_bar();
+         hscroll.connect('scroll-start',
+                          Lang.bind(this, function() {
+                          if(this.parent.menu)
+                             this.parent.menu.passEvents = true;
+                       }));
+         hscroll.connect('scroll-stop',
+                          Lang.bind(this, function() {
+                          if(this.parent.menu)
+                             this.parent.menu.passEvents = false;
+                       }));
+      }
+      return scrollBox;
+   },
+
+   _onAllocationChanged: function(actor, event) {
+      if(this.visible) {
+         let w = this.panelToScroll.get_allocation_box().x2-this.panelToScroll.get_allocation_box().x1
+         if((!this.vertical)&&(this.actor.get_width() > w - 10)) {
+            this.scroll.get_hscroll_bar().visible = false;
+         } else {
+            this.scroll.get_hscroll_bar().visible = true;
+         }
+      }   
+   },
+
+//horizontalcode
+   _setHorizontalAutoScroll: function(hScroll, setValue) {
+      if(hScroll) {
+         let childrens = hScroll.get_children();
+         if((childrens)&&(childrens[0])&&(!childrens[0].get_vertical())) {
+            if(!this.hScrollSignals)
+               this.hScrollSignals = new Array();
+            let hScrollSignal = this.hScrollSignals[hScroll];
+            if(((!hScrollSignal)||(hScrollSignal == 0))&&(setValue)) {
+               this.hScrollSignals[hScroll] = hScroll.connect('motion-event', Lang.bind(this, this._onMotionEvent));
+            }
+            else if((hScrollSignal)&&(hScrollSignal > 0)&&(!setValue)) {
+               this.hScrollSignals[hScroll] = null;
+               hScroll.disconnect(hScrollSignal);
+            }
+         }
+      }
+   },
+
+   _onMotionEvent: function(actor, event) {
+      this.hScroll = actor;
+      let dMin = 10;
+      let dMax = 50;
+      let [mx, my] = event.get_coords();
+      let [ax, ay] = this.hScroll.get_transformed_position();
+      let [ah, aw] = [this.hScroll.get_height(), this.hScroll.get_width()];
+      if((my < ay + ah)&&(my > ay)&&((mx < ax + dMin)&&(mx > ax - dMax))||
+         ((mx > ax + aw - dMin)&&(mx < ax + aw + dMax)))
+         this._doHorizontalScroll();
+   },
+
+   _doHorizontalScroll: function() {
+      if(this._timeOutScroll > 0)
+         Mainloop.source_remove(this._timeOutScroll);
+      this._timeOutScroll = 0;
+      if((this.hScrollSignals)&&(this.hScrollSignals[this.hScroll] > 0)) {
+         let dMin = 10;
+         let dMax = 50;
+         let speed = 1;
+         let [mx, my, mask] = global.get_pointer();
+         let [ax, ay] = this.hScroll.get_transformed_position();
+         let [ah, aw] = [this.hScroll.get_height(), this.hScroll.get_width()];
+         if((my < ay + ah)&&(my > ay)) {
+            if((mx < ax + dMin)&&(mx > ax - dMax)) {
+               if(ax > mx)
+                  speed = 20*speed*(ax - mx)/dMax;
+               let val = this.hScroll.get_hscroll_bar().get_adjustment().get_value();
+               this.hScroll.get_hscroll_bar().get_adjustment().set_value(val - speed);
+               this._timeOutScroll = Mainloop.timeout_add(100, Lang.bind(this, this._doHorizontalScroll));
+            }
+            else if((mx > ax + aw - dMin)&&(mx < ax + aw + dMax)) {
+               if(ax + aw < mx)
+                  speed = 20*speed*(mx - ax - aw)/dMax;
+               let val = this.hScroll.get_hscroll_bar().get_adjustment().get_value();
+               this.hScroll.get_hscroll_bar().get_adjustment().set_value(val + speed);
+               this._timeOutScroll = Mainloop.timeout_add(100, Lang.bind(this, this._doHorizontalScroll));
+            }
+         }
+      }
+   },
+//horizontalcode
+   setParent: function(parent) {
+      this.parent = parent;
+   },
+
+   setAutoScrolling: function(autoScroll) {
+      if(this.vertical)
+         this.scroll.set_auto_scrolling(autoScroll);
+      else
+         this._setHorizontalAutoScroll(this.scroll, autoScroll);
+   },
+
+   setScrollVisible: function(visible) {
+      this.visible = visible;
+      if(this.vertical)
+         this.scroll.get_vscroll_bar().visible = visible;
+      else {
+         if((visible)&&(this.idSignalAlloc == 0))
+            this.idSignalAlloc = this.actor.connect('allocation_changed', Lang.bind(this, this._onAllocationChanged));
+         else if(this.idSignalAlloc > 0) {
+            this.actor.disconnect(this.idSignalAlloc);
+            this.idSignalAlloc = 0;
+         }
+         this.scroll.get_hscroll_bar().visible = visible;
+      }
+   },
+
+   scrollToActor: function(actor) {
+      try {
+         if(actor) {
+            if(this.vertical) {
+               var current_scroll_value = this.scroll.get_vscroll_bar().get_adjustment().get_value();
+               var box_height = this.actor.get_allocation_box().y2-this.actor.get_allocation_box().y1;
+               var new_scroll_value = current_scroll_value;
+               let hActor = this._getAllocationActor(actor, 0);
+               if (current_scroll_value > hActor-10) new_scroll_value = hActor-10;
+               if (box_height+current_scroll_value < hActor + actor.get_height()+10) new_scroll_value = hActor + actor.get_height()-box_height+10;
+               if (new_scroll_value!=current_scroll_value) this.scroll.get_vscroll_bar().get_adjustment().set_value(new_scroll_value);
+               // Main.notify("finish" + new_scroll_value);
+            } else {
+               var current_scroll_value = this.scroll.get_hscroll_bar().get_adjustment().get_value();
+               var box_width = this.actor.get_allocation_box().x2-this.actor.get_allocation_box().x1;
+               var new_scroll_value = current_scroll_value;
+               if (current_scroll_value > actor.get_allocation_box().x1-10) new_scroll_value = actor.get_allocation_box().x1-10;
+               if (box_width+current_scroll_value < actor.get_allocation_box().x2+40) new_scroll_value = actor.get_allocation_box().x2-box_width+40;
+               if (new_scroll_value!=current_scroll_value) this.scroll.get_hscroll_bar().get_adjustment().set_value(new_scroll_value);
+            }
+         }
+      } catch(e) {
+        Main.notify("ScrollError", e.message);
+      }
+   },
+
+   _getAllocationActor: function(actor, currHeight) {
+      let actorParent = actor.get_parent();
+      if((actorParent != null)&&(actorParent != this.parent)) {
+         if(actorParent != this.panelToScroll) {
+            return this._getAllocationActor(actorParent, currHeight + actor.get_allocation_box().y1);
+         } else {
+            return currHeight + actor.get_allocation_box().y1;
+         }
+      }
+      return 0;//Some error
+   }
+};
 
 function HDDTempMonitor(system) {
     this._init(system);
@@ -199,20 +493,31 @@ HDDTempMonitor.prototype = {
 
 Signals.addSignalMethods(HDDTempMonitor.prototype);
 
-function GlobalContainer(uuid, system) {
-    this._init(uuid, system);
+function GlobalContainer(parent, uuid, system) {
+    this._init(parent, uuid, system);
 }
 
 GlobalContainer.prototype = {
 
-   _init: function(uuid, system) {
+   _init: function(parent, uuid, system) {
+      this._parent = parent;
+      this._uuid = uuid;
+      this._sys = system;
+
       this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
       this._mainBox.add_style_class_name('drives-main-box');
       this._rootBox = new St.BoxLayout({ vertical:true });
-      this._mainBox.set_child(this._rootBox);
+      this.scrollActor = new ScrollItemsBox(this._parent, this._rootBox, true, St.Align.START);
+      this._mainBox.set_child(this.scrollActor.actor);
+      this._rootBox.connect('allocation_changed', Lang.bind(this, function() {
+        let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
+        if(this._rootBox.get_height() > monitor.height - 100) {
+           this._mainBox.set_height(monitor.height - 100);
+        } else {
+           this._mainBox.set_height(-1);
+        }
+      }));
 
-      this._uuid = uuid;
-      this._sys = system;
       this._listCategoryContainer = new Array();
       this._listCategoryConnected = new Array();
 
@@ -226,10 +531,18 @@ GlobalContainer.prototype = {
       this._boxColor = "rgb(0,0,0)";
       this._borderBoxWidth = 1;
       this._borderBoxColor = "white";
-      this._width = 170;
+      this._width = 200;
       this._fixWidth = false;
+      this._height = 350;
+      this._fixHeight = false;
       this._fontColor = "white";
       this.setFontColor(this._fontColor); 
+      this._setStyle();
+   },
+
+   setParent: function(parent) {
+      this._parent = parent;
+      this.scrollActor.setParent(parent);
       this._setStyle();
    },
 
@@ -462,15 +775,37 @@ GlobalContainer.prototype = {
    setWidth: function(width) {
       this._width = width;
       if(this._fixWidth)
-         this._rootBox.set_width(this._width);
+         this._mainBox.set_width(this._width);
    },
 
    fixWidth: function(fix) {
       this._fixWidth = fix;
       if(this._fixWidth)
-         this._rootBox.set_width(this._width);
+         this._mainBox.set_width(this._width);
       else
-         this._rootBox.set_width(-1);
+         this._mainBox.set_width(-1);
+   },
+
+   setHeight: function(height) {
+      this._height = height;
+      if(this._fixHeight)
+         this._mainBox.set_height(this._height);
+   },
+
+   fixHeight: function(fix) {
+      this._fixHeight = fix;
+      if(this._fixHeight)
+         this._mainBox.set_height(this._height);
+      else
+         this._mainBox.set_height(-1);
+   },
+
+   setAutoscroll: function(autoscroll) {
+      this.scrollActor.setAutoScrolling(autoscroll);
+   },
+
+   setScrollVisible: function(visibleScroll) {
+      this.scrollActor.setScrollVisible(visibleScroll);
    },
 
    setFontColor: function(color) {
@@ -483,7 +818,62 @@ GlobalContainer.prototype = {
       this._setStyle();
    },
 
-   _setStyle: function() {
+   _setStyle: function() {this._parent
+      if(this._parent.menu)
+         this._setAppletStyle();
+      else
+         this._setDeskletStyle();
+      return true;
+   },
+
+   _setAppletStyle: function() {
+      this._mainBox.set_style(' ');
+      this._mainBox.set_style_class_name(' ');
+      if(this._showMainBox) {
+         let newStyle = '';
+         let remplaceColor;
+         if(this._overrideTheme) {
+            this._parent.menu.actor.set_style_class_name(' ');
+            let remplaceColor = this._textRGBToRGBA(this._boxColor, this._opacity);
+            newStyle = 'padding: 4px; border:'+this._borderBoxWidth +
+                       'px solid ' + this._borderBoxColor + '; background-color: ' +
+                       remplaceColor + '; border-radius: 12px;';
+            this._parent.menu.set_style(newStyle);
+         } else {
+            if(this._parent.menu.actor.style_class != 'popup-menu-boxpointer') {
+               this._parent.menu.actor.set_style(' ');
+               this._parent.menu.actor.set_style_class_name('popup-menu-boxpointer');
+               this._parent.menu.actor.add_style_class_name('popup-menu');
+            }
+            if(this._parent.menu.actor.visible) {
+               let themeNode = this._parent.menu.actor.get_theme_node();
+               let [have_color, box_color] = themeNode.lookup_color('background-color', false);
+               if(have_color) {
+                  remplaceColor = this._updateOpacityColor(box_color.to_string(), this._opacity);
+                  newStyle += 'background-color: ' + remplaceColor + ';';
+               }
+               let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
+               if(have_color_start) {
+                  remplaceColor = this._updateOpacityColor(box_color_start.to_string(), this._opacity);
+                  newStyle += ' background-gradient-start: ' + remplaceColor + ';';
+               }
+               let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
+               if(have_color_end) {
+                  remplaceColor = this._updateOpacityColor(box_color_end.to_string(), this._opacity);
+                  newStyle += ' background-gradient-end: ' + remplaceColor + ';';
+               }
+               if(newStyle != this._parent.menu.actor.get_style()) {
+                  this._parent.menu.actor.set_style(newStyle);
+               }
+            }
+         }
+      } else {
+         this._parent.menu.actor.set_style(' ');
+         this._parent.menu.actor.set_style_class_name(' ');
+      }
+   },
+
+   _setDeskletStyle: function() {this._parent
       if(this._showMainBox) {
          let newStyle = '';
          let remplaceColor;
@@ -526,7 +916,6 @@ GlobalContainer.prototype = {
          this._mainBox.set_style(' ');
          this._mainBox.set_style_class_name(' ');
       }
-      return true;
    },
 
    _updateOpacityColor: function(color, opacity) {
@@ -703,11 +1092,15 @@ CategoryContainer.prototype = {
          case 4: suffix = "TB" ;break;
          default:suffix = "BT" ;break;
       }
-      let _result = prefixNumber.toFixed(2).toString();
-      if(_result.length > 5)
-         _result = _result.substring(0, 5);
-      while(_result.length < 5)
-         _result = _result + "0";
+      let _result = prefixNumber.toFixed(1).toString();
+      if(_result.length > 4)
+         _result = _result.substring(0, 4);
+      if(_result[_result.length-1] == ".")
+         _result = _result.substring(0, 3);
+      else {
+         while(_result.length < 4)
+            _result = _result + "0";
+      }
       return "" + _result + "" + suffix;
    }
 };
@@ -784,6 +1177,7 @@ DriveContainer.prototype = {
    overrideTheme: function(override) {
       this._overrideTheme = override;
       this._setStyleDrive();
+      this._setStyleText();
    },
 
    showDriveBox: function(show) {
@@ -951,8 +1345,9 @@ DriveContainer.prototype = {
          let remplaceColor;
          if(this._overrideTheme) {
             this._infoContainer.set_style_class_name(' ');
-            this.percentContainer.set_style_class_name(' ');
             this._iconContainer.set_style_class_name(' ');
+            this.percentContainer.set_style_class_name(' ');
+            this.percentContainer.style = 'min-height: 6px;';
             this._ejectContainer.set_style_class_name(' ');
             this._ejectContainer.style = 'padding: 8px 0px 0px 4px;';
             this._topTextContainer.set_style_class_name(' ');
@@ -967,8 +1362,9 @@ DriveContainer.prototype = {
             this._driveBox.set_style(newStyle);
          } else {
             this._infoContainer.set_style_class_name('drives-info-drive-box');
-            this.percentContainer.set_style_class_name('drives-percent-meter-box');
             this._iconContainer.set_style_class_name('drives-icon-button-box');
+            this.percentContainer.set_style_class_name('drives-percent-meter-box');
+            this.percentContainer.style = ' ';
             this._ejectContainer.set_style_class_name('drives-eject-button-box');
             this._ejectContainer.style = ' ';
             this._topTextContainer.set_style_class_name('drives-top-text-drive-box');
@@ -2062,31 +2458,33 @@ VolumeMonitor.prototype = {
 
    _isOptical: function(opticalDrive) {
       let _deviceName = this._getIdentifier(opticalDrive);
-      let _matchSR = _deviceName.match(new RegExp('/dev/sr[0-9]+', 'g'));
-      let _matchCDRomN = _deviceName.match(new RegExp('/dev/cdrom[0-9]+', 'g'));
-      let _matchCDRom = _deviceName.match(new RegExp('/dev/cdrom', 'g'));
-      let _matchSCD = _deviceName.match(new RegExp('/dev/scd[0-9]+', 'g'));
-      let _matchHDC = _deviceName.match(new RegExp('/dev/hdc', 'g'));
-      if((_deviceName != null)&&((_matchSR != null)||(_matchCDRomN != null)||(_matchCDRom != null)||(_matchSCD != null)||(_matchHDC != null)))
-      {
-        // if((this._advanceOpticalDetect)&&(!this._firstTime))
-        //    return (this._findOpticalByDeviceName(_deviceName) != null);
+      if(_deviceName) {
+         let _matchSR = _deviceName.match(new RegExp('/dev/sr[0-9]+', 'g'));
+         let _matchCDRomN = _deviceName.match(new RegExp('/dev/cdrom[0-9]+', 'g'));
+         let _matchCDRom = _deviceName.match(new RegExp('/dev/cdrom', 'g'));
+         let _matchSCD = _deviceName.match(new RegExp('/dev/scd[0-9]+', 'g'));
+         let _matchHDC = _deviceName.match(new RegExp('/dev/hdc', 'g'));
+         if((_deviceName != null)&&((_matchSR != null)||(_matchCDRomN != null)||(_matchCDRom != null)||(_matchSCD != null)||(_matchHDC != null)))
+         {
+            // if((this._advanceOpticalDetect)&&(!this._firstTime))
+            //    return (this._findOpticalByDeviceName(_deviceName) != null);
 
-       // let client = new GUdev.Client({subsystems: ['block']});
-       // let enumerator = new GUdev.Enumerator({client: client});
-       // enumerator.add_match_subsystem('b*');
+            // let client = new GUdev.Client({subsystems: ['block']});
+            // let enumerator = new GUdev.Enumerator({client: client});
+            // enumerator.add_match_subsystem('b*');
 
-       // let devices = enumerator.execute();
-       // for(let n=0; n < devices.length; n++) 
-       // {
-       //     let device = devices[n];
-       //     Main.notifyError(device.get_property("DEVNAME"));
-       //     if(device.get_property("ID_CDROM") != null)
-       //     {
-       //        Main.notifyError(device.get_property("DEVNAME"));
-       //     }
-       // }
-        return true;
+            // let devices = enumerator.execute();
+            // for(let n=0; n < devices.length; n++) 
+            // {
+            //     let device = devices[n];
+            //     Main.notifyError(device.get_property("DEVNAME"));
+            //     if(device.get_property("ID_CDROM") != null)
+            //     {
+            //        Main.notifyError(device.get_property("DEVNAME"));
+            //     }
+            // }
+            return true;
+         }
       }	
       return false;
    },
@@ -2173,6 +2571,9 @@ MyDesklet.prototype = {
       _ = imports.gettext.domain(this.uuid).gettext;
       imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
 
+      this._timeout = null;
+      this.myManager = null;
+
       this.setHeader(_("Drives Manager"));
       this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/" + _("locale/README"));
       if(!this.helpFile.query_exists(null))
@@ -2182,15 +2583,54 @@ MyDesklet.prototype = {
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
          Util.spawnCommandLine("xdg-open " + this.helpFile.get_path());
       }));
-
+      this.appletMenuItem = new PopupMenu.PopupSwitchMenuItem(_("Show as Applet"), false);
+      this.appletMenuItem.connect('activate', Lang.bind(this, this._onAppletMenuItemActivated));
+      this._menu.addMenuItem(this.appletMenuItem);
+      
       this._initSettings();
+      this._createAppletManager();
       this._initComponents();
-      this._timeout = null;
       this._update();
+   },
+
+   _createAppletManager: function() {
+      try {
+         if(!this.myManager) {
+            for(let desklet_id in DeskletManager.deskletObj) {
+               let desk = DeskletManager.deskletObj[desklet_id];
+               if((desk)&&(desk.myManager)) {
+                  this.myManager = desk.myManager;
+               }
+            }
+            if(!this.myManager) {
+               this.myManager = new DeskletAppletManager(this);
+            }
+         }
+      } catch(e) {
+         Main.notify("error", e.message);
+      }
+   },
+
+   setVisibleAppletManager: function(visible) {
+      if(this.myManager) {
+         if(visible) {
+            this.myManager.createAppletInstance();
+         } else {
+            this.myManager.destroyAppletInstance();
+         }
+      }
+   },
+
+   on_applet_removed_from_panel: function() {
+      this._showAsApplet = false;
+      this._onShowModeChange();
    },
 
    on_desklet_removed: function() {
       try {
+         if(this._showAsApplet) {
+            this.on_applet_removed_from_panel();
+         }
          this.hardDisk.destroy();
          this.volumeMonitor.disconnect();
          if(this._timeout > 0) {
@@ -2218,7 +2658,7 @@ MyDesklet.prototype = {
 
    _initComponents: function() {
       try {
-         this.globalContainer = new GlobalContainer(this.uuid, this.sys);
+         this.globalContainer = new GlobalContainer(this, this.uuid, this.sys);
          this.setContent(this.globalContainer.getContentBox());
 
          this.hddTempMonitor = new HDDTempMonitor(this.sys);
@@ -2242,6 +2682,9 @@ MyDesklet.prototype = {
          this._onThemeChange();
          this._onTypeOpenChanged();
          this._onFixWidth();
+         this._onFixHeight();
+         this._onEnableAutoscroll();
+         this._onScrollVisibleChange();
          this._onOverrideTheme();
          this._onBorderBoxWidth();
          this._onBorderBoxColor();
@@ -2261,8 +2704,30 @@ MyDesklet.prototype = {
          this._onHddTempCritialColorChanged();
          this._onHddTempWarningTempChanged();
          this._onHddTempCritialTempChanged();
+         this._onShowModeChange();
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
+      }
+   },
+
+   _onAppletMenuItemActivated: function() {
+      if(this.appletMenuItem._switch.state != this._showAsApplet) {
+         this._menu.close(false);
+         this._showAsApplet = this.appletMenuItem._switch.state;
+         this._onShowModeChange();
+      }
+   },
+
+   _onShowModeChange: function() {
+      this.appletMenuItem._switch.setToggleState(this._showAsApplet);
+      if(this._showAsApplet) {
+         this.setVisibleAppletManager(this._showAsApplet);
+         if(this.myManager.applet) {
+            this.myManager.applet.swapContextToApplet(this._showAsApplet);
+         }
+      } else if(this.myManager.applet) {
+         this.myManager.applet.swapContextToApplet(this._showAsApplet);
+         this.setVisibleAppletManager(this._showAsApplet);
       }
    },
 
@@ -2350,6 +2815,19 @@ MyDesklet.prototype = {
    _onFixWidth: function() {
       this.globalContainer.setWidth(this._width);
       this.globalContainer.fixWidth(this._fixWidth);
+   },
+
+   _onFixHeight: function() {
+      this.globalContainer.setHeight(this._height);
+      this.globalContainer.fixHeight(this._fixHeight);
+   },
+
+   _onEnableAutoscroll: function() {
+      this.globalContainer.setAutoscroll(this._autoscroll);
+   },
+
+   _onScrollVisibleChange: function() {
+      this.globalContainer.setScrollVisible(this._scrollVisible);
    },
 
    _onBorderBoxWidth: function() {
@@ -2462,6 +2940,10 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "theme", "_theme", this._onThemeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fixWidth", this._onFixWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fixHeight", "_fixHeight", this._onFixHeight, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "height", "_height", this._onFixHeight, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "enableAutoscroll", "_autoscroll", this._onEnableAutoscroll, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "scrollVisible", "_scrollVisible", this._onScrollVisibleChange, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "opacity", "_opacity", this._onOpacity, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "overrideTheme", "_overrideTheme", this._onOverrideTheme, null);
@@ -2471,6 +2953,9 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "textBottomSize", "_textBottomSize", this._onTextBottomSize, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onBorderBoxWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onBorderBoxColor, null);
+
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "show-as-applet", "_showAsApplet", this._onShowModeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "_appletManagerOrder", null, null);
       } catch (e) {
         // Main.notify(_("Failed of Drives Manager:"), e.message);
          global.logError(e);

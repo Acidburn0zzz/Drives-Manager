@@ -230,6 +230,36 @@
         "dependency": "fixWidth",
         "tooltip": "Increase or decrease the desklet width."
     },
+   "fixHeight": {
+        "default": true,
+        "description": "Fixed height.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the height of desklet."
+    },
+    "height": {
+        "default": 350,
+        "type": "spinbutton",
+        "min": 100,
+        "max": 1600,
+        "description": "Height:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixHeight",
+        "tooltip": "Increase or decrease the desklet height."
+    },
+    "enableAutoscroll": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Enable autoscrolling.",
+        "tooltip": "Choose whether or not to enable smooth autoscrolling on the menu."
+    },
+    "scrollVisible": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Show the scrolling area.",
+        "tooltip": "Choose whether or not to show the scrolling area."
+    },
     "opacity": {
         "type": "scale",
         "default": 0.5,
@@ -314,5 +344,25 @@
         "dependency": "overrideTheme",
         "description": "Font size bottom text:",
         "tooltip": "Increase or decrease the font size of bottom text."
+    },
+    "separator-applet-top": {
+        "type": "separator"
+    },
+    "header-applet": {
+        "type": "header",
+        "description": "Applet:"
+    },
+    "separator-applet-bottom": {
+        "type": "separator"
+    },
+    "show-as-applet": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Show Drives Manager as Applet.",
+        "tooltip": "Choose whether or not to show Drives Manager as Applet or Desklet."
+    },
+    "applet-manager-order": {
+        "type": "generic",
+        "default": "panel1:right:0"
     }
 }

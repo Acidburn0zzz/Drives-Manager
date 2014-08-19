@@ -84,6 +84,7 @@ Registro de cambios:
   - El programa hddtemp fue reemplazado por Udisk2(gracias a rgcjonas).
   - Se están cambiando los iconos a svg.
   - Añadido soporte para los temas de Cinnamon.
+  - Ahora se puede elegir si Driver Manager será un Applet o un Desklet.
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.

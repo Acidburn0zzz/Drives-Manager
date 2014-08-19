@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-19 05:26-0600\n"
+"PO-Revision-Date: 2014-08-19 11:49-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -277,6 +277,39 @@ msgstr "Ancho:"
 msgid "Increase or decrease the desklet width."
 msgstr "Incrementar o disminuir el ancho del desklet."
 
+#. drivesManager@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr "Controlar la altura."
+
+#. drivesManager@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of desklet."
+msgstr "Seleccione esto para controlar la altura del desklet."
+
+#. drivesManager@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr "Altura:"
+
+#. drivesManager@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height."
+msgstr "Incrementar o disminuir la altura del desklet."
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->description
+msgid "Enable autoscrolling."
+msgstr "Habilitar el desplazamiento automático."
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->tooltip
+msgid "Choose whether or not to enable smooth autoscrolling on the menu."
+msgstr ""
+"Seleccione si desea activar o no el desplazamiento automático en el menú."
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->description
+msgid "Show the scrolling area."
+msgstr "Mostrar el área de desplazamiento."
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Choose whether or not to show the scrolling area."
+msgstr "Seleccione si mostrar o no la zona de desplazamiento."
+
 #. drivesManager@lestcape->settings-schema.json->overrideTheme->description
 msgid "Override the Cinnamon theme properties."
 msgstr "Sobre escribir las propiedades del tema de Cinnamon."
@@ -514,6 +547,14 @@ msgstr "Valor de temperatura Alarmante:"
 #. drivesManager@lestcape->settings-schema.json->criticalHddTemp->tooltip
 msgid "Set the custom Alarming temperature value to display a alarm."
 msgstr "Selecciona tu valor de temperatura Alarmante."
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+msgid "Show Drives Manager as Applet."
+msgstr "Mostrar Drives Manager como Applet."
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
+msgstr "Seleccione si desea o no mostrar Drives Manager como applet o desklet."
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#
 #. drivesManager@lestcape->settings-schema.json->borderBoxWidth->units

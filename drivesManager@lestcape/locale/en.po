@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-19 05:26-0600\n"
+"PO-Revision-Date: 2014-08-19 11:49-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -274,6 +274,38 @@ msgstr "Width:"
 msgid "Increase or decrease the desklet width."
 msgstr "Increase or decrease the desklet width."
 
+#. drivesManager@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr "Fixed height."
+
+#. drivesManager@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of desklet."
+msgstr "Check this if you want to control the height of desklet."
+
+#. drivesManager@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr "Height:"
+
+#. drivesManager@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height."
+msgstr "Increase or decrease the desklet height."
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->description
+msgid "Enable autoscrolling."
+msgstr "Enable autoscrolling."
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->tooltip
+msgid "Choose whether or not to enable smooth autoscrolling on the menu."
+msgstr "Choose whether or not to enable smooth autoscrolling on the menu."
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->description
+msgid "Show the scrolling area."
+msgstr "Show the scrolling area."
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Choose whether or not to show the scrolling area."
+msgstr "Choose whether or not to show the scrolling area."
+
 #. drivesManager@lestcape->settings-schema.json->overrideTheme->description
 msgid "Override the Cinnamon theme properties."
 msgstr "Override the Cinnamon theme properties."
@@ -504,6 +536,14 @@ msgstr "Value of Alarming temperature to display a alarm:"
 #. drivesManager@lestcape->settings-schema.json->criticalHddTemp->tooltip
 msgid "Set the custom Alarming temperature value to display a alarm."
 msgstr "Set the custom Alarming temperature value to display a alarm."
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+msgid "Show Drives Manager as Applet."
+msgstr "Show Drives Manager as Applet."
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
+msgstr "Choose whether or not to show Drives Manager as Applet or Desklet."
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#
 #. drivesManager@lestcape->settings-schema.json->borderBoxWidth->units

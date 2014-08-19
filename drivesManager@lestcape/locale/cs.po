@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-19 05:26-0600\n"
+"PO-Revision-Date: 2014-08-19 11:49-0600\n"
 "Last-Translator: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "Language-Team: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "MIME-Version: 1.0\n"
@@ -270,6 +270,38 @@ msgstr "Šířka:"
 msgid "Increase or decrease the desklet width."
 msgstr "Zvětšete nebo zmenšete šířku deskletu."
 
+#. drivesManager@lestcape->settings-schema.json->fixHeight->description
+msgid "Fixed height."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->fixHeight->tooltip
+msgid "Check this if you want to control the height of desklet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->height->description
+msgid "Height:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->height->tooltip
+msgid "Increase or decrease the desklet height."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->description
+msgid "Enable autoscrolling."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->enableAutoscroll->tooltip
+msgid "Choose whether or not to enable smooth autoscrolling on the menu."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->description
+msgid "Show the scrolling area."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->scrollVisible->tooltip
+msgid "Choose whether or not to show the scrolling area."
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->overrideTheme->description
 msgid "Override the Cinnamon theme properties."
 msgstr ""
@@ -496,6 +528,14 @@ msgstr "Hodnota alarmní teploty zobrazující alarm:"
 #. drivesManager@lestcape->settings-schema.json->criticalHddTemp->tooltip
 msgid "Set the custom Alarming temperature value to display a alarm."
 msgstr "Nastavte vlastní alarmní teploty zobrazující alarm."
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+msgid "Show Drives Manager as Applet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
+msgstr ""
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#
 #. drivesManager@lestcape->settings-schema.json->borderBoxWidth->units
