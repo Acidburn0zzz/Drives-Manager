@@ -105,7 +105,7 @@
     },
     "header-hdd-temp": {
         "type": "header",
-        "description": "HDD Temp:"
+        "description": "HDD temperature:"
     },
     "separator-hdd-temp-bottom": {
        "type": "separator"
@@ -184,7 +184,7 @@
     },
     "theme": {
         "type": "combobox",
-        "description": "Selected theme:",
+        "description": "Select icon theme:",
         "default": "mind",
         "tooltip": "Select a theme to show icons.",
         "options": {
@@ -300,8 +300,8 @@
         "step": 1,
         "indent": true,
         "dependency": "overrideTheme",
-        "description": "Upper text font size:",
-        "tooltip": "Increase or decrease the upper text font size."
+        "description": "Font size top text:",
+        "tooltip": "Increase or decrease the font size of top text."
     },
     "textBottomSize": {
         "default": 7,
@@ -312,7 +312,7 @@
         "step": 1,
         "indent": true,
         "dependency": "overrideTheme",
-        "description": "Bottom text font size:",
-        "tooltip": "Increase or decrease the bottom text font size."
+        "description": "Font size bottom text:",
+        "tooltip": "Increase or decrease the font size of bottom text."
     }
 }

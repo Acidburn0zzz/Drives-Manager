@@ -770,7 +770,7 @@ System.prototype = {
                   _moLocale = _moFile.substring(0, _moFile.lastIndexOf("."));
                   _moPath = _localeFolder.get_path() + "/" + _moLocale + "/LC_MESSAGES/";
                   _src = Gio.file_new_for_path(String(_moFolder.get_path() + "/" + _moFile));
-                  _dest = Gio.file_new_for_path(String(_moPath + this._uuid + ".mo"));
+                  _dest = Gio.file_new_for_path(String(_moPath + this.uuid + ".mo"));
                   try {
                      if(_dest.query_exists(null)) {
                         _destModified = _dest.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_time().tv_sec;

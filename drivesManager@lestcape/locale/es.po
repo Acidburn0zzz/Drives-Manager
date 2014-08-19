@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-18 07:04-0600\n"
+"PO-Revision-Date: 2014-08-19 05:26-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -152,9 +152,29 @@ msgstr ""
 msgid "Could not parse command:"
 msgstr "No se pudo entender el comando:"
 
+#. drivesManager@lestcape->settings-schema.json->header-categories->description
+msgid "Categories:"
+msgstr "Categorías:"
+
+#. drivesManager@lestcape->settings-schema.json->header-tools->description
+msgid "Tools:"
+msgstr "Herramientas:"
+
+#. drivesManager@lestcape->settings-schema.json->header-hdd-temp->description
+msgid "HDD temperature:"
+msgstr "Temperatura del disco duro:"
+
+#. drivesManager@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance:"
+msgstr "Apariencia:"
+
+#. drivesManager@lestcape->settings-schema.json->header-advanced-appearance->description
+msgid "Advanced Appearance:"
+msgstr "Opciones avanzadas de apariencia:"
+
 #. drivesManager@lestcape->settings-schema.json->theme->description
-msgid "Selected theme:"
-msgstr "Tema seleccionado:"
+msgid "Select icon theme:"
+msgstr "Tema de iconos seleccionado:"
 
 #. drivesManager@lestcape->settings-schema.json->theme->tooltip
 msgid "Select a theme to show icons."
@@ -257,6 +277,17 @@ msgstr "Ancho:"
 msgid "Increase or decrease the desklet width."
 msgstr "Incrementar o disminuir el ancho del desklet."
 
+#. drivesManager@lestcape->settings-schema.json->overrideTheme->description
+msgid "Override the Cinnamon theme properties."
+msgstr "Sobre escribir las propiedades del tema de Cinnamon."
+
+#. drivesManager@lestcape->settings-schema.json->overrideTheme->tooltip
+msgid ""
+"Check this if you want to override the Cinnamon theme properties or not."
+msgstr ""
+"Seleccione esta opción si usted desea anular las propiedades del tema de "
+"Cinnamon o no."
+
 #. drivesManager@lestcape->settings-schema.json->fontColor->description
 msgid "Font color:"
 msgstr "Color del texto:"
@@ -266,26 +297,26 @@ msgid "Set the custom text color."
 msgstr "Elija el color del texto."
 
 #. drivesManager@lestcape->settings-schema.json->textTopSize->description
-msgid "Upper text font size:"
+msgid "Font size top text:"
 msgstr "Tamaño del texto superior:"
 
 #. drivesManager@lestcape->settings-schema.json->textTopSize->tooltip
-msgid "Increase or decrease the upper text font size."
+msgid "Increase or decrease the font size of top text."
 msgstr "Incrementar o disminuir el tamaño del texto superior."
 
-#. drivesManager@lestcape->settings-schema.json->textButtonSize->description
-msgid "Button text font size:"
+#. drivesManager@lestcape->settings-schema.json->textBottomSize->description
+msgid "Font size bottom text:"
 msgstr "Tamaño del texto inferior:"
 
-#. drivesManager@lestcape->settings-schema.json->textButtonSize->tooltip
-msgid "Increase or decrease the button text font size."
+#. drivesManager@lestcape->settings-schema.json->textBottomSize->tooltip
+msgid "Increase or decrease the font size of bottom text."
 msgstr "Incrementar o disminuir el tamaño del texto inferior."
 
-#. drivesManager@lestcape->settings-schema.json->transparency->description
+#. drivesManager@lestcape->settings-schema.json->opacity->description
 msgid "Opacity:"
 msgstr "Opacidad:"
 
-#. drivesManager@lestcape->settings-schema.json->transparency->tooltip
+#. drivesManager@lestcape->settings-schema.json->opacity->tooltip
 msgid "Select a opacity percent."
 msgstr "Seleccione el porciento de opacidad."
 

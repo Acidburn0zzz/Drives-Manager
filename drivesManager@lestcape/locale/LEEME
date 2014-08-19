@@ -63,13 +63,12 @@ Agregar nuevos idiomas:
 Errores conocidos y requerimientos:
 --------------
 1- ¡Advertencia! Este desklet necesita que los siguientes programas estén instalados:
-   - gksu, pkexec o kdesu.
+   - udisks2
    - cdrecord
    - eject
    - Un editor de texto plano cualquiera.
-   - hddtemp(opcional).
 
-2- Los datos de hddtemp no se obtienen directamente dentro del hilo de procesamiento de Cinnamon, porque esto bloquea por unas milésimas de segundo el escritorio. Un nuevo hilo de ejecución es lanzado para realizar esta tarea, fuera del contexto de ejecución de Cinnamon, solo si esta opción es requerida y durante el tiempo que lo sea.
+2- Los datos de temperatura del disco duro se obtienen directamente de udisks2. Por lo que necesita ubuntu 12.10 o superior, o un equivalente que venga con o permita instalar udisks2.
 
 3- Solamente se detectan como discos ópticos de CD/DVD, a los dispositivos que sean reconocidos por el kernel de Linux con una expresión regular de alguna de estas formas: "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". Si usted tiene un identificador de algún dispositivo óptico diferente, por favor repórtelo en el sitio web de este programa y este será incluido en la próxima versión.
 

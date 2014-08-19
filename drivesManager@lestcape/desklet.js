@@ -2174,11 +2174,13 @@ MyDesklet.prototype = {
       imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
 
       this.setHeader(_("Drives Manager"));
-      this.helpFile = GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this.uuid + "/" + _("locale/README");
+      this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/" + _("locale/README"));
+      if(!this.helpFile.query_exists(null))
+         this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/locale/README");
       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
-         Util.spawnCommandLine("xdg-open " + this.helpFile);
+         Util.spawnCommandLine("xdg-open " + this.helpFile.get_path());
       }));
 
       this._initSettings();

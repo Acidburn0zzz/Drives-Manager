@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-18 07:35-0600\n"
+"PO-Revision-Date: 2014-08-19 05:26-0600\n"
 "Last-Translator: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "Language-Team: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "MIME-Version: 1.0\n"
@@ -146,8 +146,28 @@ msgstr "Nemáte žádný GUI program pro získání rootovských oprávnění."
 msgid "Could not parse command:"
 msgstr "Nemohu analyzovat příkaz:"
 
+#. drivesManager@lestcape->settings-schema.json->header-categories->description
+msgid "Categories:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->header-tools->description
+msgid "Tools:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->header-hdd-temp->description
+msgid "HDD temperature:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->header-appearance->description
+msgid "Appearance:"
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->header-advanced-appearance->description
+msgid "Advanced Appearance:"
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->theme->description
-msgid "Selected theme:"
+msgid "Select icon theme:"
 msgstr "Vyberte vzhled:"
 
 #. drivesManager@lestcape->settings-schema.json->theme->tooltip
@@ -250,6 +270,15 @@ msgstr "Šířka:"
 msgid "Increase or decrease the desklet width."
 msgstr "Zvětšete nebo zmenšete šířku deskletu."
 
+#. drivesManager@lestcape->settings-schema.json->overrideTheme->description
+msgid "Override the Cinnamon theme properties."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->overrideTheme->tooltip
+msgid ""
+"Check this if you want to override the Cinnamon theme properties or not."
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->fontColor->description
 msgid "Font color:"
 msgstr "Barva písma:"
@@ -259,26 +288,26 @@ msgid "Set the custom text color."
 msgstr "Nastavte vlastní barvu textu."
 
 #. drivesManager@lestcape->settings-schema.json->textTopSize->description
-msgid "Upper text font size:"
+msgid "Font size top text:"
 msgstr "Velikost nadpisového písma:"
 
 #. drivesManager@lestcape->settings-schema.json->textTopSize->tooltip
-msgid "Increase or decrease the upper text font size."
+msgid "Increase or decrease the font size of top text."
 msgstr "Zvětšete nebo zmenšete velikost nadpisového písma."
 
-#. drivesManager@lestcape->settings-schema.json->textButtonSize->description
-msgid "Button text font size:"
+#. drivesManager@lestcape->settings-schema.json->textBottomSize->description
+msgid "Font size bottom text:"
 msgstr "Velikost tlačítkového písma"
 
-#. drivesManager@lestcape->settings-schema.json->textButtonSize->tooltip
-msgid "Increase or decrease the button text font size."
+#. drivesManager@lestcape->settings-schema.json->textBottomSize->tooltip
+msgid "Increase or decrease the font size of bottom text."
 msgstr "Zvětšete nebo zmenšete velikost tlačítkového písma."
 
-#. drivesManager@lestcape->settings-schema.json->transparency->description
+#. drivesManager@lestcape->settings-schema.json->opacity->description
 msgid "Opacity:"
 msgstr "Průhlednost:"
 
-#. drivesManager@lestcape->settings-schema.json->transparency->tooltip
+#. drivesManager@lestcape->settings-schema.json->opacity->tooltip
 msgid "Select a opacity percent."
 msgstr "Vyberte procentuální průhlednost."
 

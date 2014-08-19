@@ -74,13 +74,12 @@ Add new languages:
 Known bugs and requirements:
 --------------
 1. Warning! To use this desklet needs you have installed the following programs:
- - gksu, kdesu or pkexec.
+ - udisks2.
  - cdrecord.
  - eject.
  - A plain text editor either.
- - hddtemp (optional).
 
-2. The data of hddtemp not was obtained directly in the Cinnamon thread processing, because it blocked by a few milliseconds the desktop. A new theme is launched to perform this task, outside the context of the implementation of cinnamon, only if this option is required and for the time being.
+2. The data of hdd temperature are obtained directly from udisks2. So you need ubuntu 12.10 or higher or an equivalent that come or allow install udisks2.
 
 3. Only we can detect optical disks a CD/DVD, if to devices are recognized by the Linux kernel matching with the regular expresions "dev/sr[0-9] +",  "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+" and "/dev/hdc". If you have a handle to a different optical device, please report it on the website of this program, and this will be included in the next version.
 
