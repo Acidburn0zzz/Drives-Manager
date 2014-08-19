@@ -1,120 +1,5 @@
 {
-    "separator-apparience-top": {
-        "type": "separator"
-    },
-    "header-apparience": {
-        "type": "header",
-        "description": "Apparience:"
-    },
-    "separator-apparience-bottom": {
-        "type": "separator"
-    },
-    "theme": {
-        "type": "combobox",
-        "description": "Selected theme:",
-        "default": "mind",
-        "tooltip": "Select a theme to show icons.",
-        "options": {
-            "Mind": "mind",
-            "Ubuntu": "ubuntu",
-            "Linux": "linux",
-            "Comic": "comic",
-            "Windows": "windows",
-            "Blue": "blue",
-            "Metalic": "metalic",
-            "Black": "black",
-            "Orange": "orange",
-            "Pink": "pink"
-        }
-    },
-    "mainBox": {
-        "default": true,
-        "description": "Show the main box.",
-        "type": "checkbox",
-        "tooltip": "Check this to make the main box visible/invisible."
-    },
-    "driveBox": {
-        "default": true,
-        "description": "Show the drive box.",
-        "type": "checkbox",
-        "tooltip": "Check this to make the drive box visible/invisible."
-    },
-    "borderBoxWidth": {
-        "default": 1,
-        "type": "spinbutton",
-        "min": 0,
-        "max": 4,
-        "description": "Border's box width:",
-        "units": "pixels",
-        "step": 1,
-        "tooltip": "Increase or decrease the border's box width."
-    },
-    "borderBoxColor": {
-        "type": "colorchooser",
-        "default": "white",
-        "description": "Border's box color:",
-        "tooltip": "Set the custom border box's color."
-    },
-    "boxColor": {
-        "type": "colorchooser",
-        "default": "rgb(0,0,0)",
-        "description": "Box color:",
-        "tooltip": "Set the custom box's color."
-    },
-    "fixWidth": {
-        "default": true,
-        "description": "Fixed width.",
-        "type": "checkbox",
-        "tooltip": "Check this if you want to control the width of desklet."
-    },
-    "width": {
-        "default": 170,
-        "type": "spinbutton",
-        "min": 100,
-        "max": 1600,
-        "description": "Width:",
-        "units": "pixels",
-        "step": 10,
-        "indent": true,
-        "dependency": "fixWidth",
-        "tooltip": "Increase or decrease the desklet width."
-    },
-    "fontColor": {
-        "type": "colorchooser",
-        "default": "white",
-        "description": "Font color:",
-        "tooltip": "Set the custom text color."
-    },
-    "textTopSize": {
-        "default": 9,
-        "type": "spinbutton",
-        "min": 2,
-        "max": 14,
-        "description": "Upper text font size:",
-        "units": "pixels",
-        "step": 1,
-        "tooltip": "Increase or decrease the upper text font size."
-    },
-    "textButtonSize": {
-        "default": 7,
-        "type": "spinbutton",
-        "min": 2,
-        "max": 14,
-        "description": "Button text font size:",
-        "units": "pixels",
-        "step": 1,
-        "tooltip": "Increase or decrease the button text font size."
-    },
-    "transparency": {
-        "type": "scale",
-        "default": 0.5,
-        "min": 0.0,
-        "max": 1.0,
-        "step": 0.05,
-        "description": "Opacity:",
-        "tooltip": "Select a opacity percent."
-    },
-    "separator-categories-top": {
+   "separator-categories-top": {
        "type": "separator"
     },
     "header-categories": {
@@ -286,5 +171,148 @@
         "tooltip": "Set the custom Alarming temperature value to display a alarm.",
         "indent": true,
         "dependency": "hddTemp"
+    },
+    "separator-appearance-top": {
+        "type": "separator"
+    },
+    "header-appearance": {
+        "type": "header",
+        "description": "Appearance:"
+    },
+    "separator-appearance-bottom": {
+        "type": "separator"
+    },
+    "theme": {
+        "type": "combobox",
+        "description": "Selected theme:",
+        "default": "mind",
+        "tooltip": "Select a theme to show icons.",
+        "options": {
+            "Mind": "mind",
+            "Ubuntu": "ubuntu",
+            "Linux": "linux",
+            "Comic": "comic",
+            "Windows": "windows",
+            "Blue": "blue",
+            "Metalic": "metalic",
+            "Black": "black",
+            "Orange": "orange",
+            "Pink": "pink"
+        }
+    },
+    "mainBox": {
+        "default": true,
+        "description": "Show the main box.",
+        "type": "checkbox",
+        "tooltip": "Check this to make the main box visible/invisible."
+    },
+    "driveBox": {
+        "default": true,
+        "description": "Show the drive box.",
+        "type": "checkbox",
+        "tooltip": "Check this to make the drive box visible/invisible."
+    },
+    "fixWidth": {
+        "default": true,
+        "description": "Fixed width.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to control the width of desklet."
+    },
+    "width": {
+        "default": 170,
+        "type": "spinbutton",
+        "min": 100,
+        "max": 1600,
+        "description": "Width:",
+        "units": "pixels",
+        "step": 10,
+        "indent": true,
+        "dependency": "fixWidth",
+        "tooltip": "Increase or decrease the desklet width."
+    },
+    "transparency": {
+        "type": "scale",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05,
+        "description": "Opacity:",
+        "tooltip": "Select a opacity percent."
+    },
+    "separator-advanced-appearance-top": {
+        "type": "separator"
+    },
+    "header-advanced-appearance": {
+        "type": "header",
+        "description": "Advanced Appearance:"
+    },
+    "separator-advanced-appearance-bottom": {
+        "type": "separator"
+    },
+    "overrideTheme": {
+        "default": false,
+        "description": "Override the Cinnamon theme properties.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want to override the Cinnamon theme properties or not."
+    },
+    "borderBoxWidth": {
+        "default": 1,
+        "type": "spinbutton",
+        "min": 0,
+        "max": 4,
+        "units": "pixels",
+        "step": 1,
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Border's box width:",
+        "tooltip": "Increase or decrease the border's box width."
+    },
+    "borderBoxColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Border's box color:",
+        "tooltip": "Set the custom border box's color."
+    },
+    "boxColor": {
+        "type": "colorchooser",
+        "default": "rgb(0,0,0)",
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Box color:",
+        "tooltip": "Set the custom box's color."
+    },
+    "fontColor": {
+        "type": "colorchooser",
+        "default": "white",
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Font color:",
+        "tooltip": "Set the custom text color."
+    },
+    "textTopSize": {
+        "default": 9,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "units": "pixels",
+        "step": 1,
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Upper text font size:",
+        "tooltip": "Increase or decrease the upper text font size."
+    },
+    "textButtonSize": {
+        "default": 7,
+        "type": "spinbutton",
+        "min": 2,
+        "max": 14,
+        "units": "pixels",
+        "step": 1,
+        "indent": true,
+        "dependency": "overrideTheme",
+        "description": "Button text font size:",
+        "tooltip": "Increase or decrease the button text font size."
     }
 }

@@ -206,8 +206,8 @@ function GlobalContainer(uuid, system) {
 GlobalContainer.prototype = {
 
    _init: function(uuid, system) {
-      this._mainBox = new St.Bin({x_align: St.Align.START});
-      this._rootBox = new St.BoxLayout({vertical:true});
+      this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders' });
+      this._rootBox = new St.BoxLayout({ vertical:true });
       this._mainBox.set_child(this._rootBox);
 
       this._uuid = uuid;
@@ -215,6 +215,7 @@ GlobalContainer.prototype = {
       this._listCategoryContainer = new Array();
       this._listCategoryConnected = new Array();
 
+      this._overrideTheme = false;
       this._topTextSize = 9;
       this._buttonTextSize = 7;
       this._showMainBox = true;
@@ -289,6 +290,13 @@ GlobalContainer.prototype = {
    },
 
 //Child property
+   overrideTheme: function(override) {
+      this._overrideTheme = override;
+      this._setStyle();
+      for(let index in this._listCategoryContainer)
+         this._listCategoryContainer[index].overrideTheme(override);
+   },
+
    showDriveBox: function(show) {
       this._showDriveBox = show;
       for(let index in this._listCategoryContainer)
@@ -472,14 +480,21 @@ GlobalContainer.prototype = {
    },
 
    _setStyle: function() {
-      if(this._showMainBox)
-      {
-         let _color = (this._boxColor.replace(")","," + this._transparency + ")")).replace('rgb','rgba');
-         this._mainBox.set_style('padding: 4px; border:'+this._borderBoxWidth +
-                                 'px solid ' + this._borderBoxColor + '; background-color: ' +
-                                  _color + '; border-radius: 12px;');
-      } else
+      if(this._showMainBox) {
+         if(this._overrideTheme) {
+            this._mainBox.set_style_class_name(' ');
+            let _color = (this._boxColor.replace(")","," + this._transparency + ")")).replace('rgb','rgba');
+            this._mainBox.set_style('padding: 4px; border:'+this._borderBoxWidth +
+                                    'px solid ' + this._borderBoxColor + '; background-color: ' +
+                                     _color + '; border-radius: 12px;');
+         } else {
+            this._mainBox.set_style(' ');
+            this._mainBox.set_style_class_name('desklet-with-borders');
+         }
+      } else {
          this._mainBox.set_style(' ');
+         this._mainBox.set_style_class_name(' ');
+      }
    }
 };
 
@@ -493,6 +508,7 @@ CategoryContainer.prototype = {
       this._parent = parent;
       this._categoryBox = new St.BoxLayout({vertical:true});
       this._listDriveContainer = new Array();
+      this._overrideTheme = "false";
       this._theme = "mind";
       this._showDriveBox = true;
       this._borderBoxWidth = 1;
@@ -554,6 +570,12 @@ CategoryContainer.prototype = {
       return -1;
    },
 
+   overrideTheme: function(override) {
+      this._overrideTheme = override;
+      for(let index in this._listDriveContainer)
+         this._listDriveContainer[index].overrideTheme(override);
+   },
+
    setTheme: function(theme) {
       this._theme = theme;
       for(let index in this._listDriveContainer)
@@ -603,6 +625,7 @@ CategoryContainer.prototype = {
    },
 
    applyDriveStyle: function(driveContainer) {
+      driveContainer.overrideTheme(this._overrideTheme);
       driveContainer.setTheme(this._theme);
       driveContainer.showDriveBox(this._showDriveBox);
       driveContainer.setBorderBoxWidth(this._borderBoxWidth);
@@ -650,6 +673,7 @@ DriveContainer.prototype = {
 
    _init: function(parent) {
       this._parent = parent;
+      this._overrideTheme = false;
       this._showDriveBox = true;
       this._boxColor = "rgb(0,0,0)";
       this._transparency = 50;
@@ -660,7 +684,7 @@ DriveContainer.prototype = {
       this._textButtonSize = 7;
       this._clickedEject = false;
 
-      this._driveBox = new St.BoxLayout({vertical:false});
+      this._driveBox = new St.BoxLayout({ vertical:false, style_class: 'menu-favorites-box' });
 
       this._iconContainer = new St.BoxLayout({vertical:true});
           
@@ -704,6 +728,11 @@ DriveContainer.prototype = {
 
    setParent: function(parent) {
       this._parent = parent;
+   },
+
+   overrideTheme: function(override) {
+      this._overrideTheme = override;
+      this._setStyleDrive();
    },
 
    showDriveBox: function(show) {
@@ -868,10 +897,17 @@ DriveContainer.prototype = {
    _setStyleDrive: function() {
       if(this._showDriveBox)
       {
-         let _color = (this._boxColor.replace(")",","+this._transparency+")")).replace('rgb','rgba');
-         this._driveBox.set_style('padding: 0px 6px 0px 0px; border:' + this._borderBoxWidth + 'px solid ' +
-                                 this._borderBoxColor +'; background-color: ' + _color + '; border-radius: 12px;');
+         if(this._overrideTheme) {
+            this._driveBox.set_style_class_name(' ');
+            let _color = (this._boxColor.replace(")",","+this._transparency+")")).replace('rgb','rgba');
+            this._driveBox.set_style('padding: 0px 6px 0px 0px; border:' + this._borderBoxWidth + 'px solid ' +
+                                     this._borderBoxColor +'; background-color: ' + _color + '; border-radius: 12px;');
+         } else {
+            this._driveBox.set_style(' ');
+            this._driveBox.set_style_class_name('menu-favorites-box');
+         }
       } else {
+         this._driveBox.set_style_class_name(' ');
          this._driveBox.set_style(' ');
       }
    },
@@ -2068,6 +2104,7 @@ MyDesklet.prototype = {
          this._onThemeChange();
          this._onTypeOpenChanged();
          this._onFixWidth();
+         this._onOverrideTheme();
          this._onBorderBoxWidth();
          this._onBorderBoxColor();
          this._onBoxColor();
@@ -2185,6 +2222,10 @@ MyDesklet.prototype = {
       this.globalContainer.setBorderBoxColor(this._borderBoxColor);
    },
 
+   _onOverrideTheme: function() {
+      this.globalContainer.overrideTheme(this._overrideTheme);
+   },
+
    _onBoxColor: function() {
       this.globalContainer.setBoxColor(this._boxColor);
    },
@@ -2254,18 +2295,6 @@ MyDesklet.prototype = {
    _initSettings: function() {
       try {
          this.settings = new Settings.DeskletSettings(this, this.metadata["uuid"], this.instance_id);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "mainBox", "_showMainBox", this._onShowMainBox, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "driveBox", "_showDriveBox", this._onShowDriveBox, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "theme", "_theme", this._onThemeChange, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onBoxColor, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onFontColor, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "textTopSize", "_textTopSize", this._onTextTopSize, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "textButtonSize", "_textButtonSize", this._onTextButtonSize, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._onTransparency, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fixWidth", this._onFixWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onBorderBoxWidth, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onBorderBoxColor, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "speedMeter", "_showSpeedMeter", this._onShowSpeedMeter, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hardDrives", "_showHardDrives", this._onShowHardDisk, null);
@@ -2290,6 +2319,20 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "warningHddTemp", "_warningHddTemp", this._onHddTempWarningTempChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "criticalHddTemp", "_criticalHddTemp", this._onHddTempCritialTempChanged, null);
 
+         this.settings.bindProperty(Settings.BindingDirection.IN, "mainBox", "_showMainBox", this._onShowMainBox, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "driveBox", "_showDriveBox", this._onShowDriveBox, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "theme", "_theme", this._onThemeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fixWidth", "_fixWidth", this._onFixWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "width", "_width", this._onFixWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "transparency", "_transparency", this._onTransparency, null);
+
+         this.settings.bindProperty(Settings.BindingDirection.IN, "overrideTheme", "_overrideTheme", this._onOverrideTheme, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "boxColor", "_boxColor", this._onBoxColor, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "fontColor", "_fontColor", this._onFontColor, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "textTopSize", "_textTopSize", this._onTextTopSize, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "textButtonSize", "_textButtonSize", this._onTextButtonSize, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onBorderBoxWidth, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onBorderBoxColor, null);
       } catch (e) {
         // Main.notify(_("Failed of Drives Manager:"), e.message);
          global.logError(e);
