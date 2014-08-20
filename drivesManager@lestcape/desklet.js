@@ -953,10 +953,23 @@ CategoryContainer.prototype = {
       this._topTextSize = 9;
       this._bottomTextSize = 7;
       this._opacity = 50;
+      this.setParentContainer(parent);
    },
 
    setParentContainer: function(parent) {
       this._parent = parent;
+      if(this._parent) {
+         this._overrideTheme = this._parent._overrideTheme;
+         this._theme = this._parent._theme;
+         this._showDriveBox = this._parent._showDriveBox;
+         this._borderBoxWidth = this._parent._borderBoxWidth;
+         this._borderBoxColor  = this._parent._borderBoxColor;
+         this._boxColor = this._parent._boxColor;
+         this._topTextSize = this._parent._topTextSize;
+         this._bottomTextSize = this._parent._bottomTextSize;
+         this._opacity = this._parent._opacity;
+         this.overrideTheme(this._overrideTheme);
+      }
    },
 
    getContainerBox: function() {
@@ -1120,8 +1133,8 @@ DriveContainer.prototype = {
       this._borderBoxWidth = 1;
       this._borderBoxColor = "white";
       this._fontFamily = ""; //Default Font family
-      this._textTopSize = 9;
-      this._textBottomSize = 7;
+      this._topTextSize = 9;
+      this._bottomTextSize = 7;
       this._clickedEject = false;
 
       this._driveBox = new St.BoxLayout({ vertical:false, style_class: 'menu-favorites-box', reactive: true, track_hover: true });
@@ -1157,9 +1170,9 @@ DriveContainer.prototype = {
       this._driveBox.add(this._iconContainer, {x_fill: true, x_align: St.Align.START});
       this._driveBox.add(this._infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
       this._driveBox.add(this._ejectContainer, { x_fill: true, x_align: St.Align.START });
-      this._setStyleDrive();
       this._currentMeterImage = new Array();
       this._currentIndexMeterImage = new Array();
+      this.setParent(this._parent);
    },
 
    enableClickedEject: function() {
@@ -1172,12 +1185,23 @@ DriveContainer.prototype = {
 
    setParent: function(parent) {
       this._parent = parent;
+      if(this._parent) {
+         this._overrideTheme = this._parent._overrideTheme;
+         this._showDriveBox = this._parent._showDriveBox;
+         this._boxColor = this._parent._boxColor;
+         this._opacity = this._parent._opacity;
+         this._borderBoxWidth = this._parent._borderBoxWidth;
+         this._borderBoxColor  = this._parent._borderBoxColor;
+         this._topTextSize = this._parent._topTextSize;
+         this._bottomTextSize = this._parent._bottomTextSize;
+         this._setStyleDrive();
+      }
+      this._setStyleDrive();
    },
 
    overrideTheme: function(override) {
       this._overrideTheme = override;
       this._setStyleDrive();
-      this._setStyleText();
    },
 
    showDriveBox: function(show) {
@@ -1282,16 +1306,15 @@ DriveContainer.prototype = {
 
    setFontFamily: function(fontFamily) {
       this._fontFamily = fontFamily;
-      
    },
 
    setTopTextSize: function(size) {
-      this._textTopSize = size;
+      this._topTextSize = size;
       this._setStyleText();
    },
 
    setBottomTextSize: function(size) {
-      this._textBottomSize = size;
+      this._bottomTextSize = size;
       this._setStyleText();
    },
 
@@ -1402,6 +1425,7 @@ DriveContainer.prototype = {
          this._driveBox.set_style_class_name(' ');
          this._driveBox.set_style(' ');
       }
+      this._setStyleText();
       return true;
    },
 
@@ -1427,22 +1451,22 @@ DriveContainer.prototype = {
          this._leftBottomText.set_style_class_name(' ');
          this._rightBottomText.set_style_class_name(' ');
          if(this._leftTopFontColor)
-            this._leftTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._leftTopFontColor + " " + this._fontFamily;
+            this._leftTopText.style="font-size: " + this._topTextSize + "pt; color:" + this._leftTopFontColor + " " + this._fontFamily;
          else
-            this._leftTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
+            this._leftTopText.style="font-size: " + this._topTextSize + "pt; " + this._fontFamily;
          if(this._rightTopFontColor)
-            this._rightTopText.style="font-size: " + this._textTopSize + "pt; color:" + this._rightTopFontColor + " " + this._fontFamily;
+            this._rightTopText.style="font-size: " + this._topTextSize + "pt; color:" + this._rightTopFontColor + " " + this._fontFamily;
          else
-            this._rightTopText.style="font-size: " + this._textTopSize + "pt; " + this._fontFamily;
+            this._rightTopText.style="font-size: " + this._topTextSize + "pt; " + this._fontFamily;
 
          if(this._leftBottomFontColor)
-            this._leftBottomText.style="font-size: " + this._textBottomSize + "pt; color:" + this._leftBottomFontColor + " " + this._fontFamily;
+            this._leftBottomText.style="font-size: " + this._bottomTextSize + "pt; color:" + this._leftBottomFontColor + " " + this._fontFamily;
          else
-            this._leftBottomText.style="font-size: " + this._textBottomSize + "pt; " + this._fontFamily;
+            this._leftBottomText.style="font-size: " + this._bottomTextSize + "pt; " + this._fontFamily;
          if(this._rightBottomFontColor)
-            this._rightBottomText.style="font-size: " + this._textBottomSize + "pt; color:" + this._rightBottomFontColor + " " + this._fontFamily;
+            this._rightBottomText.style="font-size: " + this._bottomTextSize + "pt; color:" + this._rightBottomFontColor + " " + this._fontFamily;
          else
-            this._rightBottomText.style="font-size: " + this._textBottomSize + "pt; " + this._fontFamily;
+            this._rightBottomText.style="font-size: " + this._bottomTextSize + "pt; " + this._fontFamily;
       } else {
          this._leftTopText.set_style(' ');
          this._rightTopText.set_style(' ');
@@ -1660,7 +1684,6 @@ HardDiskContainer.prototype = {
       CategoryContainer.prototype._init.call(this, parent);
       this._hddTempMonitor = hddTempMonitor;
       this.mountsHard = new Array();
-      this._browser = "nemo";
       this._capacityDetect = true;
       this.idConnect = this._hddTempMonitor.connect('temp-changed', Lang.bind(this, this._onHDDTempChange));
       this.update();
@@ -1738,16 +1761,12 @@ HardDiskContainer.prototype = {
 
    openMountDrive: function(_index) {
       if((_index > -1)&&(_index < this.mountsHard.length)) {
-         if(GLib.find_program_in_path(this._browser)) { 
-            Util.spawnCommandLine(this._browser + " '" + this.mountsHard[_index][1] + "'");
+         if(this.mountsHard[_index][1]) {
+            Util.spawnCommandLine("xdg-open '" + this.mountsHard[_index][1] + "'");
          } else {
-            Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the default browser."));
+            Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the mount point."));
          }
       }
-   },
-
-   setDefaultBrowser: function(browser) {
-      this._browser = browser;
    },
 
    _checkChange: function(currMountsHard) {
@@ -1819,7 +1838,6 @@ DeviceContainer.prototype = {
       this._listDevices = new Array();
       this._capacityDetect = true;
       this._unEjecting = false;
-      this._browser = "nemo";
       this._openConnect = true;
    },
 
@@ -2055,12 +2073,16 @@ DeviceContainer.prototype = {
 
    openMountDrive: function(_index) {
       if((_index > -1)&&(_index < this._listDevices.length)) {
-         if(GLib.find_program_in_path(this._browser)) {
-            let _volume = this._listDevices[_index];//Only volume have click...   
+         let _volume = this._listDevices[_index];//Only volume have click...
+         if(_volume) {
             let urlPath = this.getDevicePath(_volume); //A volume need to be mount, or don't have mount point to open.
-            Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
+            if(urlPath) {
+               Util.spawnCommandLine("xdg-open '" + urlPath + "'");
+            } else {
+               Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the mount point."));
+            }
          } else {
-            Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the default browser."));
+            Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the mount point."));
          }
       }
    },
@@ -2071,10 +2093,6 @@ DeviceContainer.prototype = {
 
    openOnConnect: function(open) {
       this._openConnect = open;
-   },
-
-   setDefaultBrowser: function(browser) {
-      this._browser = browser;
    },
 
    _onDriveClicked: function(button) {
@@ -2220,14 +2238,12 @@ function VolumeMonitor(globalContainer) {
 VolumeMonitor.prototype = {
 
    _init: function(globalContainer) {
-      this._browser = "nemo";
       this._unEjecting = false;
       this._openConnect = true;
       this._capacityDetect = true;
       this._globalContainer = globalContainer;
       this._monitor = Gio.VolumeMonitor.get();
       this._client = new GUdev.Client ({subsystems: ["block"]});
-      //this._client
       this._volumeMonitorSignals = [];
       this._idGuDev;
       this.connect();
@@ -2358,15 +2374,14 @@ VolumeMonitor.prototype = {
       this._listCategory.push(new DeviceContainer(this._globalContainer, "Empty"));
       this._globalContainer.insertCategoryContainer(this._listCategory[6], _indexCategory + 6);
       if(this.listConnect[6]) this._globalContainer.connectCategory(this._listCategory[6]);
-
       let _listDrives = this._monitor.get_connected_drives();
       for(let i = 0; i < _listDrives.length; i++) {
          this._insertInCategory(_listDrives[i]);
       }
       this.setCapacityDetect(this._capacityDetect);
-      this.setDefaultBrowser(this._browser);
       this.openOnConnect(this._openConnect);
       this.unEjecting(this._unEjecting);
+      this._globalContainer.overrideTheme(this._globalContainer._overrideTheme);
    },
 
    _insertInCategory: function(drive) {
@@ -2413,12 +2428,6 @@ VolumeMonitor.prototype = {
       this._capacityDetect = capacityDetect;
       for(let category in this._listCategory)
          this._listCategory[category].setCapacityDetect(capacityDetect);
-   },
-
-   setDefaultBrowser: function(browser) {
-      this._browser = browser;
-      for(let category in this._listCategory)
-         this._listCategory[category].setDefaultBrowser(browser);
    },
 
    openOnConnect: function(open) {
@@ -2497,11 +2506,9 @@ VolumeMonitor.prototype = {
          Main.notifyError(_("The device has been loaded."));
          global.play_theme_sound(0, 'device-added-media');
          if(this._openConnect) {
-            if(GLib.find_program_in_path(this._browser)) { 
-               let urlPath = this.getDevicePath(mount); //A volume need to be mount, or don't have mount point to open.
-               Util.spawnCommandLine(this._browser + " '" + urlPath + "'");
-            } else {
-               Main.notifyError(_("Failed of Drives Manager:") + " " + _("Can't find the default browser."));
+            let urlPath = this.getDevicePath(mount); //A volume need to be mount, or don't have mount point to open.
+            if(urlPath) {
+               Util.spawnCommandLine("xdg-open '" + urlPath + "'");
             }
          } 
        
@@ -2695,7 +2702,6 @@ MyDesklet.prototype = {
          this._onOpacity();
          this._onCapacityDetect();
          this._onOpenConnect();
-         this._onDefaultBrowser();
          this._onUnEjecting();
          this._onHddTempChanged();
          this._onHddTempPlaySoundChanged();
@@ -2851,11 +2857,11 @@ MyDesklet.prototype = {
    },
 
    _onTextTopSize: function() {
-      this.globalContainer.setTopTextSize(this._textTopSize);
+      this.globalContainer.setTopTextSize(this._topTextSize);
    },
 
    _onTextBottomSize: function() {
-      this.globalContainer.setBottomTextSize(this._textBottomSize);
+      this.globalContainer.setBottomTextSize(this._bottomTextSize);
    },
 
    _onOpacity: function() {
@@ -2869,11 +2875,6 @@ MyDesklet.prototype = {
    _onCapacityDetect: function() {
       this.hardDisk.setCapacityDetect(this._capacityDetect);
       this.volumeMonitor.setCapacityDetect(this._capacityDetect);
-   },
-
-   _onDefaultBrowser: function() {
-      this.volumeMonitor.setDefaultBrowser(this._browser);
-      this.hardDisk.setDefaultBrowser(this._browser);
    },
 
    _onUnEjecting: function() {
@@ -2923,7 +2924,6 @@ MyDesklet.prototype = {
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "openSystem", "_openSystem", this._onTypeOpenChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "openConnect", "_openConnect", this._onOpenConnect, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "openWith", "_browser", this._onDefaultBrowser, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unEjecting", "_unEjecting", this._onUnEjecting, null);
 

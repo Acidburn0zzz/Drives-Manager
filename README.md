@@ -95,6 +95,7 @@ Change Log:
   - We are changing the icons to svg.
   - Added Cinnamon theme support.
   - Now we can choose whether Drives Manager will be presented as an Applet or Desklet.
+  - Mount points can opened now with the default browser of your computer.
 
 1.1-RTM
   - Added parameter, was missing in CriticalNotify .

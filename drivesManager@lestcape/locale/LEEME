@@ -85,6 +85,7 @@ Registro de cambios:
   - Se están cambiando los iconos a svg.
   - Añadido soporte para los temas de Cinnamon.
   - Ahora se puede elegir si Driver Manager será un Applet o un Desklet.
+  - Los puntos de montaje ahora se abren con el navegador por defecto de su computadora.
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.

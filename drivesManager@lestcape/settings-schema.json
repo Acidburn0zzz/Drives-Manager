@@ -83,17 +83,6 @@
         "type": "checkbox",
         "tooltip": "Check this to mount points auto open or not  when the volumen was mounted."
     },
-    "openWith": {
-        "type": "combobox",
-        "description": "Open with:",
-        "default": "nemo",
-        "tooltip": "Select the default browser.",
-        "indent": true,
-        "options": {
-           "Nemo": "nemo",
-           "Nautilus": "nautilus"
-        }
-    },
     "unEjecting": {
         "default": false,
         "description": "Don't eject Removable Drive (they can be reconnected without need to pull out of the connector).",
