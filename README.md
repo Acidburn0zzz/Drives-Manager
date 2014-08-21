@@ -83,7 +83,7 @@ Known bugs and requirements:
 
 3. Only we can detect optical disks a CD/DVD, if to devices are recognized by the Linux kernel matching with the regular expresions "dev/sr[0-9] +",  "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+" and "/dev/hdc". If you have a handle to a different optical device, please report it on the website of this program, and this will be included in the next version.
 
-4. The option of auto-open mount points can give many problems, it's because the known incompatibility between Nautilus and Nemo. Any incident, please report it on the website of this desklet.
+4. The option of auto-open mount points can give many problems, it's because the known incompatibility between Nautilus and Nemo. Any incident, please report it on the website of this desklet. Also automount could not work, please check if this file exist: "/etc/mtab.fuselock" and if exist execute in terminal: sudo rm /etc/mtab.fuselock and reboot your computer.
 
 5. Be careful! When a removable device has more than one partition and is active the option to reconnect the device, this without removing them from the connector. It can be happen that in a negligence, you unplugged a device that have some partitions mounted yet and therefore you can lose some importan data.
 
