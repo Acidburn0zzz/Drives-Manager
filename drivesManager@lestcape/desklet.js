@@ -23,6 +23,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+const Clutter = imports.gi.Clutter;
 
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -830,42 +831,9 @@ GlobalContainer.prototype = {
       this._mainBox.set_style(' ');
       this._mainBox.set_style_class_name(' ');
       if(this._showMainBox) {
-         let newStyle = '';
-         let remplaceColor;
-         if(this._overrideTheme) {
-            this._parent.menu.actor.set_style_class_name(' ');
-            let remplaceColor = this._textRGBToRGBA(this._boxColor, this._opacity);
-            newStyle = 'padding: 4px; border:'+this._borderBoxWidth +
-                       'px solid ' + this._borderBoxColor + '; background-color: ' +
-                       remplaceColor + '; border-radius: 12px;';
-            this._parent.menu.set_style(newStyle);
-         } else {
-            if(this._parent.menu.actor.style_class != 'popup-menu-boxpointer') {
-               this._parent.menu.actor.set_style(' ');
-               this._parent.menu.actor.set_style_class_name('popup-menu-boxpointer');
-               this._parent.menu.actor.add_style_class_name('popup-menu');
-            }
-            if(this._parent.menu.actor.visible) {
-               let themeNode = this._parent.menu.actor.get_theme_node();
-               let [have_color, box_color] = themeNode.lookup_color('background-color', false);
-               if(have_color) {
-                  remplaceColor = this._updateOpacityColor(box_color.to_string(), this._opacity);
-                  newStyle += 'background-color: ' + remplaceColor + ';';
-               }
-               let [have_color_start, box_color_start] = themeNode.lookup_color('background-gradient-start', false);
-               if(have_color_start) {
-                  remplaceColor = this._updateOpacityColor(box_color_start.to_string(), this._opacity);
-                  newStyle += ' background-gradient-start: ' + remplaceColor + ';';
-               }
-               let [have_color_end, box_color_end] = themeNode.lookup_color('background-gradient-end', false);
-               if(have_color_end) {
-                  remplaceColor = this._updateOpacityColor(box_color_end.to_string(), this._opacity);
-                  newStyle += ' background-gradient-end: ' + remplaceColor + ';';
-               }
-               if(newStyle != this._parent.menu.actor.get_style()) {
-                  this._parent.menu.actor.set_style(newStyle);
-               }
-            }
+         if(this._parent.menu.actor.style_class != 'popup-menu-boxpointer') {
+            this._parent.menu.actor.set_style_class_name('popup-menu-boxpointer');
+            this._parent.menu.actor.add_style_class_name('popup-menu');
          }
       } else {
          this._parent.menu.actor.set_style(' ');
@@ -1260,7 +1228,7 @@ DriveContainer.prototype = {
       this._iconDriveName = iconName;
       if(this._driveButton)
          this._iconContainer.remove_actor(this._driveButton);
-      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName);
+      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48);
       this._driveButton = new St.Button({ child: _driveIcon });
       this._iconContainer.add_actor(this._driveButton, {x_fill: true, x_align: St.Align.START});
       if(this._callDriveClicked) {
@@ -1504,15 +1472,19 @@ DriveContainer.prototype = {
       return this._getIconImage(this._path() + "meter/meter" + imageNumber);
    },
 
-   _getIconImage: function(pathC) {
+   _getIconImage: function(pathC, iconSize) {
       try {
          let file = Gio.file_new_for_path(pathC + ".png");
          if(!file.query_exists(null))
             file = Gio.file_new_for_path(pathC + ".svg");
-         let icon_uri = file.get_uri();
-         //return St.TextureCache.get_default().load_uri_sync(1, icon_uri, 1064, 1064);
-         return St.TextureCache.get_default().load_uri_async(icon_uri, 1064, 1064);
-      }catch(e) {
+         if(iconSize) {
+            let gicon = new Gio.FileIcon({ file: file });
+            return  new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.FULLCOLOR});
+         } else {
+            //return St.TextureCache.get_default().load_uri_sync(1, file.get_uri(), 1064, 1064);
+            return St.TextureCache.get_default().load_uri_async(file.get_uri(), 1064, 1064);
+         }
+      } catch(e) {
          //this._reportFailure(e);
       }
       return null;      

@@ -96,6 +96,9 @@ Change Log:
   - Added Cinnamon theme support.
   - Now we can choose whether Drives Manager will be presented as an Applet or Desklet.
   - Mount points can opened now with the default browser of your computer.
+  - The height is limited to not exceed the height of the monitor with an scroll box.
+  - Was added options to configure the behavior of the scroll box.
+  - Removed the option to open mount points with nautilus or nemo. Instead will open with the default browser.
 
 1.1-RTM
   - Added parameter, was missing in CriticalNotify .
