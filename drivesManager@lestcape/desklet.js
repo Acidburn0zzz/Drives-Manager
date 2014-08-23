@@ -364,6 +364,76 @@ ScrollItemsBox.prototype = {
    }
 };
 
+
+function MeterBox(size) {
+    this._init(size);
+}
+
+MeterBox.prototype = {
+   _init: function(size) {
+      this.size = size;
+      this.override = false;
+      this.actor = new St.BoxLayout({ vertical:false, style_class: 'drives-meter'});
+      this._buildCalorPalete();
+      this.boxesLed = new Array();
+      for(let pos = 0; pos < this.size; pos++) {
+         boxLed = new St.BoxLayout({ vertical:false, style_class: 'drives-meter-led' });
+         boxLed.style = "background-color: " + this.getDefaultColorInPalet() + ";";
+         this.actor.add(boxLed, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START });
+         this.boxesLed.push(boxLed);
+      }
+   },
+
+   overrideTheme: function(override) {
+      if(override) {
+         for(let pos = 0; pos < this.size; pos++) {
+            this.boxesLed[pos].set_style_class_name(' ');
+         }
+      } else {
+         for(let pos = 0; pos < this.size; pos++) {
+            this.boxesLed[pos].set_style_class_name('drives-meter-led');
+         }
+      }
+   },
+
+   setMeterImage: function(currentValue, totalValue) {
+      let actualValue = 0;
+      if(totalValue > 0) {
+         actualValue = Math.floor(Math.round(this.size*currentValue/totalValue));
+         let oldColorPos = 0;
+         for(let pos = 0; pos < actualValue; pos++) {
+            this.boxesLed[pos].style = "background-color: " + this.findColorInPalet(pos) + ";";
+         }
+      }
+      for(let pos = actualValue; pos < this.size; pos++) {
+         this.boxesLed[pos].style = "background-color: " + this.getDefaultColorInPalet() + ";";
+      } 
+   },
+
+   findColorInPalet: function(posCurrent) {
+      let valueColor = Math.floor(Math.round(100*posCurrent/this.size));
+      for(let pos = 1; pos < this.colorPalete.length; pos++) {
+         if(valueColor < this.colorPalete[pos][1])
+            return this.colorPalete[pos][0];
+      }
+      return this.getDefaultColorInPalet();
+   },
+
+   getDefaultColorInPalet: function(currentValue) {
+      return this.colorPalete[0][0];
+   },
+
+   _buildCalorPalete: function(currentValue) {
+      this.colorPalete = new Array();
+      this.colorPalete.push(["#718397", 0]);
+      this.colorPalete.push(["#009900", 33]);
+      this.colorPalete.push(["#00cc00", 50]);
+      this.colorPalete.push(["#00ff00", 70]);
+      this.colorPalete.push(["#e4dd14", 90]);
+      this.colorPalete.push(["#9a0030", 100]);
+   }
+};
+
 function HDDTempMonitor(system) {
     this._init(system);
 }
@@ -505,6 +575,22 @@ GlobalContainer.prototype = {
       this._uuid = uuid;
       this._sys = system;
 
+      this._overrideTheme = false;
+      this._topTextSize = 9;
+      this._bottomTextSize = 7;
+      this._showMainBox = true;
+      this._showDriveBox = true;
+      this._theme = "mind";
+      this._opacity = 50;
+      this._boxColor = "rgb(0,0,0)";
+      this._borderBoxWidth = 1;
+      this._borderBoxColor = "white";
+      this._width = 200;
+      this._fixWidth = false;
+      this._height = 350;
+      this._fixHeight = false;
+      this._fontColor = "white";
+
       this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
       this._mainBox.add_style_class_name('drives-main-box');
       this._rootBox = new St.BoxLayout({ vertical:true });
@@ -522,21 +608,6 @@ GlobalContainer.prototype = {
       this._listCategoryContainer = new Array();
       this._listCategoryConnected = new Array();
 
-      this._overrideTheme = false;
-      this._topTextSize = 9;
-      this._bottomTextSize = 7;
-      this._showMainBox = true;
-      this._showDriveBox = true;
-      this._theme = "mind";
-      this._opacity = 50;
-      this._boxColor = "rgb(0,0,0)";
-      this._borderBoxWidth = 1;
-      this._borderBoxColor = "white";
-      this._width = 200;
-      this._fixWidth = false;
-      this._height = 350;
-      this._fixHeight = false;
-      this._fontColor = "white";
       this.setFontColor(this._fontColor); 
       this._setStyle();
    },
@@ -673,6 +744,7 @@ GlobalContainer.prototype = {
       categoryContainer.setTopTextSize(this._topTextSize);
       categoryContainer.setBottomTextSize(this._bottomTextSize);
       categoryContainer.setOpacity(this._opacity);
+      categoryContainer.overrideTheme(this._overrideTheme);
    },
 
    addCategoryContainer: function(categoryContainer) {
@@ -1042,7 +1114,6 @@ CategoryContainer.prototype = {
    },
 
    applyDriveStyle: function(driveContainer) {
-      driveContainer.overrideTheme(this._overrideTheme);
       driveContainer.setTheme(this._theme);
       driveContainer.showDriveBox(this._showDriveBox);
       driveContainer.setBorderBoxWidth(this._borderBoxWidth);
@@ -1051,6 +1122,7 @@ CategoryContainer.prototype = {
       driveContainer.setTopTextSize(this._topTextSize);
       driveContainer.setBottomTextSize(this._bottomTextSize);
       driveContainer.setOpacity(this._opacity);
+      driveContainer.overrideTheme(this._overrideTheme);
    },
 //Child property
    update: function() {
@@ -1125,7 +1197,7 @@ DriveContainer.prototype = {
       this._bottomTextContainer.add(this._leftBottomText, {x_fill: true, expand: true, x_align: St.Align.START});
       this._bottomTextContainer.add(this._rightBottomText, {x_fill: true, x_align: St.Align.END});
 
-      this.percentContainer = new St.BoxLayout({ vertical:true, style_class: 'drives-percent-meter-box' });
+      this.percentContainer = new St.BoxLayout({ vertical:true, style_class: 'drives-meter-box' });
 
       this._ejectContainer = new St.BoxLayout({vertical:true, style_class: 'drives-eject-button-box' });
       //this._ejectContainer.set_style('padding: 8px 0px 0px 4px;');
@@ -1139,7 +1211,6 @@ DriveContainer.prototype = {
       this._driveBox.add(this._infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
       this._driveBox.add(this._ejectContainer, { x_fill: true, x_align: St.Align.START });
       this._currentMeterImage = new Array();
-      this._currentIndexMeterImage = new Array();
       this.setParent(this._parent);
    },
 
@@ -1198,9 +1269,10 @@ DriveContainer.prototype = {
    },
  
    addMeter: function() {
-      this._currentMeterImage.push(null);
-      this._currentIndexMeterImage.push(-1);
-      this.setMeterImage(this._currentMeterImage.length-1, 0, 0);
+      this._currentMeterImage.push(new MeterBox(20));
+      let index = this._currentMeterImage.length - 1;
+      this.percentContainer.add(this._currentMeterImage[index].actor, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START });
+      this.setMeterImage(index, 0, 0);
    },
 
    removeMeterImage: function(index) {
@@ -1212,14 +1284,7 @@ DriveContainer.prototype = {
 
    setMeterImage: function(index, currValue, totalValue) {
       if((index > -1)&&(index < this._currentMeterImage.length)) {
-         let _indexImage = this._findIndexMeterImage(currValue, totalValue);
-         if(this._currentIndexMeterImage[index] != _indexImage) {
-            let _preloadImage = this._getMeterImage(_indexImage);
-            if(this._currentMeterImage[index])
-               this.percentContainer.remove_actor(this._currentMeterImage[index]);
-            this._currentMeterImage[index] = _preloadImage;
-            this.percentContainer.add(this._currentMeterImage[index], {x_fill: true, x_align: St.Align.MIDDLE});
-         }
+         this._currentMeterImage[index].setMeterImage(currValue, totalValue);
       }
    },
 
@@ -1330,7 +1395,27 @@ DriveContainer.prototype = {
       this._setStyleText();
    },
 
+   _setStyleMeter: function() {
+      let meter;
+      if(this._overrideTheme) {
+         for(let index in this._currentMeterImage) {
+            meter = this._currentMeterImage[index];
+            meter.actor.set_style_class_name(' ');
+            meter.actor.style = 'min-height: 6px; spacing: 2px;';
+            meter.overrideTheme(this._overrideTheme);
+         }
+      } else {
+         for(let index in this._currentMeterImage) {
+            meter = this._currentMeterImage[index];
+            meter.actor.set_style_class_name('drives-meter');
+            meter.actor.style = ' ';
+            meter.overrideTheme(this._overrideTheme);
+         }
+      }
+   },
+
    _setStyleDrive: function() {
+      this._setStyleMeter();
       if(this._showDriveBox) {
          let newStyle = '';
          let remplaceColor;
@@ -1338,7 +1423,7 @@ DriveContainer.prototype = {
             this._infoContainer.set_style_class_name(' ');
             this._iconContainer.set_style_class_name(' ');
             this.percentContainer.set_style_class_name(' ');
-            this.percentContainer.style = 'min-height: 6px;';
+            this.percentContainer.style = 'spacing: 2px;';
             this._ejectContainer.set_style_class_name(' ');
             this._ejectContainer.style = 'padding: 8px 0px 0px 4px;';
             this._topTextContainer.set_style_class_name(' ');
@@ -1354,7 +1439,7 @@ DriveContainer.prototype = {
          } else {
             this._infoContainer.set_style_class_name('drives-info-drive-box');
             this._iconContainer.set_style_class_name('drives-icon-button-box');
-            this.percentContainer.set_style_class_name('drives-percent-meter-box');
+            this.percentContainer.set_style_class_name('drives-meter-box');
             this.percentContainer.style = ' ';
             this._ejectContainer.set_style_class_name('drives-eject-button-box');
             this._ejectContainer.style = ' ';
@@ -1458,20 +1543,6 @@ DriveContainer.prototype = {
       return GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this._parent.getUUID() + "/";//+ this.uuid + "/";
    },
 
-   _findIndexMeterImage: function(currValue, totalValue) {
-      let _imageNumber = 1;
-      if(totalValue > 0)
-        _imageNumber = (currValue/totalValue)*10 + 1;
-      _imageNumber = Math.floor(Math.round(_imageNumber));
-      if(_imageNumber < 1) _imageNumber = 1;
-      if(_imageNumber > 11) _imageNumber = 11;
-      return _imageNumber;
-   },
-
-   _getMeterImage: function(imageNumber) {
-      return this._getIconImage(this._path() + "meter/meter" + imageNumber);
-   },
-
    _getIconImage: function(pathC, iconSize) {
       try {
          let file = Gio.file_new_for_path(pathC + ".png");
@@ -1479,7 +1550,7 @@ DriveContainer.prototype = {
             file = Gio.file_new_for_path(pathC + ".svg");
          if(iconSize) {
             let gicon = new Gio.FileIcon({ file: file });
-            return  new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.FULLCOLOR});
+            return new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.FULLCOLOR});
          } else {
             //return St.TextureCache.get_default().load_uri_sync(1, file.get_uri(), 1064, 1064);
             return St.TextureCache.get_default().load_uri_async(file.get_uri(), 1064, 1064);
@@ -1810,6 +1881,7 @@ DeviceContainer.prototype = {
       this._listDevices = new Array();
       this._capacityDetect = true;
       this._unEjecting = false;
+      this._unmountAll = true;
       this._openConnect = true;
    },
 
@@ -2039,6 +2111,21 @@ DeviceContainer.prototype = {
       return "";
    },
 
+   getMountBrothers: function(deviceMount) {
+      let listOfMounts = new Array();
+      try {
+         let listOfVolumes = deviceMount.get_drive().get_volumes();
+
+         let mount;
+         for(let pos in listOfVolumes) {
+            mount = listOfVolumes[pos].get_mount();
+            if(mount)
+               listOfMounts.push(mount);
+         }
+      } catch (e) {}
+      return listOfMounts;
+   },
+
    _getIdentifier: function(deviceVolume) {
       return deviceVolume.get_identifier(Gio.VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
    },
@@ -2061,6 +2148,10 @@ DeviceContainer.prototype = {
 
    unEjecting: function(unEjecting) {
       this._unEjecting = unEjecting;
+   },
+
+   unmountAll: function(unmountAll) {
+      this._unmountAll = unmountAll;
    },
 
    openOnConnect: function(open) {
@@ -2124,12 +2215,21 @@ DeviceContainer.prototype = {
             _mount = _volume;
          }
          try {
-            let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(_mount);
-            if((_mount.can_eject())&&((!this._unEjecting)||(this._deviceType == "OpticalMount"))) {
-               _mount.eject_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onEjectFinish));
-            } 
-            else if(_mount.can_unmount()) {
-               _mount.unmount_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onUnmountFinish));
+            let listToUnmount;
+            if((this._deviceType != "OpticalMount")&&(this._unEjecting)&&(this._unmountAll))
+               listToUnmount = this.getMountBrothers(_mount);
+            else {
+               listToUnmount = [];
+               listToUnmount.push(_mount);
+            }
+            for(let mountPos in listToUnmount) {
+               let _mountOp = new CinnamonMountOperation.CinnamonMountOperation(listToUnmount[mountPos]);
+               if((listToUnmount[mountPos].can_eject())&&((!this._unEjecting)||(this._deviceType == "OpticalMount"))) {
+                  listToUnmount[mountPos].eject_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onEjectFinish));
+               }
+               else if(listToUnmount[mountPos].can_unmount()) {
+                  listToUnmount[mountPos].unmount_with_operation(Gio.MountUnmountFlags.NONE, _mountOp.mountOp, null, Lang.bind(this, this._onUnmountFinish));
+               }
             }
          } catch (e) {
             Main.notifyError(_("Failed of Drives Manager:"), e.message);
@@ -2211,6 +2311,7 @@ VolumeMonitor.prototype = {
 
    _init: function(globalContainer) {
       this._unEjecting = false;
+      this._unmountAll = true;
       this._openConnect = true;
       this._capacityDetect = true;
       this._globalContainer = globalContainer;
@@ -2353,6 +2454,7 @@ VolumeMonitor.prototype = {
       this.setCapacityDetect(this._capacityDetect);
       this.openOnConnect(this._openConnect);
       this.unEjecting(this._unEjecting);
+      this.unmountAll(this._unmountAll);
       this._globalContainer.overrideTheme(this._globalContainer._overrideTheme);
    },
 
@@ -2412,6 +2514,12 @@ VolumeMonitor.prototype = {
       this._unEjecting = unEjecting;
       for(let category in this._listCategory)
          this._listCategory[category].unEjecting(unEjecting);
+   },
+
+   unmountAll: function(unmountAll) {
+      this._unmountAll = unmountAll;
+      for(let category in this._listCategory)
+         this._listCategory[category].unmountAll(unmountAll);
    },
 
    getCategory: function(index) {
@@ -2552,11 +2660,12 @@ MyDesklet.prototype = {
 
       this._timeout = null;
       this.myManager = null;
+      this.path = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid;
 
       this.setHeader(_("Drives Manager"));
-      this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/" + _("locale/README"));
+      this.helpFile = Gio.file_new_for_path(this.path + "/" + _("locale/README"));
       if(!this.helpFile.query_exists(null))
-         this.helpFile = Gio.file_new_for_path(GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid + "/locale/README");
+         this.helpFile = Gio.file_new_for_path(this.path + "/locale/README");
       this._menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
       this._menu.addAction(_("Help"), Lang.bind(this, function() {
@@ -2675,6 +2784,7 @@ MyDesklet.prototype = {
          this._onCapacityDetect();
          this._onOpenConnect();
          this._onUnEjecting();
+         this._onUnmountAll();
          this._onHddTempChanged();
          this._onHddTempPlaySoundChanged();
          this._onHddTempNormalColorChanged();
@@ -2853,6 +2963,11 @@ MyDesklet.prototype = {
       this.volumeMonitor.unEjecting(this._unEjecting);
    },
 
+   _onUnmountAll: function() {
+      this.volumeMonitor.unmountAll(this._unmountAll);
+   },
+
+
    _onHddTempChanged: function() {
       this.hddTempMonitor.enableMonitor(this._hddTempActive);
    },
@@ -2898,6 +3013,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "openConnect", "_openConnect", this._onOpenConnect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unEjecting", "_unEjecting", this._onUnEjecting, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "unmountAll", "_unmountAll", this._onUnmountAll, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "hddTemp", "_hddTempActive", this._onHddTempChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hddTempSound", "_hddTempSound", this._onHddTempPlaySoundChanged, null);

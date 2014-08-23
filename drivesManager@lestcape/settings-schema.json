@@ -89,6 +89,14 @@
         "type": "checkbox",
         "tooltip": "Check this to use or not the option of don't eject Removable Drive. They can be reconnected without need to pull out of the connector if you this option is active."
     },
+    "unmountAll": {
+        "default": true,
+        "description": "Unmount all mounted belonging to the same drive.",
+        "type": "checkbox",
+        "tooltip": "Check this to unmount all mounted belonging to the same drive. This avoid try to unplug a drive that still contains some mounted volumes.",
+        "indent": true,
+        "dependency": "unEjecting"
+    },
     "separator-hdd-temp-top": {
        "type": "separator"
     },

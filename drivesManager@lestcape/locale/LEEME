@@ -80,15 +80,17 @@ Errores conocidos y requerimientos:
 Registro de cambios:
 --------------
 1.2-RTM
+  - Se están cambiando los iconos a svg.
   - Añadido el idioma Checo(gracias a vanek.jakub4).
   - El programa hddtemp fue reemplazado por Udisk2(gracias a rgcjonas).
-  - Se están cambiando los iconos a svg.
   - Añadido soporte para los temas de Cinnamon.
   - Ahora se puede elegir si Driver Manager será un Applet o un Desklet.
   - Los puntos de montaje ahora se abren con el navegador por defecto de su computadora.
-  - Se limitó el alto, para que no sobrepase la altura del monitor con un scroll.
+  - Se limitó la altura, para que no sobrepase la altura del monitor con un scroll.
   - Se añadiron opciones para configurar el comportamiento del scroll.
   - Eliminada la opción para abrir puntos de montaje con nemo o nautilus, en su lugar se habren con el navegador por defecto.
+  - Fue añadida una opción para auto desmontar simultaneamente todos los volumenes (evitar la perdida de datos por errores humanos).
+  - Las imagenes de medicion fueron sustituidas por una implementación interna. Se acabaron los parpadeos y ahora esto es configurable desde css.
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.
