@@ -182,9 +182,11 @@
     "theme": {
         "type": "combobox",
         "description": "Select icon theme:",
-        "default": "mind",
+        "default": "native",
         "tooltip": "Select a theme to show icons.",
         "options": {
+            "Native": "native",
+            "Symbolic": "symbolic",
             "Mind": "mind",
             "Ubuntu": "ubuntu",
             "Linux": "linux",
@@ -192,9 +194,7 @@
             "Windows": "windows",
             "Blue": "blue",
             "Metalic": "metalic",
-            "Black": "black",
-            "Symbolic": "symbolic",
-            "Pink": "pink"
+            "Black": "black"
         }
     },
     "mainBox": {

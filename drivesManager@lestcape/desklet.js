@@ -1012,6 +1012,10 @@ CategoryContainer.prototype = {
       }
    },
 
+   getNativeIcon: function(dr) {
+      return null;
+   },
+
    getContainerBox: function() {
       return this._categoryBox;
    },
@@ -1297,6 +1301,8 @@ DriveContainer.prototype = {
       let _driveIcon;
       if(themeName == "symbolic")
          _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48, true);
+      else if(themeName == "native")
+         _driveIcon = this._getNativeDriveIcon(48);
       else
          _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48);
       this._driveButton = new St.Button({ child: _driveIcon });
@@ -1317,6 +1323,8 @@ DriveContainer.prototype = {
          _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName, 30);
       else if(themeName == "symbolic")
          _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 30, true);
+      else if(themeName == "native")
+         _ejectIcon = this._getNativeEjectIcon(iconName, 30);
       else
          _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 30);
       this._ejectButton = new St.Button({ child: _ejectIcon });
@@ -1429,10 +1437,11 @@ DriveContainer.prototype = {
          if(this._overrideTheme) {
             this._infoContainer.set_style_class_name(' ');
             this._iconContainer.set_style_class_name(' ');
+            this._iconContainer.style = 'padding: 4px;';
             this.percentContainer.set_style_class_name(' ');
             this.percentContainer.style = 'spacing: 2px;';
             this._ejectContainer.set_style_class_name(' ');
-            this._ejectContainer.style = 'padding-left: 8px;';
+            this._ejectContainer.style = 'padding-left: 4px; padding-right: 4px;';
             this._topTextContainer.set_style_class_name(' ');
             this._topTextContainer.style = 'spacing: 4px;';
             this._bottomTextContainer.set_style_class_name(' ');
@@ -1446,6 +1455,7 @@ DriveContainer.prototype = {
          } else {
             this._infoContainer.set_style_class_name('drives-info-drive-box');
             this._iconContainer.set_style_class_name('drives-icon-button-box');
+            this._iconContainer.style = ' ';
             this.percentContainer.set_style_class_name('drives-meter-box');
             this.percentContainer.style = ' ';
             this._ejectContainer.set_style_class_name('drives-eject-button-box');
@@ -1573,6 +1583,35 @@ DriveContainer.prototype = {
       return null;      
    },
 
+   _getNativeDriveIcon: function(iconSize) {
+      try {
+         if(this._parent) {
+            let iconNative = this._parent.getNativeIcon(this);
+            if(iconNative) {
+               iconNative.set_icon_size(iconSize);
+               return iconNative;
+            }
+         }
+      } catch(e) {
+         Main.notify("Error", e.message);
+      }
+      return null;
+   },
+
+   _getNativeEjectIcon: function(iconName, iconSize) {
+      try {
+         let icon = new St.Icon({ icon_name: 'media-eject', icon_type: St.IconType.FULLCOLOR, icon_size: iconSize });
+         if(iconName == "inject") {
+            icon.set_pivot_point(0.5, 0.5);
+            icon.set_rotation_angle(Clutter.RotateAxis.X_AXIS, 180);
+         }
+         return icon;
+      } catch(e) {
+         Main.notify("Error", e.message);
+      }
+      return null;
+   },
+
    _animateIcon: function(animeIcon, step) {
       if (step>=3) return;
       Tweener.addTween(animeIcon,
@@ -1641,7 +1680,6 @@ function SpeedDiskContainer(parent) {
 }
 
 SpeedDiskContainer.prototype = {
-
    __proto__: CategoryContainer.prototype,
 
    _init: function(parent) {
@@ -1655,6 +1693,10 @@ SpeedDiskContainer.prototype = {
       this._dr.addMeter();
       this._meterTimeDelay = 2;
       this.update();
+   },
+
+   getNativeIcon: function(dr) {
+      return new St.Icon({ icon_name: 'utilities-system-monitor', icon_type: St.IconType.FULLCOLOR });
    },
 
    setTopTextSize: function(size) {
@@ -1732,7 +1774,6 @@ function HardDiskContainer(parent, hddTempMonitor) {
 }
 
 HardDiskContainer.prototype = {
-
    __proto__: CategoryContainer.prototype,
 
    _init: function(parent, hddTempMonitor) {
@@ -1757,6 +1798,10 @@ HardDiskContainer.prototype = {
           _dr.setRightTopText(this.mountsHard[_pos][0]);
           this._hddTempMonitor.addDevice(this.mountsHard[_pos][0]);
       }
+   },
+
+   getNativeIcon: function(dr) {
+      return new St.Icon({ icon_name: 'drive-harddisk', icon_type: St.IconType.FULLCOLOR });
    },
 
    setCapacityDetect: function(capacityDetect) {
@@ -1884,7 +1929,6 @@ function DeviceContainer(parent, deviceType) {
 }
 
 DeviceContainer.prototype = {
-
    __proto__: CategoryContainer.prototype,
 
    _init: function(parent, deviceType) {
@@ -1936,6 +1980,15 @@ DeviceContainer.prototype = {
             break;
       }
       this.update();
+   },
+
+   getNativeIcon: function(dr) {
+      let index = this._listDriveContainer.indexOf(dr);
+      if(index != -1) {
+         let gicon = this._listDevices[index].get_icon();
+         return new St.Icon({gicon: gicon});
+      }
+      return null;
    },
 
    indexOfDevice: function(device) {
