@@ -1290,9 +1290,15 @@ DriveContainer.prototype = {
    setDriveIcon: function(themeName, iconName, callBackClicked) {
       this._callDriveClicked = callBackClicked;
       this._iconDriveName = iconName;
-      if(this._driveButton)
+      if(this._driveButton) {
          this._iconContainer.remove_actor(this._driveButton);
-      let _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48);
+         this._driveButton.destroy();
+      }
+      let _driveIcon;
+      if(themeName == "symbolic")
+         _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48, true);
+      else
+         _driveIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 48);
       this._driveButton = new St.Button({ child: _driveIcon });
       this._iconContainer.add_actor(this._driveButton, {x_fill: true, x_align: St.Align.START});
       if(this._callDriveClicked) {
@@ -1308,9 +1314,11 @@ DriveContainer.prototype = {
          this._ejectContainer.remove_actor(this._ejectButton);
       let _ejectIcon;
       if(iconName == "empty")
-         _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName);
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName, 30);
+      else if(themeName == "symbolic")
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 30, true);
       else
-         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName);
+         _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 30);
       this._ejectButton = new St.Button({ child: _ejectIcon });
       this._ejectContainer.add_actor(this._ejectButton);
       if(this._callEjectClicked) {
@@ -1542,14 +1550,19 @@ DriveContainer.prototype = {
       return GLib.get_home_dir()+ "/.local/share/cinnamon/desklets/" + this._parent.getUUID() + "/";//+ this.uuid + "/";
    },
 
-   _getIconImage: function(pathC, iconSize) {
+   _getIconImage: function(pathC, iconSize, symbolic) {
       try {
+         if((iconSize)&&(symbolic))
+            pathC = pathC + "-symbolic";
          let file = Gio.file_new_for_path(pathC + ".png");
          if(!file.query_exists(null))
             file = Gio.file_new_for_path(pathC + ".svg");
          if(iconSize) {
             let gicon = new Gio.FileIcon({ file: file });
-            return new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.FULLCOLOR});
+            if(symbolic) {
+               return new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.SYMBOLIC});
+            } else
+               return new St.Icon({gicon: gicon, icon_size: iconSize, icon_type: St.IconType.FULLCOLOR});
          } else {
             //return St.TextureCache.get_default().load_uri_sync(1, file.get_uri(), 1064, 1064);
             return St.TextureCache.get_default().load_uri_async(file.get_uri(), 1064, 1064);
