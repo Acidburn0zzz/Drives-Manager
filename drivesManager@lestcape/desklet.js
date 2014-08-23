@@ -1200,7 +1200,6 @@ DriveContainer.prototype = {
       this.percentContainer = new St.BoxLayout({ vertical:true, style_class: 'drives-meter-box' });
 
       this._ejectContainer = new St.BoxLayout({vertical:true, style_class: 'drives-eject-button-box' });
-      //this._ejectContainer.set_style('padding: 8px 0px 0px 4px;');
 
       this._infoContainer = new St.BoxLayout({ vertical: true, style_class: 'drives-info-drive-box' });
       this._infoContainer.add(this._topTextContainer, {x_fill: true, expand: true, x_align: St.Align.START});
@@ -1209,7 +1208,7 @@ DriveContainer.prototype = {
 
       this._driveBox.add(this._iconContainer, {x_fill: true, x_align: St.Align.START});
       this._driveBox.add(this._infoContainer, {x_fill: true, expand: true, x_align: St.Align.START});
-      this._driveBox.add(this._ejectContainer, { x_fill: true, x_align: St.Align.START });
+      this._driveBox.add(this._ejectContainer, { x_fill: true, y_fill: false, y_expand: true, y_align: St.Align.MIDDLE});
       this._currentMeterImage = new Array();
       this.setParent(this._parent);
    },
@@ -1271,7 +1270,7 @@ DriveContainer.prototype = {
    addMeter: function() {
       this._currentMeterImage.push(new MeterBox(20));
       let index = this._currentMeterImage.length - 1;
-      this.percentContainer.add(this._currentMeterImage[index].actor, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START });
+      this.percentContainer.add(this._currentMeterImage[index].actor, { x_fill: true, y_fill: true, expand: true, x_align: St.Align.START, y_align: St.Align.MIDDLE });
       this.setMeterImage(index, 0, 0);
    },
 
@@ -1425,11 +1424,11 @@ DriveContainer.prototype = {
             this.percentContainer.set_style_class_name(' ');
             this.percentContainer.style = 'spacing: 2px;';
             this._ejectContainer.set_style_class_name(' ');
-            this._ejectContainer.style = 'padding: 8px 0px 0px 4px;';
+            this._ejectContainer.style = 'padding-left: 8px;';
             this._topTextContainer.set_style_class_name(' ');
             this._topTextContainer.style = 'spacing: 4px;';
             this._bottomTextContainer.set_style_class_name(' ');
-            this._bottomTextContainer.style = 'spacing: 4px;';
+            this._bottomTextContainer.style = 'padding-top: 2px; spacing: 4px;';
 
             this._driveBox.set_style_class_name(' ');
             let remplaceColor = this._textRGBToRGBA(this._boxColor, this._opacity);

@@ -21,6 +21,7 @@
  * The box that containt the two buttom text (the second text only show when hdd temp is active) 
  * ===================================================================*/
 .drives-bottom-text-drive-box {
+    padding-top: 2px;
     spacing: 4px;
 }
 
@@ -71,7 +72,7 @@
  * The eject button
  * ===================================================================*/
 .drives-eject-button-box {
-    padding: 8px 0px 0px 4px;
+    padding-left: 8px;
 }
 /* ===================================================================
  * The icon button
