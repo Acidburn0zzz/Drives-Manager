@@ -643,20 +643,6 @@ System.prototype = {
       return "Default";
    },
 
-   getGSettingsProp: function(property, attribute) {
-      let [res, out, err, status] = this.execCommandSync('gsettings get ' + property + ' ' + attribute);
-      return out.toString().substring(0, out.length - 1);
-   },
-
-   setGSettingsProp: function(property, attribute, value) {
-      let out = this.getGSettingsProp(property, attribute);
-      //Main.notify("Real:" + out.toString() + "/ New:" + value.toString() + "/");
-      if(out.toString() != value.toString())
-      {
-         this.execCommand('gsettings set ' + property + ' ' + attribute + ' ' + value); 
-      }
-   },
-
    readFile: function(path) {
       //GLib.file_get_contents(path).toString();
       try {

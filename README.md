@@ -101,6 +101,8 @@ Change Log:
   - Removed the option to open mount points with nautilus or nemo. Instead will open with the default browser.
   - It was added an option to unmount all volumes simultaneously (to avoid data loss due to human errors).
   - Images from measurement were replaced by an internal implementation. The flickers finished and now it is configurable from css.
+  - Reimplemented the automount-open, to be used the new GSettings for Cinnamon (Nemo).
+  - Added missing category from volumes without drives (like ftp, sftp, iso images and more).
 
 1.1-RTM
   - Added parameter, was missing in CriticalNotify .

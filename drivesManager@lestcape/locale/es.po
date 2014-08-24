@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-19 11:49-0600\n"
+"PO-Revision-Date: 2014-08-24 06:21-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -393,6 +393,18 @@ msgstr "Mostrar los Dispositivos Electrificados."
 msgid "Check this to show the Fixed Drives or not."
 msgstr "Seleccione esto para mostrar los Dispositivos Electrificados o no."
 
+#. drivesManager@lestcape->settings-schema.json->notDrives->description
+msgid "Show the Volumes without Drives."
+msgstr "Mostrar los Dispositivos No Físicos."
+
+#. drivesManager@lestcape->settings-schema.json->notDrives->tooltip
+msgid ""
+"Check this to show the Volumes without Drives (like ftp, sftp, iso images "
+"and more)."
+msgstr ""
+"Seleccione esto para mostrar los Dispositivos No Físicos (como ftp, sftp, "
+"imágenes iso y más)."
+
 #. drivesManager@lestcape->settings-schema.json->emptyDrives->description
 msgid "Show the Empty Drives."
 msgstr "Mostrar los Dispositivos Vacíos."
@@ -412,31 +424,29 @@ msgstr ""
 "Aumentar o disminuir el tiempo entre las mediciones de velocidad en la "
 "transferencia de archivos."
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->description
-msgid "Auto open mount points by the O.S."
-msgstr ""
-"El S.O. auto-abre los puntos de montaje, cuando se montan los dispositivos."
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->description
+msgid "The O.S. do not auto open mount points."
+msgstr "El S.O. no auto abre los puntos de montaje."
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->tooltip
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->tooltip
 msgid ""
-"Check this to use or not org.gnome.desktop.media-handling automount-open O."
-"S. property."
+"Check this to set in false the desktop.media-handling automount-open "
+"property of org.cinnamon and org.gnome."
 msgstr ""
-"Seleccione esto para usar o no la propiedad del S.O. org.gnome.desktop.media-"
-"handling automount-open."
+"Seleccione esto para establecer a falso la propiedad automount-open de "
+"desktop.media-handling, en org.cinnamon y org.gnome."
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->description
-msgid "Auto open mount points by the Drives Manager."
-msgstr ""
-"Drives Manager auto-abre los puntos de montaje, cuando se montan los "
-"dispositivos."
+msgid "Drives Manager auto open the mount points."
+msgstr "Drives Manager auto abre los puntos de montaje."
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->tooltip
 msgid ""
-"Check this to mount points auto open or not  when the volumen was mounted."
+"Check this if you want that Drives Manager auto open the mount points when "
+"the volume was mounted."
 msgstr ""
-"Seleccione esto para que Drives Manager auto-abra los puntos de montaje, "
-"cuando se montan los dispositivos."
+"Seleccione esta opción si desea que Drives Manager, auto abra los puntos de "
+"montaje cuando se monte el volumen."
 
 #. drivesManager@lestcape->settings-schema.json->openWith->description
 msgid "Open with:"
@@ -483,6 +493,20 @@ msgid ""
 msgstr ""
 "Seleccione esto para no apagar los Dispositivos Extraíbles. Si se marca "
 "puede volverlos a reconectar sin necesidad de extraerlos del conector."
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->description
+msgid "Unmount all mounted belonging to the same drive."
+msgstr ""
+"Desmontar todos los volúmenes montados pertenecientes a la misma unidad."
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->tooltip
+msgid ""
+"Check this to unmount all mounted belonging to the same drive. This avoid "
+"try to unplug a drive that still contains some mounted volumes."
+msgstr ""
+"Active esta opción para desmontar todos los volúmenes montados "
+"pertenecientes a la misma unidad. Esto evita tratar de desconectar una "
+"unidad que todavía contiene algunos volúmenes montados."
 
 #. drivesManager@lestcape->settings-schema.json->hddTemp->description
 msgid "Use the temperature detection in the Hard drives."

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-19 11:49-0600\n"
+"PO-Revision-Date: 2014-08-24 06:21-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -388,6 +388,18 @@ msgstr "Show the Fixed Drives."
 msgid "Check this to show the Fixed Drives or not."
 msgstr "Check this to show the Fixed Drives or not."
 
+#. drivesManager@lestcape->settings-schema.json->notDrives->description
+msgid "Show the Volumes without Drives."
+msgstr "Show the Volumes without Drives."
+
+#. drivesManager@lestcape->settings-schema.json->notDrives->tooltip
+msgid ""
+"Check this to show the Volumes without Drives (like ftp, sftp, iso images "
+"and more)."
+msgstr ""
+"Check this to show the Volumes without Drives (like ftp, sftp, iso images "
+"and more)."
+
 #. drivesManager@lestcape->settings-schema.json->emptyDrives->description
 msgid "Show the Empty Drives."
 msgstr "Show the Empty Drives."
@@ -405,27 +417,29 @@ msgid "Increase or decrease the time between measurements file transfer speed."
 msgstr ""
 "Increase or decrease the time between measurements file transfer speed."
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->description
-msgid "Auto open mount points by the O.S."
-msgstr "Auto open mount points by the O.S."
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->description
+msgid "The O.S. do not auto open mount points."
+msgstr "The O.S. do not auto open mount points."
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->tooltip
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->tooltip
 msgid ""
-"Check this to use or not org.gnome.desktop.media-handling automount-open O."
-"S. property."
+"Check this to set in false the desktop.media-handling automount-open "
+"property of org.cinnamon and org.gnome."
 msgstr ""
-"Check this to use or not org.gnome.desktop.media-handling automount-open O."
-"S. property."
+"Check this to set in false the desktop.media-handling automount-open "
+"property of org.cinnamon and org.gnome."
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->description
-msgid "Auto open mount points by the Drives Manager."
-msgstr "Auto open mount points by the Drives Manager."
+msgid "Drives Manager auto open the mount points."
+msgstr "Drives Manager auto open the mount points."
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->tooltip
 msgid ""
-"Check this to mount points auto open or not  when the volumen was mounted."
+"Check this if you want that Drives Manager auto open the mount points when "
+"the volume was mounted."
 msgstr ""
-"Check this to mount points auto open or not  when the volumen was mounted."
+"Check this if you want that Drives Manager auto open the mount points when "
+"the volume was mounted."
 
 #. drivesManager@lestcape->settings-schema.json->openWith->description
 msgid "Open with:"
@@ -472,6 +486,18 @@ msgstr ""
 "Check this to use or not the option of don't eject Removable Drive. They can "
 "be reconnected without need to pull out of the connector if you this option "
 "is active."
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->description
+msgid "Unmount all mounted belonging to the same drive."
+msgstr "Unmount all mounted belonging to the same drive."
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->tooltip
+msgid ""
+"Check this to unmount all mounted belonging to the same drive. This avoid "
+"try to unplug a drive that still contains some mounted volumes."
+msgstr ""
+"Check this to unmount all mounted belonging to the same drive. This avoid "
+"try to unplug a drive that still contains some mounted volumes."
 
 #. drivesManager@lestcape->settings-schema.json->hddTemp->description
 msgid "Use the temperature detection in the Hard drives."

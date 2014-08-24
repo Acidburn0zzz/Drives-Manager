@@ -91,6 +91,8 @@ Registro de cambios:
   - Eliminada la opción para abrir puntos de montaje con nemo o nautilus, en su lugar se habren con el navegador por defecto.
   - Fue añadida una opción para auto desmontar simultaneamente todos los volumenes (evitar la perdida de datos por errores humanos).
   - Las imagenes de medicion fueron sustituidas por una implementación interna. Se acabaron los parpadeos y ahora esto es configurable desde css.
+  - Reimplementado el automount-open, para utilizar el nuevo GSetting de Cinnamon (Nemo).
+  - Se ha añadido la categoría que falta de volúmenes sin unidades (como ftp, sftp, imágenes ISO y más).
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.

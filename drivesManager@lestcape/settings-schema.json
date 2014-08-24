@@ -39,6 +39,12 @@
         "type": "checkbox",
         "tooltip": "Check this to show the Fixed Drives or not."
     },
+    "notDrives": {
+        "default": true,
+        "description": "Show the Volumes without Drives.",
+        "type": "checkbox",
+        "tooltip": "Check this to show the Volumes without Drives (like ftp, sftp, iso images and more)."
+    },
     "emptyDrives": {
         "default": false,
         "description": "Show the Empty Drives.",
@@ -71,17 +77,19 @@
     "separator-tools-bottom": {
         "type": "separator"
     },
-    "openSystem": {
+    "notOpenSystem": {
         "default": false,
-        "description": "Auto open mount points by the O.S.",
+        "description": "The O.S. do not auto open mount points.",
         "type": "checkbox",
-        "tooltip": "Check this to use or not org.gnome.desktop.media-handling automount-open O.S. property."
+        "tooltip": "Check this to set in false the desktop.media-handling automount-open property of org.cinnamon and org.gnome."
     },
     "openConnect": {
         "default": false,
-        "description": "Auto open mount points by the Drives Manager.",
+        "description": "Drives Manager auto open the mount points.",
         "type": "checkbox",
-        "tooltip": "Check this to mount points auto open or not  when the volumen was mounted."
+        "tooltip": "Check this if you want that Drives Manager auto open the mount points when the volume was mounted.",
+        "indent": true,
+        "dependency": "notOpenSystem"
     },
     "unEjecting": {
         "default": false,

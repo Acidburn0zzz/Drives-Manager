@@ -1974,6 +1974,15 @@ DeviceContainer.prototype = {
             _dr.setDriveIcon(this._theme, "volume", null);
             _dr.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onDriveInject));
             break;
+         case "NotDriveMount":
+            _dr.setDriveIcon(this._theme, "volume", Lang.bind(this, this._onDriveClicked));
+            _dr.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onDriveEject));
+            _dr.addMeter();
+            break;
+         case "NotDriveUmount":
+            _dr.setDriveIcon(this._theme, "volume", null);
+            _dr.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onDriveInject));
+            break;
          case "Empty":
             _dr.setDriveIcon(this._theme, "drive", null);
             _dr.setEjectIcon(this._theme, "empty", null);
@@ -2281,9 +2290,10 @@ DeviceContainer.prototype = {
          }
          try {
             let listToUnmount;
-            if((this._deviceType != "OpticalMount")&&(this._unEjecting)&&(this._unmountAll))
+            if((this._deviceType != "OpticalMount")&&(this._deviceType != "NotDriveMount")&&
+               (this._unEjecting)&&(this._unmountAll)) {
                listToUnmount = this.getMountBrothers(_mount);
-            else {
+            } else {
                listToUnmount = [];
                listToUnmount.push(_mount);
             }
@@ -2509,12 +2519,38 @@ VolumeMonitor.prototype = {
       this._globalContainer.insertCategoryContainer(this._listCategory[5], _indexCategory + 5);
       if(this.listConnect[5]) this._globalContainer.connectCategory(this._listCategory[5]);
 
-      this._listCategory.push(new DeviceContainer(this._globalContainer, "Empty"));
+      this._listCategory.push(new DeviceContainer(this._globalContainer, "NotDriveMount"));
       this._globalContainer.insertCategoryContainer(this._listCategory[6], _indexCategory + 6);
       if(this.listConnect[6]) this._globalContainer.connectCategory(this._listCategory[6]);
+
+      this._listCategory.push(new DeviceContainer(this._globalContainer, "NotDriveUmount"));
+      this._globalContainer.insertCategoryContainer(this._listCategory[7], _indexCategory + 7);
+      if(this.listConnect[7]) this._globalContainer.connectCategory(this._listCategory[7]);
+
+      this._listCategory.push(new DeviceContainer(this._globalContainer, "Empty"));
+      this._globalContainer.insertCategoryContainer(this._listCategory[8], _indexCategory + 8);
+      if(this.listConnect[8]) this._globalContainer.connectCategory(this._listCategory[8]);
       let _listDrives = this._monitor.get_connected_drives();
       for(let i = 0; i < _listDrives.length; i++) {
          this._insertInCategory(_listDrives[i]);
+      }
+      /* add all volumes that is not associated with a drive */
+      let _listVolumes = this._monitor.get_volumes();
+      for(let i = 0; i < _listVolumes.length; i++) {
+         if(!_listVolumes[i].get_drive()) {
+            if(_listVolumes[i].get_mount())
+               this._listCategory[6].addDevice(_listVolumes[i]);
+            else
+               this._listCategory[7].addDevice(_listVolumes[i]);
+         }
+      }
+
+      /* add mounts that have no volume (/etc/mtab mounts, ftp, sftp,...) */
+      let _listMounts = this._monitor.get_mounts();
+      for(let i = 0; i < _listMounts.length; i++) {
+         if((!_listMounts[i].is_shadowed())&&(!_listMounts[i].get_volume())) {
+            this._listCategory[6].addDevice(_listMounts[i]);
+         }
       }
       this.setCapacityDetect(this._capacityDetect);
       this.openOnConnect(this._openConnect);
@@ -2547,7 +2583,7 @@ VolumeMonitor.prototype = {
             if(this._isOptical(drive))
                this._listCategory[1].addDevice(drive);
             else
-               this._listCategory[6].addDevice(drive);
+               this._listCategory[8].addDevice(drive);
          }
       }
    },
@@ -2739,7 +2775,14 @@ MyDesklet.prototype = {
       this.appletMenuItem = new PopupMenu.PopupSwitchMenuItem(_("Show as Applet"), false);
       this.appletMenuItem.connect('activate', Lang.bind(this, this._onAppletMenuItemActivated));
       this._menu.addMenuItem(this.appletMenuItem);
-      
+
+      this.cinnamonSettings = new Gio.Settings({ schema: "org.cinnamon.desktop.media-handling" });
+      this.gnomeSettings = new Gio.Settings({ schema: "org.gnome.desktop.media-handling" });
+      this.cinnamonSettings.connect("changed::automount-open", Lang.bind(this, function() {
+         this._notOpenSystem = !this.cinnamonSettings.get_boolean("automount-open");
+         this._onTypeOpenChanged();
+      }));
+      this.isGSettingRead = false;
       this._initSettings();
       this._createAppletManager();
       this._initComponents();
@@ -2828,12 +2871,14 @@ MyDesklet.prototype = {
          this._onShowOpticalDrives();
          this._onShowRemovableDrives();
          this._onShowFixedDrives();
+         this._onShowNotDrives();
          this._onShowEmptyDrives();
          this._onMeterTimeDelay();
          this._onShowMainBox();
          this._onShowDriveBox();
          this._onThemeChange();
          this._onTypeOpenChanged();
+         this._onOpenConnect();
          this._onFixWidth();
          this._onFixHeight();
          this._onEnableAutoscroll();
@@ -2847,7 +2892,7 @@ MyDesklet.prototype = {
          this._onTextBottomSize();
          this._onOpacity();
          this._onCapacityDetect();
-         this._onOpenConnect();
+
          this._onUnEjecting();
          this._onUnmountAll();
          this._onHddTempChanged();
@@ -2943,12 +2988,23 @@ MyDesklet.prototype = {
       }
    },
 
-   _onShowEmptyDrives: function() {
-      if(this._showEmptyDrives) {
+   _onShowNotDrives: function() {
+      if(this._showNotDrives) {
          this.globalContainer.connectCategory(this.volumeMonitor.getCategory(6));
+         this.globalContainer.connectCategory(this.volumeMonitor.getCategory(7));
       }
       else {
          this.globalContainer.disconnectCategory(this.volumeMonitor.getCategory(6));
+         this.globalContainer.disconnectCategory(this.volumeMonitor.getCategory(7));
+      }
+   },
+
+   _onShowEmptyDrives: function() {
+      if(this._showEmptyDrives) {
+         this.globalContainer.connectCategory(this.volumeMonitor.getCategory(8));
+      }
+      else {
+         this.globalContainer.disconnectCategory(this.volumeMonitor.getCategory(8));
       }
    },
 
@@ -2956,13 +3012,31 @@ MyDesklet.prototype = {
       this.speedDisk.setMeterTimeDelay(this._meterTimeDelay);
    },
 
-   _onTypeOpenChanged: function() {
+   _onTypeOpenChanged: function() { //This will read the current gsetting first, and preserve only the cinnamon value also in gnome.
       try {
-         this.sys.setGSettingsProp("org.gnome.desktop.media-handling", "automount-open", this._openSystem);
-         //this.sys.setGSettingsProp("org.gnome.desktop.media-handling", "automount", this._openSystem);
+         if(this.isGSettingRead) {
+            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
+            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.cinnamonSettings.set_boolean("automount-open", !this._notOpenSystem);
+         } else {
+            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem) {
+               this._notOpenSystem = (!this._notOpenSystem); 
+            }
+            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
+         }
+         this._onOpenConnect();//if gsetting is active disable Drive Manager.
+         this.isGSettingRead = true;
       } catch(e) {
-        Main.notify(_("Failed of Drives Manager:"), e.message);
+         Main.notify(_("Failed of Drives Manager:"), e.message);
       }
+   },
+
+   _onOpenConnect: function() {
+      if((!this._notOpenSystem)&&(this._openConnect)) //Do not allow set drive manager if gsetting is active. 
+         this._openConnect = (!this._openConnect);
+      this.volumeMonitor.openOnConnect(this._openConnect);
    },
 
    _onFixWidth: function() {
@@ -3013,10 +3087,6 @@ MyDesklet.prototype = {
 
    _onOpacity: function() {
       this.globalContainer.setOpacity(this._opacity);
-   },
-
-   _onOpenConnect: function() {
-      this.volumeMonitor.openOnConnect(this._openConnect);
    },
 
    _onCapacityDetect: function() {
@@ -3070,12 +3140,13 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "opticalDrives", "_showOpticalDrives", this._onShowOpticalDrives, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "removableDrives", "_showRemovableDrives", this._onShowRemovableDrives, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "fixedDrives",  "_showFixedDrives", this._onShowFixedDrives, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "notDrives",  "_showNotDrives", this._onShowNotDrives, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "emptyDrives", "_showEmptyDrives", this._onShowEmptyDrives, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "meterTimeDelay", "_meterTimeDelay", this._onMeterTimeDelay, null);
 
 
-         this.settings.bindProperty(Settings.BindingDirection.IN, "openSystem", "_openSystem", this._onTypeOpenChanged, null);
-         this.settings.bindProperty(Settings.BindingDirection.IN, "openConnect", "_openConnect", this._onOpenConnect, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "notOpenSystem", "_notOpenSystem", this._onTypeOpenChanged, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "openConnect", "_openConnect", this._onOpenConnect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unEjecting", "_unEjecting", this._onUnEjecting, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unmountAll", "_unmountAll", this._onUnmountAll, null);

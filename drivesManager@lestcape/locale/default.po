@@ -411,6 +411,14 @@ msgstr ""
 msgid "Check this to show the Fixed Drives or not."
 msgstr ""
 
+#. drivesManager@lestcape->settings-schema.json->notDrives->description
+msgid "Show the Volumes without Drives."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->notDrives->tooltip
+msgid "Check this to show the Volumes without Drives (like ftp, sftp, iso images and more)."
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->emptyDrives->description
 msgid "Show the Empty Drives."
 msgstr ""
@@ -427,20 +435,20 @@ msgstr ""
 msgid "Increase or decrease the time between measurements file transfer speed."
 msgstr ""
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->description
-msgid "Auto open mount points by the O.S."
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->description
+msgid "The O.S. do not auto open mount points."
 msgstr ""
 
-#. drivesManager@lestcape->settings-schema.json->openSystem->tooltip
-msgid "Check this to use or not org.gnome.desktop.media-handling automount-open O.S. property."
+#. drivesManager@lestcape->settings-schema.json->notOpenSystem->tooltip
+msgid "Check this to set in false the desktop.media-handling automount-open property of org.cinnamon and org.gnome."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->description
-msgid "Auto open mount points by the Drives Manager."
+msgid "Drives Manager auto open the mount points."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->openConnect->tooltip
-msgid "Check this to mount points auto open or not  when the volumen was mounted."
+msgid "Check this if you want that Drives Manager auto open the mount points when the volume was mounted."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->openWith->description
@@ -473,6 +481,14 @@ msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->unEjecting->tooltip
 msgid "Check this to use or not the option of don't eject Removable Drive. They can be reconnected without need to pull out of the connector if you this option is active."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->description
+msgid "Unmount all mounted belonging to the same drive."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->unmountAll->tooltip
+msgid "Check this to unmount all mounted belonging to the same drive. This avoid try to unplug a drive that still contains some mounted volumes."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->hddTemp->description
