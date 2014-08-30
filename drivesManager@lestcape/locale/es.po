@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-24 06:21-0600\n"
+"PO-Revision-Date: 2014-08-30 18:12-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -102,6 +102,14 @@ msgstr "Drives Manager"
 #: desklet.js:2078
 msgid "Help"
 msgstr "Ayuda"
+
+#: desklet.js:2767
+msgid "Show as Applet"
+msgstr "Mostrar como Applet"
+
+#: applet.js:69
+msgid "Show as Desklet"
+msgstr "Mostrar como Desklet"
 
 #: system.js:79 system.js:92 system.js:101 system.js:408
 msgid "Error:"

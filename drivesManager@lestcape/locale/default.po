@@ -124,6 +124,14 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
+#: desklet.js:2767
+msgid "Show as Applet"
+msgstr ""
+
+#: applet.js:69
+msgid "Show as Desklet"
+msgstr ""
+
 #: system.js:79
 #: system.js:92
 #: system.js:101

@@ -591,11 +591,11 @@ GlobalContainer.prototype = {
       this._fixHeight = false;
       this._fontColor = "white";
 
-      this._mainBox = new St.Bin({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
+      this._mainBox = new St.BoxLayout({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
       this._mainBox.add_style_class_name('drives-main-box');
       this._rootBox = new St.BoxLayout({ vertical:true });
       this.scrollActor = new ScrollItemsBox(this._parent, this._rootBox, true, St.Align.START);
-      this._mainBox.set_child(this.scrollActor.actor);
+      this._mainBox.add(this.scrollActor.actor, {x_fill: true, expand: true, x_align: St.Align.START});
       this._rootBox.connect('allocation_changed', Lang.bind(this, function() {
         let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
         if(this._rootBox.get_height() > monitor.height - 100) {
@@ -751,6 +751,7 @@ GlobalContainer.prototype = {
       categoryContainer.setParentContainer(this);
       this.applyDriveStyle(categoryContainer);
       this._listCategoryContainer.push(categoryContainer);
+      this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, expand: true, x_align: St.Align.START});
    },
 
    insertCategoryContainer: function(categoryContainer, index) {
@@ -760,6 +761,8 @@ GlobalContainer.prototype = {
          this.applyDriveStyle(categoryContainer);
          this._listCategoryContainer.splice(index, 0, categoryContainer);
       }
+      //fix that.... to insert in index...
+      this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, expand: true, x_align: St.Align.START});
    },
 
    indexOfCategoryContainer: function(categoryContainer) {
@@ -800,10 +803,11 @@ GlobalContainer.prototype = {
             currCat = currCat + 1;
          }
          this._listCategoryConnected[index] = true;
-         let parentContainer = catContainer.getContainerBox().get_parent();
+         /*let parentContainer = catContainer.getContainerBox().get_parent();
          if(parentContainer)
             parentContainer.remove_actor(catContainer.getContainerBox());
-         this._rootBox.insert_actor(catContainer.getContainerBox(), _indexConnect);
+         this._rootBox.insert_actor(catContainer.getContainerBox(), _indexConnect);*/
+         catContainer.getContainerBox().visible = true;
          catContainer.overrideTheme(this._overrideTheme);
       }
    },
@@ -816,9 +820,10 @@ GlobalContainer.prototype = {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
          this._listCategoryConnected[index] = false;
          let containerBox = this._listCategoryContainer[index].getContainerBox();
-         let parentContainerBox = containerBox.get_parent();
+         /*let parentContainerBox = containerBox.get_parent();
          if(parentContainerBox)
-            parentContainerBox.remove_actor(containerBox);
+            parentContainerBox.remove_actor(containerBox);*/
+         containerBox.visible = false;
       }
    },
 
@@ -2077,7 +2082,9 @@ DeviceContainer.prototype = {
 
    updateOpticalByIdentifier: function(deviceId) {
       let _index = this.getIndexOfDeviceByIdentifier(deviceId);
+      //Main.notify("Optical")
       if(_index != -1) {
+         //Main.notify("find")
          let _drContainer = this.getDriveContainer(_index);
          let _opticalClose = this._isOpticalClosed(this._listDevices[_index]);
          let _ejectName = _drContainer.getEjectName();
@@ -2580,9 +2587,9 @@ VolumeMonitor.prototype = {
          }
          if(_listVols.length == 0)
          {
-            if(this._isOptical(drive))
+            if(this._isOptical(drive)) {
                this._listCategory[1].addDevice(drive);
-            else
+            } else
                this._listCategory[8].addDevice(drive);
          }
       }
@@ -2649,32 +2656,17 @@ VolumeMonitor.prototype = {
    _isOptical: function(opticalDrive) {
       let _deviceName = this._getIdentifier(opticalDrive);
       if(_deviceName) {
-         let _matchSR = _deviceName.match(new RegExp('/dev/sr[0-9]+', 'g'));
+         let device = this._client.query_by_device_file(_deviceName);
+         if(device.get_property("ID_CDROM") != null)
+            return true;
+         /*let _matchSR = _deviceName.match(new RegExp('/dev/sr[0-9]+', 'g'));
          let _matchCDRomN = _deviceName.match(new RegExp('/dev/cdrom[0-9]+', 'g'));
          let _matchCDRom = _deviceName.match(new RegExp('/dev/cdrom', 'g'));
          let _matchSCD = _deviceName.match(new RegExp('/dev/scd[0-9]+', 'g'));
          let _matchHDC = _deviceName.match(new RegExp('/dev/hdc', 'g'));
-         if((_deviceName != null)&&((_matchSR != null)||(_matchCDRomN != null)||(_matchCDRom != null)||(_matchSCD != null)||(_matchHDC != null)))
-         {
-            // if((this._advanceOpticalDetect)&&(!this._firstTime))
-            //    return (this._findOpticalByDeviceName(_deviceName) != null);
-
-            // let client = new GUdev.Client({subsystems: ['block']});
-            // let enumerator = new GUdev.Enumerator({client: client});
-            // enumerator.add_match_subsystem('b*');
-
-            // let devices = enumerator.execute();
-            // for(let n=0; n < devices.length; n++) 
-            // {
-            //     let device = devices[n];
-            //     Main.notifyError(device.get_property("DEVNAME"));
-            //     if(device.get_property("ID_CDROM") != null)
-            //     {
-            //        Main.notifyError(device.get_property("DEVNAME"));
-            //     }
-            // }
+         if((_deviceName != null)&&((_matchSR != null)||(_matchCDRomN != null)||(_matchCDRom != null)||(_matchSCD != null)||(_matchHDC != null))) {
             return true;
-         }
+         }*/
       }	
       return false;
    },
