@@ -1,7 +1,11 @@
 {
     "last-edited": "1383180728", 
-    "prevent-decorations": false, 
-    "description": "A desklet to manager drive's.", 
-    "name": "Drives Manager", 
-    "uuid": "drivesManager@lestcape"
+    "prevent-decorations": false,
+    "website": "https://github.com/lestcape/Drives-Manager",
+    "contributors": "Author: Lester Carballo P\u00e9rez",
+    "description": "A desklet to manager drive's.",
+    "version": "1.2-RTM",
+    "name": "Drives Manager",
+    "uuid": "drivesManager@lestcape",
+    "comments": "This is not just a desklet, also can be see as an applet and you can customise like you want."
 }
