@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-30 18:12-0600\n"
+"PO-Revision-Date: 2014-09-05 22:58-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -506,6 +506,27 @@ msgid ""
 msgstr ""
 "Check this to unmount all mounted belonging to the same drive. This avoid "
 "try to unplug a drive that still contains some mounted volumes."
+
+#. drivesManager@lestcape->settings-schema.json->displayMessage->description
+msgid "Display a message when drives change."
+msgstr "Display a message when drives change."
+
+#. drivesManager@lestcape->settings-schema.json->displayMessage->tooltip
+msgid "Check this to display a message when a change occurs in the drives."
+msgstr "Check this to display a message when a change occurs in the drives."
+
+#. drivesManager@lestcape->settings-schema.json->raiseKey->description
+msgid "Raise to top shorcut key."
+msgstr "Raise to top shorcut key."
+
+#. drivesManager@lestcape->settings-schema.json->raiseCenter->description
+msgid "Display in the center when the desklet is raised."
+msgstr "Display in the center when the desklet is raised."
+
+#. drivesManager@lestcape->settings-schema.json->raiseCenter->tooltip
+msgid "Check this to display the desklet in the screen center, when is raised."
+msgstr ""
+"Check this to display the desklet in the screen center, when is raised."
 
 #. drivesManager@lestcape->settings-schema.json->hddTemp->description
 msgid "Use the temperature detection in the Hard drives."

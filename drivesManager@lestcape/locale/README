@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.2-RTM
 
-Last version release date: 15 August 2014
+Last version release date: 5 September 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 
@@ -12,11 +12,12 @@ Website: https://github.com/lestcape/Drives-Manager
 Special thanks to:
 --------------
  - The Cinnamon programmers.
- - mtwebster in http://cinnamon-spices.linuxmint.com/users/view/339
- - rgcjonas https://github.com/rgcjonas
- - KZom in https://github.com/KZom
- - duncannz in https://github.com/duncannz
- - nimdahk in https://github.com/nimdahk
+ - mtwebster (http://cinnamon-spices.linuxmint.com/users/view/339)
+ - rgcjonas (https://github.com/rgcjonas)
+ - KZom (https://github.com/KZom)
+ - duncannz (https://github.com/duncannz)
+ - nimdahk (https://github.com/nimdahk)
+ - collins (https://github.com/collinss)
 
 --------------
 Author of language translation:
@@ -32,10 +33,9 @@ Skills including:
 2- The volumes can be mounted and unmounted with a single click.
 3- If you have data volumes mounted, you can access the mount point with your favorite browser (Nemo or Nautilus) with a single click or automatically if desired when the volume is mounted.
 4- The desklet has a wide range of configuration options, allowing you to fit almost all themes desk.
-5- Through this desklet, you can monitor the temperatures of your hard disks and even activate an alarm when the disc temperature exceeds a value, that you consider unacceptable. To use this option, we required the installation and configuration of hddtemp program, but do not worry, simply activate the option and the desklet will installed and configured, without your intervention.
+5- Through this desklet, you can monitor the temperatures of your hard disks and even activate an alarm when the disc temperature exceeds a value, that you consider unacceptable. To use this option, we required udisk2.
 6- You can enable the option to reconnect removable usb device, without the need to remove the device from the connector. Like USB Safely Removed works in Windows.
 7- You can also monitor the speed of read/write files on your system.
-8- If you have a CD-ROM disc tray, you can opened/closed it with a single click, even if a disc is present (Unfortunately, this skill requires that you have installed eject and cdrecord programs).
 
 --------------
 This program is free software:
@@ -63,26 +63,16 @@ Add new languages:
 --------------
 Known bugs and requirements:
 --------------
-1- Warning! To use this desklet needs you have installed the following programs:
-   - udisks2.
-   - cdrecord.
-   - eject.
-   - A plain text editor either.
+1- Warning! To use the temperature detection you need to have installed udisks2. The data of hdd temperature are obtained directly from udisks2. So you need ubuntu 12.10 or higher or an equivalent that come or allow install udisks2.
 
-2- The data of hdd temperature are obtained directly from udisks2. So you need ubuntu 12.10 or higher or an equivalent that come or allow install udisks2.
-
-3- Only we can detect optical disks a CD/DVD, if to devices are recognized by the Linux kernel matching with the regular expresions "dev/sr[0-9] +",  "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+" and "/dev/hdc". If you have a handle to a different optical device, please report it on the website of this program, and this will be included in the next version.
-
-4- The option of auto-open mount points can give many problems, it's because the known incompatibility between Nautilus and Nemo. Any incident, please report it on the website of this desklet.
-
-5- Be careful! When a removable device has more than one partition and is active the option to reconnect the device, this without removing them from the connector. It can be happen that in a negligence, you unplugged a device that have some partitions mounted yet and therefore you can lose some importan data.
+2- Be careful! When a removable device has more than one partition and is active the option to reconnect the device without removing from the connector. Can happen that you unplugged a device that have some partitions mounted and therefore you can lose some important data, so i fully recommend activate the option "Unmount all mounted belonging to the same drive". By default it's active.
 
 --------------
 Change Log:
 --------------
 
 1.2-RTM
-  - We are changing the icons to svg.
+  - All icons are in svg now.
   - Added Czech language(thanks vanek.jakub4).
   - The hddtemp program was replaced by Udisk2(thanks rgcjonas).
   - Added Cinnamon theme support.
@@ -93,8 +83,11 @@ Change Log:
   - Removed the option to open mount points with nautilus or nemo. Instead will open with the default browser.
   - It was added an option to unmount all volumes simultaneously (to avoid data loss due to human errors).
   - Images from measurement were replaced by an internal implementation. The flickers finished and now it is configurable from css.
-  - Reimplemented the automount-open, to be used the new GSettings for Cinnamon (Nemo).
+  - Reimplemented the automount-open, to be used the new GSettings for Cinnamon (Nemo) and also read the GSettings for Gnome nautilus.
   - Added missing category from volumes without drives (like ftp, sftp, iso images and more).
+  - Decreased the CPU usage to the minimum.
+  - Added Hotkey to raise or open the Desklet/Applet(thanks collins).
+  - Removed the special handling of CDROM drives, because cause many conflicts and problems.
 
 1.1-RTM
   - Added parameter, was missing in CriticalNotify.

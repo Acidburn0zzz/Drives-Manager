@@ -105,6 +105,23 @@
         "indent": true,
         "dependency": "unEjecting"
     },
+    "displayMessage": {
+        "default": true,
+        "description": "Display a message when drives change.",
+        "type": "checkbox",
+        "tooltip": "Check this to display a message when a change occurs in the drives."
+    },
+    "raiseKey": {
+        "type": "keybinding",
+        "description": "Raise to top shorcut key.",
+        "default": "<Super>m"
+    },
+    "raiseCenter": {
+        "default": true,
+        "description": "Display in the center when the desklet is raised.",
+        "type": "checkbox",
+        "tooltip": "Check this to display the desklet in the screen center, when is raised."
+    },
     "separator-hdd-temp-top": {
        "type": "separator"
     },

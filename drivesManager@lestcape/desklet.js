@@ -1,6 +1,6 @@
 
 // Desklet : Drives Manager         Version      : v1.2-RTM
-// O.S.    : Cinnamon               Release Date : 15 August 2014.
+// O.S.    : Cinnamon               Release Date : 5 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
@@ -35,6 +35,7 @@ const GUdev = imports.gi.GUdev;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
+const Gettext = imports.gettext;
 
 const AppletManager = imports.ui.appletManager;
 const DeskletManager = imports.ui.deskletManager;
@@ -47,6 +48,7 @@ const Tweener = imports.ui.tweener;
 const CinnamonMountOperation = imports.ui.cinnamonMountOperation;
 const Main = imports.ui.main;
 const Util = imports.misc.util;
+
 
 /****Import File****/
 //const AppletDir = AppletManager.applets['drivesManager@lestcape'];
@@ -134,7 +136,7 @@ DeskletAppletManager.prototype = {
             this.applet = AppletManager.appletObj[newAppletID];
             this.applet.setParentDesklet(this.desklet);
          } catch (e) {
-            Main.notify("error", e.message);
+            Main.notifyError(_("Failed of Drives Manager:"), e.message);
          }
       }
    },
@@ -166,11 +168,99 @@ DeskletAppletManager.prototype = {
             delete AppletManager.appletObj[this.applet.instance_id];
             this.applet = null; 
          } catch (e) {
-            Main.notify("error", e.message);
+            Main.notifyError(_("Failed of Drives Manager:"), e.message);
          }
       }
    }
 };
+
+function RaisedBox() {
+   this._init();
+}
+
+RaisedBox.prototype = {
+   _init: function() {
+      try {
+         this.stageEventIds = [];
+         this.contextMenuEvents = [];
+         this.actor = new St.Group({ visible: false, x: 0, y: 0 });
+         Main.uiGroup.add_actor(this.actor);
+         let constraint = new Clutter.BindConstraint({ source: global.stage,
+                                                       coordinate: Clutter.BindCoordinate.POSITION | Clutter.BindCoordinate.SIZE });
+         this.actor.add_constraint(constraint);
+         this._backgroundBin = new St.Bin();
+         this.actor.add_actor(this._backgroundBin);
+         let monitor = Main.layoutManager.focusMonitor;
+         this._backgroundBin.set_position(monitor.x, monitor.y);
+         this._backgroundBin.set_size(monitor.width, monitor.height);
+         let stack = new Cinnamon.Stack();
+         this._backgroundBin.child = stack;
+         this.eventBlocker = new Clutter.Group({ reactive: true });
+         stack.add_actor(this.eventBlocker);
+         this.groupContent = new St.Bin();
+         stack.add_actor(this.groupContent);
+      } catch(e) {
+         Main.notify("err", e.message);
+         global.logError(e);
+      }
+   },
+
+   add: function(desklet) {
+      try {
+         this.desklet = desklet;
+         this.contextMenu = this.desklet._menu;
+         this.groupContent.add_actor(this.desklet.actor);
+         if(!this.desklet._raiseCenter) {
+            let allocation = Cinnamon.util_get_transformed_allocation(desklet.actor);
+            let monitor = Main.layoutManager.findMonitorForActor(desklet.actor);
+            let x = Math.floor((monitor.width - allocation.x1 - allocation.x2) / 2);
+            let y = Math.floor((monitor.height - allocation.y1 - allocation.y2) / 2);
+            this.actor.set_anchor_point(x,y);
+         }
+         Main.pushModal(this.actor);
+         this.actor.show();
+         this.stageEventIds.push(global.stage.connect("captured-event", Lang.bind(this, this.onStageEvent)));
+         this.stageEventIds.push(global.stage.connect("enter-event", Lang.bind(this, this.onStageEvent)));
+         this.stageEventIds.push(global.stage.connect("leave-event", Lang.bind(this, this.onStageEvent)));
+         this.contextMenuEvents.push(this.contextMenu.connect("activate", Lang.bind(this, function() {
+            this.emit("closed");
+         })));
+      } catch(e) {
+         Main.notify("err", e.message);
+         global.logError(e);
+      }
+   },
+
+   remove: function() {
+      try {
+         for ( let i = 0; i < this.stageEventIds.length; i++ ) global.stage.disconnect(this.stageEventIds[i]);
+         for ( let i = 0; i < this.contextMenuEvents.length; i++ ) this.contextMenu.disconnect(this.contextMenuEvents[i]);
+         if ( this.desklet ) this.groupContent.remove_actor(this.desklet.actor);
+         Main.popModal(this.actor);
+         this.actor.destroy();
+      } catch(e) {
+         global.logError(e);
+      }
+   },
+   onStageEvent: function(actor, event) {
+      try {
+         let type = event.type();
+         if ( type == Clutter.EventType.KEY_PRESS ) return true;
+         if ( type == Clutter.EventType.KEY_RELEASE ) {
+            if ( event.get_key_symbol() == Clutter.KEY_Escape ) this.emit("closed");
+            return true;
+         }
+         let target = event.get_source();
+         if ( target == this.desklet.actor || this.desklet.actor.contains(target) ||
+            target == this.contextMenu.actor || this.contextMenu.actor.contains(target) ) return false;
+         if ( type == Clutter.EventType.BUTTON_RELEASE ) this.emit("closed");
+      } catch(e) {
+         global.logError(e);
+      }
+      return true;
+   }
+}
+Signals.addSignalMethods(RaisedBox.prototype);
 
 function ScrollItemsBox(parent, panelToScroll, vertical, align) {
    this._init(parent, panelToScroll, vertical, align);
@@ -347,7 +437,7 @@ ScrollItemsBox.prototype = {
             }
          }
       } catch(e) {
-        Main.notify("ScrollError", e.message);
+        Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
    },
 
@@ -376,6 +466,7 @@ MeterBox.prototype = {
       this.actor = new St.BoxLayout({ vertical:false, style_class: 'drives-meter'});
       this._buildCalorPalete();
       this.boxesLed = new Array();
+      let boxLed;
       for(let pos = 0; pos < this.size; pos++) {
          boxLed = new St.BoxLayout({ vertical:false, style_class: 'drives-meter-led' });
          boxLed.style = "background-color: " + this.getDefaultColorInPalet() + ";";
@@ -557,7 +648,7 @@ HDDTempMonitor.prototype = {
             this._hDDTempResultProxy(this._hddtempProxy.get_temp_info());
          }
       } catch(e) {
-         Main.notify(_("Failed of Drives Manager:"), e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
    }
 };
@@ -761,8 +852,7 @@ GlobalContainer.prototype = {
          this.applyDriveStyle(categoryContainer);
          this._listCategoryContainer.splice(index, 0, categoryContainer);
       }
-      //fix that.... to insert in index...
-      this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, expand: true, x_align: St.Align.START});
+      this._rootBox.insert_actor(categoryContainer.getContainerBox(), index, {x_fill: true, expand: true, x_align: St.Align.START});
    },
 
    indexOfCategoryContainer: function(categoryContainer) {
@@ -780,9 +870,11 @@ GlobalContainer.prototype = {
 
    removeCategoryContainerByIndex: function(index) {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
+         let catContainer = this._listCategoryContainer[index];
          this.disconnectCategoryByIndex(index);
          this._listCategoryContainer.splice(index, 1);
          this._listCategoryConnected.splice(index, 1);
+         catContainer.destroy();
       }
    },
 
@@ -803,10 +895,6 @@ GlobalContainer.prototype = {
             currCat = currCat + 1;
          }
          this._listCategoryConnected[index] = true;
-         /*let parentContainer = catContainer.getContainerBox().get_parent();
-         if(parentContainer)
-            parentContainer.remove_actor(catContainer.getContainerBox());
-         this._rootBox.insert_actor(catContainer.getContainerBox(), _indexConnect);*/
          catContainer.getContainerBox().visible = true;
          catContainer.overrideTheme(this._overrideTheme);
       }
@@ -820,9 +908,6 @@ GlobalContainer.prototype = {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
          this._listCategoryConnected[index] = false;
          let containerBox = this._listCategoryContainer[index].getContainerBox();
-         /*let parentContainerBox = containerBox.get_parent();
-         if(parentContainerBox)
-            parentContainerBox.remove_actor(containerBox);*/
          containerBox.visible = false;
       }
    },
@@ -1164,6 +1249,10 @@ CategoryContainer.prototype = {
             _result = _result + "0";
       }
       return "" + _result + "" + suffix;
+   },
+
+   destroy: function() {
+      this._categoryBox.destroy();
    }
 };
 
@@ -1324,7 +1413,7 @@ DriveContainer.prototype = {
       if(this._ejectButton)
          this._ejectContainer.remove_actor(this._ejectButton);
       let _ejectIcon;
-      if(iconName == "empty")
+      if((!iconName)||(iconName == "empty"))
          _ejectIcon = this._getIconImage(this._path() + "theme/" + iconName, 30);
       else if(themeName == "symbolic")
          _ejectIcon = this._getIconImage(this._path() + "theme/" + themeName + "/" + iconName, 30, true);
@@ -1598,7 +1687,7 @@ DriveContainer.prototype = {
             }
          }
       } catch(e) {
-         Main.notify("Error", e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
       return null;
    },
@@ -1612,7 +1701,7 @@ DriveContainer.prototype = {
          }
          return icon;
       } catch(e) {
-         Main.notify("Error", e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
       return null;
    },
@@ -1906,7 +1995,6 @@ HardDiskContainer.prototype = {
       }
       return _mountsHard;
    },
-         
 
    _getDriveUsedSpace: function(partitionPath) {
       let _attribute = "filesystem::used";
@@ -1944,22 +2032,26 @@ DeviceContainer.prototype = {
       this._unEjecting = false;
       this._unmountAll = true;
       this._openConnect = true;
+      this._displayMessage = true;
    },
 
    addDevice: function(device) {
       this._listDevices.push(device);
       let _dr = this.addDriveContainer();
       _dr.setLeftTopText(this.getDeviceName(device));
+      
       switch(this._deviceType) {
          case "OpticalMount":
             _dr.setDriveIcon(this._theme, "cdrom", Lang.bind(this, this._onDriveClicked));
-            _dr.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onOpticalEject));
+            _dr.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onDriveEject));
             _dr.addMeter();
             this._initializeOptical();
             break;
          case "OpticalUmount":
-            _dr.setDriveIcon(this._theme, "cdrom", null);
-            this.updateOpticalByIdentifier(this._getIdentifier(device));
+            _dr.setDriveIcon(this._theme, "cdrom", Lang.bind(this, this._onDriveClicked));
+            _dr.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onDriveInject));
+           /* _dr.setDriveIcon(this._theme, "cdrom", null);
+            this.updateOpticalByIdentifier(this._getIdentifier(device));*/
             break;
          case "RemovableMount":
             _dr.setDriveIcon(this._theme, "usb", Lang.bind(this, this._onDriveClicked));
@@ -2006,14 +2098,6 @@ DeviceContainer.prototype = {
    },
 
    indexOfDevice: function(device) {
-     // let currDevice;
-     // for(let currIndexDevice in this._listDevices)
-     // {
-     //    currDevice = this._listDevices[currIndexDevice];  
-     //    if(currDevice == device)
-     //       return currIndexDevice;
-     // }
-     // return -1;
       return this._listDevices.indexOf(device);
    },
 
@@ -2064,56 +2148,6 @@ DeviceContainer.prototype = {
 
    setCapacityDetect: function(capacityDetect) {
       this._capacityDetect = capacityDetect;
-   },
-
-   _isOpticalClosed: function(opticalDrive) {
-      if((this.deviceIs(opticalDrive) == "GDrive")&&(!opticalDrive.has_volumes()))
-      {
-         let _deviceName = this._getIdentifier(opticalDrive);
-         if(_deviceName) {
-            let [res, out, err, status] = GLib.spawn_command_line_sync('cdrecord -V --inq dev=' + _deviceName);
-            let _closeErr = err.toString().indexOf("tray closed");
-            let _closeOut = out.toString().indexOf("tray closed");
-            return ((_closeErr != -1)||(_closeErr != -1));
-         }
-      }          
-      return true;
-   },
-
-   updateOpticalByIdentifier: function(deviceId) {
-      let _index = this.getIndexOfDeviceByIdentifier(deviceId);
-      //Main.notify("Optical")
-      if(_index != -1) {
-         //Main.notify("find")
-         let _drContainer = this.getDriveContainer(_index);
-         let _opticalClose = this._isOpticalClosed(this._listDevices[_index]);
-         let _ejectName = _drContainer.getEjectName();
-         if(!_ejectName) {
-            if(_opticalClose)
-               _drContainer.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onOpticalEject));
-            else
-               _drContainer.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onOpticalInject));
-         } else {
-            if((_drContainer.getEjectName() == "inject")&&(_opticalClose)) {
-               Main.notifyError(_("The device has been loaded."));
-               _drContainer.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onOpticalEject));
-            }
-            else if((_drContainer.getEjectName() == "eject")&&(!_opticalClose)) {
-               _drContainer.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onOpticalInject));
-               Main.notifyError(_("The device has been ejected."));
-            }
-         }
-         Util.spawnCommandLine("eject -i on " + deviceId);//"/lib/udev/cdrom_id --lock-media /dev/sr0"
-            //Need to lock optical drive for active gudev events.
-         return true;
-      }
-      return false;
-   },
-
-   ejectOpticalByCommand: function(deviceId) {
-      //Used for a bug in udev: https://bugs.launchpad.net/ubuntu/+source/udev/+bug/875543
-      Util.spawnCommandLine("eject -i off " + deviceId);
-      Util.spawnCommandLine("eject -T " + deviceId);   
    },
 
    getIndexOfDeviceByIdentifier: function(deviceId) {
@@ -2239,8 +2273,65 @@ DeviceContainer.prototype = {
       this._openConnect = open;
    },
 
+   displayMessage: function(show) {
+      this._displayMessage = show;
+   },
+
    _onDriveClicked: function(button) {
       this.openMountDrive(this.indexOfDriverButton(button));
+   },
+
+/*
+   _isOpticalClosed: function(opticalDrive) {
+      if((this.deviceIs(opticalDrive) == "GDrive")&&(!opticalDrive.has_volumes()))
+      {
+         let _deviceName = this._getIdentifier(opticalDrive);
+         if(_deviceName) {
+            let [res, out, err, status] = GLib.spawn_command_line_sync('cdrecord -V --inq dev=' + _deviceName);
+            let _closeErr = err.toString().indexOf("tray closed");
+            let _closeOut = out.toString().indexOf("tray closed");
+            return ((_closeErr != -1)||(_closeErr != -1));
+         }
+      }          
+      return true;
+   },
+
+   updateOpticalByIdentifier: function(deviceId) {
+      let index = this.getIndexOfDeviceByIdentifier(deviceId);
+      if(index != -1) {
+         let drContainer = this.getDriveContainer(index);
+         let opticalClose = this._isOpticalClosed(this._listDevices[index]);
+         let ejectName = drContainer.getEjectName();
+         if(ejectName) {
+            //Main.notify("find:" + ejectName + " close:" + opticalClose)
+            if((ejectName == "inject")&&(opticalClose)) {
+               drContainer.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onOpticalEject));
+               if(this._displayMessage)
+                  Main.notify(_("The device has been loaded."));
+            }
+            else if((ejectName == "eject")&&(!opticalClose)) {
+               drContainer.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onOpticalInject));
+               if(this._displayMessage)
+                  Main.notify(_("The device has been ejected."));
+            }
+         } else {
+            if(opticalClose)
+               drContainer.setEjectIcon(this._theme, "eject", Lang.bind(this, this._onOpticalEject));
+            else
+               drContainer.setEjectIcon(this._theme, "inject", Lang.bind(this, this._onOpticalInject));
+            
+         }
+         //Util.spawnCommandLine("eject -i on " + deviceId);//"/lib/udev/cdrom_id --lock-media /dev/sr0"
+            //Need to lock optical drive for active gudev events.
+         return true;
+      } 
+      return false;
+   },
+
+   ejectOpticalByCommand: function(deviceId) {
+      //Used for a bug in udev: https://bugs.launchpad.net/ubuntu/+source/udev/+bug/875543
+      //Util.spawnCommandLine("eject -i off " + deviceId);
+      Util.spawnCommandLine("eject -T " + deviceId);   
    },
 
    _onOpticalEject: function(button) {
@@ -2277,14 +2368,16 @@ DeviceContainer.prototype = {
       if(_index != -1) 
       {
          let _drive = this._listDevices[_index];
+         if(_drive.can_mount())
+            this._onDriveInject(button);
          let _id = this._getIdentifier(_drive);
          this.ejectOpticalByCommand(_id);
          this._listDriveContainer[_index].enableClickedEject();//Enabled event click.
          this.updateOpticalByIdentifier(_id);
-        // Main.notifyError(_("Device Inject"));
+        // Main.notify(_("Device Inject"));
       }
    },
-
+*/
    _onDriveEject: function(button) {
       let _index = this.indexOfEjectButton(button);
       if(_index != -1) {
@@ -2345,7 +2438,7 @@ DeviceContainer.prototype = {
    _onEjectFinish: function(mount, result) {
       try {
          mount.eject_with_operation_finish(result);
-         //Main.notifyError(_("The device has been ejected."));
+         //Main.notify(_("The device has been ejected."));
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
@@ -2354,7 +2447,7 @@ DeviceContainer.prototype = {
    _onUnmountFinish: function(mount, result) {
       try {
          mount.unmount_with_operation_finish(result);
-        // Main.notifyError(_("The device has been ejected."));
+        // Main.notify(_("The device has been ejected."));
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
@@ -2396,6 +2489,7 @@ VolumeMonitor.prototype = {
       this._unmountAll = true;
       this._openConnect = true;
       this._capacityDetect = true;
+      this._displayMessage = true;
       this._globalContainer = globalContainer;
       this._monitor = Gio.VolumeMonitor.get();
       this._client = new GUdev.Client ({subsystems: ["block"]});
@@ -2423,40 +2517,15 @@ VolumeMonitor.prototype = {
      //this._volumeMonitorSignals.push(id);
      //id = this._monitor.connect('drive-eject-button', Lang.bind(this, this._onDriveEjectButton));
      //this._volumeMonitorSignals.push(id);
-
-     this._idGuDev = this._client.connect('uevent', Lang.bind(this, this.on_uevent));
-     //let enumerator = new GUdev.Enumerator({client: client});
-     //let d = this._client.query_by_device_file ("/dev/sda1");
-     //this.print_device(d);
+     //this._idGuDev = this._client.connect('uevent', Lang.bind(this, this.on_uevent));
    },
-
+/*
    on_uevent: function(client, action, device) {
       let _deviceId = device.get_device_file();
       if(_deviceId)
          this._listCategory[1].updateOpticalByIdentifier(_deviceId);
    },
-
-
-   print_device: function(device) {
-      Main.notifyError ("  subsystem:             " + device.get_subsystem ());
-      Main.notifyError ("  devtype:               " + device.get_devtype ());
-      Main.notifyError ("  name:                  " + device.get_name ());
-      Main.notifyError ("  number:                " + device.get_number ());
-      Main.notifyError ("  sysfs_path:            " + device.get_sysfs_path ());
-      Main.notifyError ("  driver:                " + device.get_driver ());
-      Main.notifyError ("  action:                " + device.get_action ());
-      Main.notifyError ("  seqnum:                " + device.get_seqnum ());
-      Main.notifyError ("  device type:           " + device.get_device_type ());
-      Main.notifyError ("  device number:         " + device.get_device_number ());
-      Main.notifyError ("  device file:           " + device.get_device_file ());
-      Main.notifyError ("  device file symlinks:  " + device.get_device_file_symlinks ());
-      Main.notifyError ("  foo: " + device.get_sysfs_attr_as_strv ("stat"));
-      let keys = device.get_property_keys ();
-      for(let n = 0; n < keys.length; n++) {
-         Main.notifyError ("    " + keys[n] + "=" + device.get_property (keys[n]));
-      }
-   },
-
+*/
    _onVolumeAdded: function() {
        this._createCategory();
    },
@@ -2474,11 +2543,11 @@ VolumeMonitor.prototype = {
    },
 
 //   _onDriveChange: function() {
-//       Main.notifyError("changed");
+//       Main.notify("changed");
 //   },
 
 //   _onDriveEjectButton: function() {
-//       Main.notifyError("Eject Button");
+//       Main.notify("Eject Button");
 //   },
 
    disconnect: function() {
@@ -2495,7 +2564,6 @@ VolumeMonitor.prototype = {
          for(let i = 0; i < this._listCategory.length; i++) {
             this.listConnect[i] = this._globalContainer.isCategoryConnectByIndex(_indexCategory);
             this._globalContainer.removeCategoryContainerByIndex(_indexCategory);
-            //category.destroy();
          }
       } else {
          this.listConnect = new Array(true, true, true, true, true, true, true);
@@ -2563,6 +2631,7 @@ VolumeMonitor.prototype = {
       this.openOnConnect(this._openConnect);
       this.unEjecting(this._unEjecting);
       this.unmountAll(this._unmountAll);
+      this.displayMessage(this._displayMessage);
       this._globalContainer.overrideTheme(this._globalContainer._overrideTheme);
    },
 
@@ -2587,9 +2656,9 @@ VolumeMonitor.prototype = {
          }
          if(_listVols.length == 0)
          {
-            if(this._isOptical(drive)) {
+            if((this._isOptical(drive))&&(drive.can_poll_for_media())) {
                this._listCategory[1].addDevice(drive);
-            } else
+            } else 
                this._listCategory[8].addDevice(drive);
          }
       }
@@ -2630,6 +2699,12 @@ VolumeMonitor.prototype = {
          this._listCategory[category].unmountAll(unmountAll);
    },
 
+   displayMessage: function(show) {
+      this._displayMessage = show;
+      for(let category in this._listCategory)
+         this._listCategory[category].displayMessage(show);
+   },
+
    getCategory: function(index) {
       return this._listCategory[index];
    },
@@ -2642,14 +2717,12 @@ VolumeMonitor.prototype = {
       let category = this._listCategory[index];
       if(category) {
          this._globalContainer.removeCategoryContainer(category);
-         //category.destroy();
       }
    },
 
    removeAllCategory: function() {
       for(let category in this._listCategory) {
          this._globalContainer.removeCategoryContainer(category);
-         //category.destroy();
       }
    },
 
@@ -2657,16 +2730,8 @@ VolumeMonitor.prototype = {
       let _deviceName = this._getIdentifier(opticalDrive);
       if(_deviceName) {
          let device = this._client.query_by_device_file(_deviceName);
-         if(device.get_property("ID_CDROM") != null)
+         if((device)&&(device.get_property("ID_CDROM") != null))
             return true;
-         /*let _matchSR = _deviceName.match(new RegExp('/dev/sr[0-9]+', 'g'));
-         let _matchCDRomN = _deviceName.match(new RegExp('/dev/cdrom[0-9]+', 'g'));
-         let _matchCDRom = _deviceName.match(new RegExp('/dev/cdrom', 'g'));
-         let _matchSCD = _deviceName.match(new RegExp('/dev/scd[0-9]+', 'g'));
-         let _matchHDC = _deviceName.match(new RegExp('/dev/hdc', 'g'));
-         if((_deviceName != null)&&((_matchSR != null)||(_matchCDRomN != null)||(_matchCDRom != null)||(_matchSCD != null)||(_matchHDC != null))) {
-            return true;
-         }*/
       }	
       return false;
    },
@@ -2676,7 +2741,8 @@ VolumeMonitor.prototype = {
       this._createCategory();
       //this._insertInCategory(mount.get_drive());
       try {
-         Main.notifyError(_("The device has been loaded."));
+         if(this._displayMessage)
+            Main.notify(_("The device has been loaded."));
          global.play_theme_sound(0, 'device-added-media');
          if(this._openConnect) {
             let urlPath = this.getDevicePath(mount); //A volume need to be mount, or don't have mount point to open.
@@ -2699,7 +2765,8 @@ VolumeMonitor.prototype = {
 
    _onMountRemoved: function(monit, mount) {
       try {
-        Main.notifyError(_("The device has been ejected."));
+        if(this._displayMessage)
+           Main.notify(_("The device has been ejected."));
         global.play_theme_sound(0, 'device-removed-media');
         this._createCategory();
       } catch(e) {
@@ -2725,7 +2792,11 @@ VolumeMonitor.prototype = {
 };
 
 function _(str) {
-   return Gettext.dgettext("drivesManager@lestcape", str);
+   let resultConf = Gettext.dgettext("drivesManager@lestcape", str);
+   if(resultConf != str) {
+      return resultConf;
+   }
+   return Gettext.gettext(str);
 }
 
 function MyDesklet(metadata) {
@@ -2748,11 +2819,11 @@ MyDesklet.prototype = {
       //this.sys.print_all_device();
 
       this.sys.execInstallLanguage();
-      _ = imports.gettext.domain(this.uuid).gettext;
-      imports.gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
+      Gettext.bindtextdomain(this.uuid, GLib.get_home_dir() + "/.local/share/locale");
 
       this._timeout = null;
-      this.myManager = null;
+      this._myManager = null;
+      this._desklet_raised = false;
       this.path = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this.uuid;
 
       this.setHeader(_("Drives Manager"));
@@ -2783,28 +2854,28 @@ MyDesklet.prototype = {
 
    _createAppletManager: function() {
       try {
-         if(!this.myManager) {
+         if(!this._myManager) {
             for(let desklet_id in DeskletManager.deskletObj) {
                let desk = DeskletManager.deskletObj[desklet_id];
-               if((desk)&&(desk._uuid == this._uuid)&&(desk.myManager)) {
-                  this.myManager = desk.myManager;
+               if((desk)&&(desk._uuid == this._uuid)&&(desk._myManager)) {
+                  this._myManager = desk._myManager;
                }
             }
-            if(!this.myManager) {
-               this.myManager = new DeskletAppletManager(this);
+            if(!this._myManager) {
+               this._myManager = new DeskletAppletManager(this);
             }
          }
       } catch(e) {
-         Main.notify("error", e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
    },
 
    setVisibleAppletManager: function(visible) {
-      if(this.myManager) {
+      if(this._myManager) {
          if(visible) {
-            this.myManager.createAppletInstance();
+            this._myManager.createAppletInstance();
          } else {
-            this.myManager.destroyAppletInstance();
+            this._myManager.destroyAppletInstance();
          }
       }
    },
@@ -2826,7 +2897,7 @@ MyDesklet.prototype = {
          }
          this.sys.destroy();
       } catch(e) {
-         Main.notify(_("Failed of Drives Manager:"), e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
    },
 
@@ -2887,6 +2958,8 @@ MyDesklet.prototype = {
 
          this._onUnEjecting();
          this._onUnmountAll();
+         this._onDisplayMessageChanged();
+         this._onRaiseKeyChange();
          this._onHddTempChanged();
          this._onHddTempPlaySoundChanged();
          this._onHddTempNormalColorChanged();
@@ -2912,11 +2985,11 @@ MyDesklet.prototype = {
       this.appletMenuItem._switch.setToggleState(this._showAsApplet);
       if(this._showAsApplet) {
          this.setVisibleAppletManager(this._showAsApplet);
-         if(this.myManager.applet) {
-            this.myManager.applet.swapContextToApplet(this._showAsApplet);
+         if(this._myManager.applet) {
+            this._myManager.applet.swapContextToApplet(this._showAsApplet);
          }
-      } else if(this.myManager.applet) {
-         this.myManager.applet.swapContextToApplet(this._showAsApplet);
+      } else if(this._myManager.applet) {
+         this._myManager.applet.swapContextToApplet(this._showAsApplet);
          this.setVisibleAppletManager(this._showAsApplet);
       }
    },
@@ -3021,8 +3094,49 @@ MyDesklet.prototype = {
          this._onOpenConnect();//if gsetting is active disable Drive Manager.
          this.isGSettingRead = true;
       } catch(e) {
-         Main.notify(_("Failed of Drives Manager:"), e.message);
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
+   },
+
+   _toggleRaise: function() {
+      try {
+         if(this._myManager.applet) {
+            this._myManager.applet.menu.toggle();
+         } else {
+            if(this._desklet_raised)
+               this._lower();
+            else
+               this._raise();
+         }
+      } catch(e) {
+         Main.notify("error", e.message);
+         global.logError(e);
+      }
+   },
+
+   _raise: function() {
+      if ( this._desklet_raised || this.changingRaiseState ) return;
+      this.changingRaiseState = true;
+      this._draggable.inhibit = true;
+      this.raisedBox = new RaisedBox();
+      this.actor.get_parent().remove_actor(this.actor);
+      this.raisedBox.add(this);
+      this.raisedBox.connect("closed", Lang.bind(this, this._lower));
+      this._desklet_raised = true;
+      this.changingRaiseState = false;
+   },
+
+   _lower: function() {
+      if (!this._desklet_raised || this.changingRaiseState ) return;
+      this.changingRaiseState = true;
+      this._menu.close();
+      if ( this.raisedBox ) this.raisedBox.remove();
+      Main.deskletContainer.addDesklet(this.actor);
+      this._draggable.inhibit = false;
+      DeskletManager.mouseTrackEnabled = -1;
+      DeskletManager.checkMouseTracking();
+      this._desklet_raised = false;
+      this.changingRaiseState = false;
    },
 
    _onOpenConnect: function() {
@@ -3094,6 +3208,16 @@ MyDesklet.prototype = {
       this.volumeMonitor.unmountAll(this._unmountAll);
    },
 
+   _onDisplayMessageChanged: function() {
+      this.volumeMonitor.displayMessage(this._displayMessage);
+   },
+
+   _onRaiseKeyChange: function() {
+      if(this.keyId)
+         Main.keybindingManager.removeHotKey(this.keyId);
+      this.keyId = this.uuid + "-raise";
+      Main.keybindingManager.addHotKey(this.keyId, this._raiseKey, Lang.bind(this, this._toggleRaise));
+   },
 
    _onHddTempChanged: function() {
       this.hddTempMonitor.enableMonitor(this._hddTempActive);
@@ -3142,6 +3266,9 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unEjecting", "_unEjecting", this._onUnEjecting, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "unmountAll", "_unmountAll", this._onUnmountAll, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "displayMessage", "_displayMessage", this._onDisplayMessageChanged, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "raiseKey", "_raiseKey", this._onRaiseKeyChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "raiseCenter", "_raiseCenter", null, null);
 
          this.settings.bindProperty(Settings.BindingDirection.IN, "hddTemp", "_hddTempActive", this._onHddTempChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "hddTempSound", "_hddTempSound", this._onHddTempPlaySoundChanged, null);
@@ -3173,7 +3300,7 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "show-as-applet", "_showAsApplet", this._onShowModeChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "_appletManagerOrder", null, null);
       } catch (e) {
-        // Main.notify(_("Failed of Drives Manager:"), e.message);
+        // Main.notifyError(_("Failed of Drives Manager:"), e.message);
          global.logError(e);
       }
    }

@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.2-RTM
 
-Last version release date: 15 August 2014
+Last version release date: 5 de Septiembre 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 Contact: lestcape@gmail.com
@@ -10,12 +10,13 @@ Website: https://github.com/lestcape/Drives-Manager
 --------------
 Gracias especiales a:
 --------------
- - The Cinnamon programmers.
- - mtwebster http://cinnamon-spices.linuxmint.com/users/view/339
- - rgcjonas https://github.com/rgcjonas
- - KZom https://github.com/KZom
- - duncannz https://github.com/duncannz
- - nimdahk https://github.com/nimdahk
+ - Los programadores de Cinnamon.
+ - mtwebster (http://cinnamon-spices.linuxmint.com/users/view/339)
+ - rgcjonas (https://github.com/rgcjonas)
+ - KZom (https://github.com/KZom)
+ - duncannz (https://github.com/duncannz)
+ - nimdahk (https://github.com/nimdahk)
+ - collins (https://github.com/collinss)
 
 --------------
 Autores de las traducciones a otros idiomas:
@@ -31,10 +32,9 @@ Habilidades incluidas:
 2- Los volúmenes pueden montarse y desmostarse con un simple clic.
 3- Si el volumen está montado usted podrá acceder al punto de montaje con su navegador preferido (Nemo o Nautilus) con un simple clic o automáticamente si así lo desea cuando el volumen se monte.
 4- El desklet cuenta con un amplio conjunto de posibilidades de configuración, que le permite adaptarse a casi todos los temas de escritorio.
-5- Mediante este desklet, se podrá monitorizar las temperaturas de sus discos duros e incluso activar una alarma, cuando algún disco sobrepase la temperatura que usted considere inaceptable. Se necesita para esta opción de la instalación y configuración del programa hddtemp, pero no se preocupe, solo tiene que activar la opción y el desklet lo instalará y configurará por usted.
+5- Mediante este desklet, se podrá monitorizar las temperaturas de sus discos duros e incluso activar una alarma, cuando algún disco sobrepase la temperatura que usted considere inaceptable. Se necesita para esta opción de udisk2.
 6- Se puede activar la opción de reconectar un dispositivo usb extraíble, sin la necesidad de quitarlo del conector. Tal cual USB Safely Removed lo hace en windows.
-7- Usted podrá también monitorizar la velocidad de lectura/escritura de los archivos en su sistema.
-8- Si usted cuenta con un dispositivo de CD-ROM con bandeja de discos, puede abrir/cerrar la misma con un simple clic, incluso si algún disco está presente(Por desgracia esta habilidad requiere de que estén instalados los programas eject y cdrecord).
+7- Usted podrá también monitoriar la velocidad de lectura/escritura de los archivos en su sistema.
 
 --------------
 Este programa es software libre:
@@ -62,19 +62,9 @@ Agregar nuevos idiomas:
 --------------
 Errores conocidos y requerimientos:
 --------------
-1- ¡Advertencia! Este desklet necesita que los siguientes programas estén instalados:
-   - udisks2
-   - cdrecord
-   - eject
-   - Un editor de texto plano cualquiera.
+1- ¡Advertencia! Para utilizar la detección de la temperatura es necesario haber instalado udisks2. Los datos de temperatura del disco duro se obtienen directamente de udisks2. Por lo que necesita ubuntu 12.10 o superior, o un equivalente que venga con udisks2 o permita instalarlo.
 
-2- Los datos de temperatura del disco duro se obtienen directamente de udisks2. Por lo que necesita ubuntu 12.10 o superior, o un equivalente que venga con o permita instalar udisks2.
-
-3- Solamente se detectan como discos ópticos de CD/DVD, a los dispositivos que sean reconocidos por el kernel de Linux con una expresión regular de alguna de estas formas: "dev/sr[0-9]+", "/dev/cdrom[0-9]+", "/dev/cdrom", "/dev/scd[0-9]+", "/dev/hdc". Si usted tiene un identificador de algún dispositivo óptico diferente, por favor repórtelo en el sitio web de este programa y este será incluido en la próxima versión.
-
-4- La opción de auto abrir los puntos de montaje puede dar muchos problemas por la conocida incompatibilidad entre Nautilus y Nemo. cualquier incidente, favor de reportarlo en el sitio web de este desklet.
-
-5- Cuando un dispositivo extraíble tiene más de una partición y está activa la opción de reconectar el dispositivo sin necesidad de sacarlo del conector, puede pasar que en un descuido usted no se percate que no todos las particiones han sido desmontadas y en consecuencia puede perder datos. ¡Tenga cuidado!
+2 ¡Tenga cuidado! Cuando un dispositivo extraíble tiene más de una partición y está activa la opción de volver a conectar el dispositivo sin sacarlo del conector. Puede suceder que usted desenchufó un dispositivo que tienen montadas algunas particiones y por lo tanto usted puede perder algunos datos importantes, por lo que te recomiendo totalmente activar la opción de "Desmontar todos los volúmenes montados pertenecientes a la misma unidad". Por defecto está activa.
 
 --------------
 Registro de cambios:
@@ -93,6 +83,9 @@ Registro de cambios:
   - Las imagenes de medicion fueron sustituidas por una implementación interna. Se acabaron los parpadeos y ahora esto es configurable desde css.
   - Reimplementado el automount-open, para utilizar el nuevo GSetting de Cinnamon (Nemo).
   - Se ha añadido la categoría que falta de volúmenes sin unidades (como ftp, sftp, imágenes ISO y más).
+  - Disminución del uso de la CPU al mínimo.
+  - Se ha añadido una teclas de acceso directo para elevar o abrir el Desklet/Applet(gracias a collins).
+  - Se ha eliminado el manejo especial de unidades de CDROM, porque causa muchos conflictos y problemas.
 
 1.1-RTM
   - Añadido un parámetro omitido en CriticalNotify.

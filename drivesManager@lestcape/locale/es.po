@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-08-30 18:12-0600\n"
+"PO-Revision-Date: 2014-09-05 22:58-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -515,6 +515,30 @@ msgstr ""
 "Active esta opción para desmontar todos los volúmenes montados "
 "pertenecientes a la misma unidad. Esto evita tratar de desconectar una "
 "unidad que todavía contiene algunos volúmenes montados."
+
+#. drivesManager@lestcape->settings-schema.json->displayMessage->description
+msgid "Display a message when drives change."
+msgstr "Mostrar un mensaje cuando las unidades cambian."
+
+#. drivesManager@lestcape->settings-schema.json->displayMessage->tooltip
+msgid "Check this to display a message when a change occurs in the drives."
+msgstr ""
+"Active esta opción para mostrar un mensaje cuando se produce un cambio en "
+"las unidades."
+
+#. drivesManager@lestcape->settings-schema.json->raiseKey->description
+msgid "Tecla rápida para elevar el desklet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->raiseCenter->description
+msgid "Display in the center when the desklet is raised."
+msgstr "Mostrar en el centro cuando se eleva el desklet."
+
+#. drivesManager@lestcape->settings-schema.json->raiseCenter->tooltip
+msgid "Check this to display the desklet in the screen center, when is raised."
+msgstr ""
+"Active esta opción para mostrar el desklet cuando se eleva en el centro de "
+"la pantalla."
 
 #. drivesManager@lestcape->settings-schema.json->hddTemp->description
 msgid "Use the temperature detection in the Hard drives."
