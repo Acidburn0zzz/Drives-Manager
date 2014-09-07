@@ -2912,6 +2912,7 @@ MyDesklet.prototype = {
             Mainloop.source_remove(this._timeout);
          }
          this.sys.destroy();
+         this._myManager = null;
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
