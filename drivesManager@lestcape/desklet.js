@@ -688,12 +688,14 @@ GlobalContainer.prototype = {
       this.scrollActor = new ScrollItemsBox(this._parent, this._rootBox, true, St.Align.START);
       this._mainBox.add(this.scrollActor.actor, {x_fill: true, expand: true, x_align: St.Align.START});
       this._rootBox.connect('allocation_changed', Lang.bind(this, function() {
-        let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
-        if(this._rootBox.get_height() > monitor.height - 100) {
-           this._mainBox.set_height(monitor.height - 100);
-        } else {
-           this._mainBox.set_height(-1);
-        }
+        if(!this._fixHeight) {
+            let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
+            if(this._rootBox.get_height() > monitor.height - 100) {
+               this._mainBox.set_height(monitor.height - 100);
+            } else {
+               this._mainBox.set_height(-1);
+            }
+         }
       }));
 
       this._listCategoryContainer = new Array();
@@ -951,16 +953,23 @@ GlobalContainer.prototype = {
 
    setHeight: function(height) {
       this._height = height;
-      if(this._fixHeight)
-         this._mainBox.set_height(this._height);
+      let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
+      if(this._fixHeight) {
+         if(this._height <= monitor.height - 100)
+            this._mainBox.set_height(this._height);
+         else
+            this._mainBox.set_height(monitor.height - 100);
+      } else {
+         if(this._rootBox.get_height() > monitor.height - 100)
+            this._mainBox.set_height(monitor.height - 100);
+         else
+            this._mainBox.set_height(-1);
+      }
    },
 
    fixHeight: function(fix) {
       this._fixHeight = fix;
-      if(this._fixHeight)
-         this._mainBox.set_height(this._height);
-      else
-         this._mainBox.set_height(-1);
+      this.setHeight(this._height)
    },
 
    setAutoscroll: function(autoscroll) {
