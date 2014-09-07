@@ -584,11 +584,11 @@ msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->appletSymbolic->description
-msgid "Show symbolic icons in the Applet Manager."
+msgid "Show symbolic icons in the Applet."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->appletSymbolic->tooltip
-msgid "Check this if you want to show symbolic icons in the Applet Manager."
+msgid "Check this if you want to show symbolic icons in the Applet."
 msgstr ""
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#

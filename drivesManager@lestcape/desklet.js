@@ -1,6 +1,6 @@
 
 // Desklet : Drives Manager         Version      : v1.2-RTM
-// O.S.    : Cinnamon               Release Date : 5 September 2014.
+// O.S.    : Cinnamon               Release Date : 7 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager

@@ -385,11 +385,11 @@
     },
     "appletSymbolic": {
         "default": true,
-        "description": "Show symbolic icons in the Applet Manager.",
+        "description": "Show symbolic icons in the Applet.",
         "type": "checkbox",
         "dependency": "showAsApplet",
         "indent": true,
-        "tooltip": "Check this if you want to show symbolic icons in the Applet Manager."
+        "tooltip": "Check this if you want to show symbolic icons in the Applet."
     },
     "applet-manager-order": {
         "type": "generic",

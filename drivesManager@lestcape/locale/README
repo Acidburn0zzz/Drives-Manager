@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.2-RTM
 
-Last version release date: 5 September 2014
+Last version release date: 7 September 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 
@@ -36,6 +36,7 @@ Skills including:
 5- Through this desklet, you can monitor the temperatures of your hard disks and even activate an alarm when the disc temperature exceeds a value, that you consider unacceptable. To use this option, we required udisk2.
 6- You can enable the option to reconnect removable usb device, without the need to remove the device from the connector. Like USB Safely Removed works in Windows.
 7- You can also monitor the speed of read/write files on your system.
+8- This extension can be a Desklet and also an Applet.
 
 --------------
 This program is free software:
@@ -88,6 +89,7 @@ Change Log:
   - Decreased the CPU usage to the minimum.
   - Added Hotkey to raise or open the Desklet/Applet(thanks collins).
   - Removed the special handling of CDROM drives, because cause many conflicts and problems.
+  - The settings has improved and now is organised by categories.
 
 1.1-RTM
   - Added parameter, was missing in CriticalNotify.
