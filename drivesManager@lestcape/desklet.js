@@ -726,12 +726,11 @@ GlobalContainer.prototype = {
          this._fontColor = parent._fontColor;
          this._autoscroll = parent._autoscroll;
          this._scrollVisible = parent._scrollVisible;
- 
-         this.setAutoscroll(this._autoscroll);
-         this.setScrollVisible(this._scrollVisible);
-         this.setFontColor(this._fontColor); 
-         this._setStyle();
       }
+      this.setAutoscroll(this._autoscroll);
+      this.setScrollVisible(this._scrollVisible);
+      this.setFontColor(this._fontColor); 
+      this._setStyle();
       this.scrollActor.setParent(parent);
 
    },
