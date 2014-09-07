@@ -377,11 +377,19 @@
     "separator-applet-bottom": {
         "type": "separator"
     },
-    "show-as-applet": {
+    "showAsApplet": {
         "type": "checkbox",
         "default": false,
         "description": "Show Drives Manager as Applet.",
         "tooltip": "Choose whether or not to show Drives Manager as Applet or Desklet."
+    },
+    "appletSymbolic": {
+        "default": true,
+        "description": "Show symbolic icons in the Applet Manager.",
+        "type": "checkbox",
+        "dependency": "showAsApplet",
+        "indent": true,
+        "tooltip": "Check this if you want to show symbolic icons in the Applet Manager."
     },
     "applet-manager-order": {
         "type": "generic",

@@ -575,12 +575,20 @@ msgstr ""
 msgid "Set the custom Alarming temperature value to display a alarm."
 msgstr ""
 
-#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+#. drivesManager@lestcape->settings-schema.json->showAsApplet->description
 msgid "Show Drives Manager as Applet."
 msgstr ""
 
-#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+#. drivesManager@lestcape->settings-schema.json->showAsApplet->tooltip
 msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->appletSymbolic->description
+msgid "Show symbolic icons in the Applet Manager."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->appletSymbolic->tooltip
+msgid "Check this if you want to show symbolic icons in the Applet Manager."
 msgstr ""
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#

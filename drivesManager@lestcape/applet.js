@@ -22,18 +22,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+const Gtk = imports.gi.Gtk;
+const St = imports.gi.St;
+const GLib = imports.gi.GLib;
+
+const Mainloop = imports.mainloop;
+const Lang = imports.lang;
+const Gettext = imports.gettext;
 
 const PopupMenu = imports.ui.popupMenu;
-const Util = imports.misc.util;
 const AppletManager = imports.ui.appletManager;
 const Applet = imports.ui.applet;
 //const Settings = imports.ui.settings;
-const Mainloop = imports.mainloop;
 const Main = imports.ui.main;
-const Lang = imports.lang;
-const St = imports.gi.St;
-const GLib = imports.gi.GLib;
-const Gettext = imports.gettext;
+const Util = imports.misc.util;
 
 const FALLBACK_ICON_HEIGHT = 22;
 
@@ -55,12 +57,16 @@ MyApplet.prototype = {
    _init: function(orientation, panel_height, instanceId) {
       Applet.Applet.prototype._init.call(this, orientation, panel_height, instanceId);
 
+      this._uuid = "drivesManager@lestcape";
       this.desklet = null;
       try {
          Gettext.bindtextdomain("drivesManager@lestcape", GLib.get_home_dir() + "/.local/share/locale");
+         let iconPath = GLib.get_home_dir() + "/.local/share/cinnamon/desklets/" + this._uuid + "/icons";
+         Gtk.IconTheme.get_default().append_search_path(iconPath);
          this.mainBox = new St.BoxLayout();
          this.menuManager = new PopupMenu.PopupMenuManager(this);
          this.menu = new Applet.AppletPopupMenu(this, orientation);
+         this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenStateChanged));
          this.menuManager.addMenu(this.menu);
          this.section = new PopupMenu.PopupMenuSection();
          this.menu.addMenuItem(this.section);
@@ -80,19 +86,28 @@ MyApplet.prototype = {
       }
    },
 
-   _onSetAppletType: function(symbolic) {
+   _onOpenStateChanged: function(menu, open) {
+      if(!open) {
+         if(this.desklet) {
+            let scroll = this.desklet.globalContainer.scrollActor.scroll;
+            let hscroll = scroll.get_hscroll_bar();
+            if(hscroll)
+               hscroll.get_adjustment().set_value(0);
+            let vscroll = scroll.get_vscroll_bar();
+               vscroll.get_adjustment().set_value(0);
+         }
+      }
+   },
+
+   _onSetAppletType: function(iconName, symbolic) {
       try {
          if(this.appletBox) {
             if(this.menu.isOpen)
                this.menu.close();
             //this.menu.removeAll();
             this.appletBox.remove_all();
-            if(symbolic)
-               this.appletBox.set_icon_type(St.IconType.SYMBOLIC);
-            else
-               this.appletBox.set_icon_type(St.IconType.FULLCOLOR);
-
-            this.appletIcon = this.appletBox.add_applet_icon_name("drive-multidisk");
+            this.setAppletSymbolicIcon(symbolic);
+            this.appletIcon = this.appletBox.add_applet_icon_name(iconName);
             this.set_applet_tooltip(_("Drives Manager"));
             this.appletIcon.connect('button-press-event', Lang.bind(this, function(actor, event) {
                if((this._draggable)&&(!this._draggable.inhibit))
@@ -108,113 +123,16 @@ MyApplet.prototype = {
       }
    },
 
-   addNewNote: function (actor, event) {
-      if((this._draggable)&&(!this._draggable.inhibit))
-         return false;
-      if(event.get_button() == 1) {
-         this.desklet._onAddNote();
-      }
-      return false;
+   setAppletSymbolicIcon: function(symbolic) {
+      if(symbolic)
+         this.appletBox.set_icon_type(St.IconType.SYMBOLIC);
+      else
+         this.appletBox.set_icon_type(St.IconType.FULLCOLOR);
    },
 
-   tryRaiseNotes: function (actor, event) {
-      //if(event.get_button() == 1) {
-         //Main.notify("Hola Raise");
-         Mainloop.idle_add(Lang.bind(this, function() {
-            this.desklet.toggleRaise();
-         }));
-     // }
-   },
-
-   raiseNotes: function (actor, event) {
-      if((this._draggable)&&(!this._draggable.inhibit))
-         return false;
-      if(event.get_button() == 1) {
-         //Main.notify("Hola Raise");
-         this.desklet.toggleRaise();
-      }
-      return false;
-   },
-
-   hideNotes: function (actor, event) {
-      if((this._draggable)&&(!this._draggable.inhibit))
-         return false;
-      if(event.get_button() == 1) {
-         this.desklet.toggleHide();
-      }
-      return false;
-   },
-
-   tryMultInstance: function (actor, event) {
-      if((this._draggable)&&(!this._draggable.inhibit))
-         return false;
-      if(event.get_button() == 1) {
-         this.multInstance();
-      }
-      return false;
-   },
-
-   multInstance: function () {
-      Mainloop.idle_add(Lang.bind(this, function() {
-         let activeMultInstance = !this.desklet._multInstance;
-         if(this.menuMultInstance) {
-            this.menuMultInstance._switch.state = !this.menuMultInstance._switch.state;
-            activeMultInstance = this.menuMultInstance._switch.state;
-         }
-         this.desklet.multInstanceMenuItem._switch.state = activeMultInstance;
-         this.desklet._onMultInstanceActivated();
-      }));
-   },
-
-   setRaiseStatus: function (raise) {
-   /*   if(this.btRaiseNote) {
-         if(raise)
-            this.btRaiseNote.set_icon_name("go-down");
-         else
-            this.btRaiseNote.set_icon_name("go-up");
-      }
-      if(this.menuRaiseNotes) {
-         if(raise) {
-            this.menuRaiseNotes._icon = "go-down";
-            this.menuRaiseNotes.icon.set_icon_name(this.menuRaiseNotes._icon);
-            this.menuRaiseNotes._text = _("Unraise Notes");
-            this.menuRaiseNotes.label.set_text(this.menuRaiseNotes._text);
-         }
-         else {
-            this.menuRaiseNotes._icon = "go-up";
-            this.menuRaiseNotes.icon.set_icon_name(this.menuRaiseNotes._icon);
-            this.menuRaiseNotes._text = _("Raise Notes");
-            this.menuRaiseNotes.label.set_text(this.menuRaiseNotes._text);
-         }
-      }*/
-   },
-
-   setHideStatus: function (hide) {
-      if(this.btRaiseNote) {
-         if(hide)
-            this.btHideNote.set_icon_name("starred");
-         else
-            this.btHideNote.set_icon_name("non-starred");
-      }
-      if(this.menuHideNotes) {
-         if(hide) {
-            this.menuHideNotes._icon = "starred";
-            this.menuHideNotes.icon.set_icon_name(this.menuHideNotes._icon);
-            this.menuHideNotes._text = ("Show Notes");
-            this.menuHideNotes.label.set_text(this.menuHideNotes._text);
-         }
-         else {
-            this.menuHideNotes._icon = "non-starred";
-            this.menuHideNotes.icon.set_icon_name(this.menuHideNotes._icon);
-            this.menuHideNotes._text = _("Hide Notes");
-            this.menuHideNotes.label.set_text(this.menuHideNotes._text);
-         }
-      }
-   },
-
-   setParentDesklet: function (desklet) {
+   setParentDesklet: function(desklet) {
       this.desklet = desklet;
-      this._onSetAppletType(true);
+      this._onSetAppletType("drives-manager", true);//"drive-multidisk"
    },
 
    swapContextToApplet: function(swap) {
@@ -247,7 +165,7 @@ MyApplet.prototype = {
          this.appletBox.set_panel_height(this._panelHeight);
    },
    
-   finalizeContextMenu: function () {
+   finalizeContextMenu: function() {
       try {
          // Add default context menus if we're in panel edit mode, ensure their removal if we're not       
          let items = this._applet_context_menu._getMenuItems();
@@ -293,56 +211,6 @@ MyApplet.prototype = {
    }
 };
 
-function ConfigurablePopupSwitchMenuItem() {
-   this._init.apply(this, arguments);
-}
-
-ConfigurablePopupSwitchMenuItem.prototype = {
-   __proto__: PopupMenu.PopupBaseMenuItem.prototype,
-
-   _init: function(text, imageOn, imageOff, active, params) {
-      PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-
-      this._imageOn = imageOn;
-      this._imageOff = imageOff;
-
-      let table = new St.Table({ homogeneous: false, reactive: true });
-
-      this.label = new St.Label({ text: text });
-      this.label.set_margin_left(6.0);
-
-      this._switch = new PopupMenu.Switch(active);
-
-      if(active)
-         this.icon = new St.Icon({ icon_name: this._imageOn, icon_type: St.IconType.FULLCOLOR, style_class: 'popup-menu-icon' });
-      else
-         this.icon = new St.Icon({ icon_name: this._imageOff, icon_type: St.IconType.FULLCOLOR, style_class: 'popup-menu-icon' });
-
-      this._statusBin = new St.Bin({ x_align: St.Align.END });
-      this._statusBin.set_margin_left(6.0);
-      this._statusLabel = new St.Label({ text: '', style_class: 'popup-inactive-menu-item' });
-      this._statusBin.child = this._switch.actor;
-
-      table.add(this.icon, {row: 0, col: 0, col_span: 1, x_expand: false, x_align: St.Align.START});
-      table.add(this.label, {row: 0, col: 1, col_span: 1, y_fill: false, y_expand: true, x_align: St.Align.MIDDLE, y_align: St.Align.MIDDLE});
-      table.add(this._statusBin, {row: 0, col: 2, col_span: 1, x_expand: true, x_align: St.Align.END});
-
-      this.addActor(table, { expand: true, span: 1, align: St.Align.START});
-   },
-
-    setToggleState: function(state) {
-        if(state)
-           this.icon.set_icon_name(this._imageOn);
-        else
-           this.icon.set_icon_name(this._imageOff);
-        this._switch.setToggleState(state);
-    },
-
-    get_state: function() {
-        return this._switch.state;
-    }
-};
-
 function AppletIconsBox(parent, box_height, icon_type) {
    this._init(parent, box_height, icon_type);
 }
@@ -357,7 +225,7 @@ AppletIconsBox.prototype = {
       this.set_icon_type(icon_type);
    },
 
-   set_icon_type: function (icon_type) {
+   set_icon_type: function(icon_type) {
       this._icon_type = icon_type;
       let childs = this.actor.get_children();
       for(let ch in childs) {
@@ -380,7 +248,7 @@ AppletIconsBox.prototype = {
       }
    },
 
-   add_applet_icon_name: function (icon_name) {
+   add_applet_icon_name: function(icon_name) {
       let applet_icon = new St.Icon({icon_name: icon_name, reactive: true, track_hover: true });
       applet_icon.set_icon_type(this._icon_type);
       if(this._icon_type == St.IconType.FULLCOLOR)
@@ -402,7 +270,7 @@ AppletIconsBox.prototype = {
       return applet_icon;
    },
 
-   remove_all: function () {
+   remove_all: function() {
       this.actor.destroy_all_children();
    },
 

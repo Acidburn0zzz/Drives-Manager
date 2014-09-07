@@ -2996,11 +2996,17 @@ MyDesklet.prototype = {
          this.setVisibleAppletManager(this._showAsApplet);
          if(this._myManager.applet) {
             this._myManager.applet.swapContextToApplet(this._showAsApplet);
+            this._myManager.applet.setAppletSymbolicIcon(this._appletSymbolic);
          }
       } else if(this._myManager.applet) {
          this._myManager.applet.swapContextToApplet(this._showAsApplet);
          this.setVisibleAppletManager(this._showAsApplet);
       }
+   },
+
+   _onAppletSymbolicChange: function() {
+      if(this._myManager.applet)
+         this._myManager.applet.setAppletSymbolicIcon(this._appletSymbolic);
    },
 
    _onShowMainBox: function() {
@@ -3306,7 +3312,8 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxWidth", "_borderBoxWidth", this._onBorderBoxWidth, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "borderBoxColor", "_borderBoxColor", this._onBorderBoxColor, null);
 
-         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "show-as-applet", "_showAsApplet", this._onShowModeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "showAsApplet", "_showAsApplet", this._onShowModeChange, null);
+         this.settings.bindProperty(Settings.BindingDirection.IN, "appletSymbolic", "_appletSymbolic", this._onAppletSymbolicChange, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "applet-manager-order", "_appletManagerOrder", null, null);
       } catch (e) {
         // Main.notifyError(_("Failed of Drives Manager:"), e.message);

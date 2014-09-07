@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-09-05 22:58-0600\n"
+"PO-Revision-Date: 2014-09-06 22:16-0600\n"
 "Last-Translator: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "Language-Team: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "MIME-Version: 1.0\n"
@@ -576,12 +576,20 @@ msgstr "Hodnota alarmní teploty zobrazující alarm:"
 msgid "Set the custom Alarming temperature value to display a alarm."
 msgstr "Nastavte vlastní alarmní teploty zobrazující alarm."
 
-#. drivesManager@lestcape->settings-schema.json->show-as-applet->description
+#. drivesManager@lestcape->settings-schema.json->showAsApplet->description
 msgid "Show Drives Manager as Applet."
 msgstr ""
 
-#. drivesManager@lestcape->settings-schema.json->show-as-applet->tooltip
+#. drivesManager@lestcape->settings-schema.json->showAsApplet->tooltip
 msgid "Choose whether or not to show Drives Manager as Applet or Desklet."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->appletSymbolic->description
+msgid "Show symbolic icons in the Applet Manager."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->appletSymbolic->tooltip
+msgid "Check this if you want to show symbolic icons in the Applet Manager."
 msgstr ""
 
 #. #-#-#-#-#  drives-manager.pot (PACKAGE VERSION)  #-#-#-#-#
