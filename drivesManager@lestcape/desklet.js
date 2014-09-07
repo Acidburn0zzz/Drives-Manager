@@ -708,29 +708,32 @@ GlobalContainer.prototype = {
 
    setParent: function(parent) {
       this._parent = parent;
-      this._overrideTheme = parent._overrideTheme;
-      this._topTextSize = parent._topTextSize;
-      this._bottomTextSize = parent._bottomTextSize;
-      this._showMainBox = parent._showMainBox;
-      this._showDriveBox = parent._showDriveBox;
-      this._theme = parent._theme;
-      this._opacity = parent._opacity;
-      this._boxColor = parent._boxColor;
-      this._borderBoxWidth = parent._borderBoxWidth;
-      this._borderBoxColor = parent._borderBoxColor;
-      this._width = parent._width;
-      this._fixWidth = parent._fixWidth;
-      this._height = parent._height;
-      this._fixHeight = parent._fixHeight;
-      this._fontColor = parent._fontColor;
-      this._autoscroll = parent._autoscroll;
-      this._scrollVisible = parent._scrollVisible;
+      if(!parent.menu) {
+         this._overrideTheme = parent._overrideTheme;
+         this._topTextSize = parent._topTextSize;
+         this._bottomTextSize = parent._bottomTextSize;
+         this._showMainBox = parent._showMainBox;
+         this._showDriveBox = parent._showDriveBox;
+         this._theme = parent._theme;
+         this._opacity = parent._opacity;
+         this._boxColor = parent._boxColor;
+         this._borderBoxWidth = parent._borderBoxWidth;
+         this._borderBoxColor = parent._borderBoxColor;
+         this._width = parent._width;
+         this._fixWidth = parent._fixWidth;
+         this._height = parent._height;
+         this._fixHeight = parent._fixHeight;
+         this._fontColor = parent._fontColor;
+         this._autoscroll = parent._autoscroll;
+         this._scrollVisible = parent._scrollVisible;
  
-      this.setAutoscroll(this._autoscroll);
-      this.setScrollVisible(this._scrollVisible);
+         this.setAutoscroll(this._autoscroll);
+         this.setScrollVisible(this._scrollVisible);
+         this.setFontColor(this._fontColor); 
+         this._setStyle();
+      }
       this.scrollActor.setParent(parent);
-      this.setFontColor(this._fontColor); 
-      this._setStyle();
+
    },
 
    diplayedMesageID: function() {
