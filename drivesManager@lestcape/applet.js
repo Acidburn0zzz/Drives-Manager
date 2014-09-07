@@ -26,7 +26,6 @@ const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
 const GLib = imports.gi.GLib;
 
-const Mainloop = imports.mainloop;
 const Lang = imports.lang;
 const Gettext = imports.gettext;
 

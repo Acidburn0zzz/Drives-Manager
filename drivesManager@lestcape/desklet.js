@@ -1,6 +1,6 @@
 
 // Desklet : Drives Manager         Version      : v1.2-RTM
-// O.S.    : Cinnamon               Release Date : 7 September 2014.
+// O.S.    : Cinnamon               Release Date : 5 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
@@ -662,9 +662,9 @@ function GlobalContainer(parent, uuid, system) {
 GlobalContainer.prototype = {
 
    _init: function(parent, uuid, system) {
-      this._parent = parent;
       this._uuid = uuid;
       this._sys = system;
+      this._parent = parent;
 
       this._overrideTheme = false;
       this._topTextSize = 9;
@@ -681,6 +681,8 @@ GlobalContainer.prototype = {
       this._height = 350;
       this._fixHeight = false;
       this._fontColor = "white";
+      this._autoscroll = true
+      this._scrollVisible = false;
 
       this._mainBox = new St.BoxLayout({ x_align: St.Align.START, style_class: 'desklet-with-borders', reactive: true, track_hover: true });
       this._mainBox.add_style_class_name('drives-main-box');
@@ -701,13 +703,33 @@ GlobalContainer.prototype = {
       this._listCategoryContainer = new Array();
       this._listCategoryConnected = new Array();
 
-      this.setFontColor(this._fontColor); 
-      this._setStyle();
+      this.setParent(parent);
    },
 
    setParent: function(parent) {
       this._parent = parent;
+      this._overrideTheme = parent._overrideTheme;
+      this._topTextSize = parent._topTextSize;
+      this._bottomTextSize = parent._bottomTextSize;
+      this._showMainBox = parent._showMainBox;
+      this._showDriveBox = parent._showDriveBox;
+      this._theme = parent._theme;
+      this._opacity = parent._opacity;
+      this._boxColor = parent._boxColor;
+      this._borderBoxWidth = parent._borderBoxWidth;
+      this._borderBoxColor = parent._borderBoxColor;
+      this._width = parent._width;
+      this._fixWidth = parent._fixWidth;
+      this._height = parent._height;
+      this._fixHeight = parent._fixHeight;
+      this._fontColor = parent._fontColor;
+      this._autoscroll = parent._autoscroll;
+      this._scrollVisible = parent._scrollVisible;
+ 
+      this.setAutoscroll(this._autoscroll);
+      this.setScrollVisible(this._scrollVisible);
       this.scrollActor.setParent(parent);
+      this.setFontColor(this._fontColor); 
       this._setStyle();
    },
 
@@ -828,33 +850,28 @@ GlobalContainer.prototype = {
          this._listCategoryContainer[index].setOpacity(opacity);
    },
 
-   applyDriveStyle: function(categoryContainer) {
-      categoryContainer.showDriveBox(this._showDriveBox);
-      categoryContainer.setTheme(this._theme);
-      categoryContainer.setBorderBoxWidth(this._borderBoxWidth);
-      categoryContainer.setBorderBoxColor(this._borderBoxColor);
-      categoryContainer.setBoxColor(this._boxColor);
-      categoryContainer.setTopTextSize(this._topTextSize);
-      categoryContainer.setBottomTextSize(this._bottomTextSize);
-      categoryContainer.setOpacity(this._opacity);
-      categoryContainer.overrideTheme(this._overrideTheme);
-   },
-
    addCategoryContainer: function(categoryContainer) {
-      categoryContainer.setParentContainer(this);
-      this.applyDriveStyle(categoryContainer);
-      this._listCategoryContainer.push(categoryContainer);
-      this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, expand: true, x_align: St.Align.START});
-   },
-
-   insertCategoryContainer: function(categoryContainer, index) {
       let _index = this._listCategoryContainer.indexOf(categoryContainer);
       if(_index == -1) {
          categoryContainer.setParentContainer(this);
-         this.applyDriveStyle(categoryContainer);
-         this._listCategoryContainer.splice(index, 0, categoryContainer);
+         this._listCategoryContainer.push(categoryContainer);
+         this._listCategoryConnected.push(false);
+         categoryContainer.getContainerBox().visible = false;
+         this._rootBox.add(categoryContainer.getContainerBox(), {x_fill: true, expand: true, x_align: St.Align.START});
       }
-      this._rootBox.insert_actor(categoryContainer.getContainerBox(), index, {x_fill: true, expand: true, x_align: St.Align.START});
+   },
+
+   insertCategoryContainer: function(categoryContainer, index) {
+      if((index >= 0)&&(index <= this._listCategoryContainer.length)) {
+         let _index = this._listCategoryContainer.indexOf(categoryContainer);
+         if(_index == -1) {
+            categoryContainer.setParentContainer(this);
+            this._listCategoryContainer.splice(index, 0, categoryContainer);
+            this._listCategoryConnected.splice(index, 0, false);
+            categoryContainer.getContainerBox().visible = false;
+            this._rootBox.insert_actor(categoryContainer.getContainerBox(), index, {x_fill: true, expand: true, x_align: St.Align.START});
+         }
+      }
    },
 
    indexOfCategoryContainer: function(categoryContainer) {
@@ -886,19 +903,12 @@ GlobalContainer.prototype = {
 
    connectCategoryByIndex: function(index) {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
-         let _indexConnect = 0;
-         let currCat = 0;
          let catContainer = this._listCategoryContainer[index];
-         while(this._listCategoryContainer[currCat] != catContainer) {
-            if(currCat >= this._listCategoryContainer.length)
-               break;
-            if(this._listCategoryConnected[currCat])
-               _indexConnect = _indexConnect + 1;
-            currCat = currCat + 1;
+         if((catContainer)&&(!this._listCategoryConnected[index])) {
+            this._listCategoryConnected[index] = true;
+            catContainer.getContainerBox().visible = true;
+            catContainer.overrideTheme(this._overrideTheme);
          }
-         this._listCategoryConnected[index] = true;
-         catContainer.getContainerBox().visible = true;
-         catContainer.overrideTheme(this._overrideTheme);
       }
    },
 
@@ -908,9 +918,12 @@ GlobalContainer.prototype = {
 
    disconnectCategoryByIndex: function(index) {
       if((index > -1)&&(index < this._listCategoryContainer.length)) {
-         this._listCategoryConnected[index] = false;
-         let containerBox = this._listCategoryContainer[index].getContainerBox();
-         containerBox.visible = false;
+         let catContainer = this._listCategoryContainer[index];
+         if((catContainer)&&(this._listCategoryConnected[index])) {
+            this._listCategoryConnected[index] = false;
+            let containerBox = this._listCategoryContainer[index].getContainerBox();
+            containerBox.visible = false;
+         }
       }
    },
 
@@ -973,10 +986,12 @@ GlobalContainer.prototype = {
    },
 
    setAutoscroll: function(autoscroll) {
+      this._autoscroll = autoscroll;
       this.scrollActor.setAutoScrolling(autoscroll);
    },
 
    setScrollVisible: function(visibleScroll) {
+      this._scrollVisible = visibleScroll;
       this.scrollActor.setScrollVisible(visibleScroll);
    },
 
@@ -1098,6 +1113,7 @@ CategoryContainer.prototype = {
    setParentContainer: function(parent) {
       this._parent = parent;
       if(this._parent) {
+         //Main.notify("Hola" + this._parent._overrideTheme + " opacity" + this._parent._opacity)
          this._overrideTheme = this._parent._overrideTheme;
          this._theme = this._parent._theme;
          this._showDriveBox = this._parent._showDriveBox;
@@ -1126,7 +1142,6 @@ CategoryContainer.prototype = {
 //Child property
    addDriveContainer: function() {
       let _driveContainer = new DriveContainer(this);
-      this.applyDriveStyle(_driveContainer);
       this._listDriveContainer.push(_driveContainer);
       this._categoryBox.add(_driveContainer.getDriveBox(), {x_fill: true, y_fill: false, expand: true, x_align: St.Align.START});
       return _driveContainer;
@@ -1216,17 +1231,6 @@ CategoryContainer.prototype = {
          this._listDriveContainer[index].setOpacity(opacity);
    },
 
-   applyDriveStyle: function(driveContainer) {
-      driveContainer.setTheme(this._theme);
-      driveContainer.showDriveBox(this._showDriveBox);
-      driveContainer.setBorderBoxWidth(this._borderBoxWidth);
-      driveContainer.setBorderBoxColor(this._borderBoxColor);
-      driveContainer.setBoxColor(this._boxColor);
-      driveContainer.setTopTextSize(this._topTextSize);
-      driveContainer.setBottomTextSize(this._bottomTextSize);
-      driveContainer.setOpacity(this._opacity);
-      driveContainer.overrideTheme(this._overrideTheme);
-   },
 //Child property
    update: function() {
    },
@@ -1331,6 +1335,7 @@ DriveContainer.prototype = {
    setParent: function(parent) {
       this._parent = parent;
       if(this._parent) {
+         //Main.notify("Hola" + this._parent._overrideTheme + " opacity" + this._parent._opacity)
          this._overrideTheme = this._parent._overrideTheme;
          this._showDriveBox = this._parent._showDriveBox;
          this._boxColor = this._parent._boxColor;
@@ -1339,7 +1344,6 @@ DriveContainer.prototype = {
          this._borderBoxColor  = this._parent._borderBoxColor;
          this._topTextSize = this._parent._topTextSize;
          this._bottomTextSize = this._parent._bottomTextSize;
-         this._setStyleDrive();
       }
       this._setStyleDrive();
    },
@@ -2505,7 +2509,7 @@ VolumeMonitor.prototype = {
       this._volumeMonitorSignals = [];
       this._idGuDev;
       this.connect();
-      this._createCategory();
+      this._createCategories();
    },
 
    connect: function() {
@@ -2536,19 +2540,19 @@ VolumeMonitor.prototype = {
    },
 */
    _onVolumeAdded: function() {
-       this._createCategory();
+       this._createCategories();
    },
 
    _onVolumeRemoved: function() {
-       this._createCategory();
+       this._createCategories();
    },
 
    _onDriveConnected: function() {
-       this._createCategory();
+       this._createCategories();
    },
 
    _onDriveDisconnected: function() {
-       this._createCategory();
+       this._createCategories();
    },
 
 //   _onDriveChange: function() {
@@ -2566,7 +2570,7 @@ VolumeMonitor.prototype = {
          this._client.disconnect(this._idGuDev);
    },
 
-   _createCategory: function() {
+   _createCategories: function() {
       let _indexCategory = this._globalContainer.countCategoryContainer();
       if(this._listCategory) {
          _indexCategory = this._globalContainer.indexOfCategoryContainer(this._listCategory[0]);
@@ -2618,7 +2622,7 @@ VolumeMonitor.prototype = {
       for(let i = 0; i < _listDrives.length; i++) {
          this._insertInCategory(_listDrives[i]);
       }
-      /* add all volumes that is not associated with a drive */
+      // add all volumes that is not associated with a drive //
       let _listVolumes = this._monitor.get_volumes();
       for(let i = 0; i < _listVolumes.length; i++) {
          if(!_listVolumes[i].get_drive()) {
@@ -2629,13 +2633,14 @@ VolumeMonitor.prototype = {
          }
       }
 
-      /* add mounts that have no volume (/etc/mtab mounts, ftp, sftp,...) */
+      // add mounts that have no volume (/etc/mtab mounts, ftp, sftp,...) //
       let _listMounts = this._monitor.get_mounts();
       for(let i = 0; i < _listMounts.length; i++) {
          if((!_listMounts[i].is_shadowed())&&(!_listMounts[i].get_volume())) {
             this._listCategory[6].addDevice(_listMounts[i]);
          }
       }
+
       this.setCapacityDetect(this._capacityDetect);
       this.openOnConnect(this._openConnect);
       this.unEjecting(this._unEjecting);
@@ -2747,7 +2752,7 @@ VolumeMonitor.prototype = {
 
 //Monitor
    _onMountAdded: function(monit, mount) {
-      this._createCategory();
+      this._createCategories();
       //this._insertInCategory(mount.get_drive());
       try {
          if(this._displayMessage)
@@ -2777,7 +2782,7 @@ VolumeMonitor.prototype = {
         if(this._displayMessage)
            Main.notify(_("The device has been ejected."));
         global.play_theme_sound(0, 'device-removed-media');
-        this._createCategory();
+        this._createCategories();
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
@@ -2939,35 +2944,40 @@ MyDesklet.prototype = {
          this.globalContainer.addCategoryContainer(this.hardDisk);
          this._onShowHardDisk();
 
+//Mainloop.idle_add(Lang.bind(this, function() {
          this.volumeMonitor = new VolumeMonitor(this.globalContainer);
+
+         this._onTypeOpenChanged();
+         //this._onOpenConnect();
+
          this._onShowOpticalDrives();
          this._onShowRemovableDrives();
          this._onShowFixedDrives();
          this._onShowNotDrives();
          this._onShowEmptyDrives();
          this._onMeterTimeDelay();
-         this._onShowMainBox();
-         this._onShowDriveBox();
-         this._onThemeChange();
-         this._onTypeOpenChanged();
-         this._onOpenConnect();
-         this._onFixWidth();
-         this._onFixHeight();
-         this._onEnableAutoscroll();
-         this._onScrollVisibleChange();
-         this._onOverrideTheme();
-         this._onBorderBoxWidth();
-         this._onBorderBoxColor();
-         this._onBoxColor();
-         this._onFontColor();
-         this._onTextTopSize();
-         this._onTextBottomSize();
-         this._onOpacity();
-         this._onCapacityDetect();
 
+         //this._onShowMainBox();
+         //this._onShowDriveBox();
+         //this._onThemeChange();
+         //this._onFixWidth();
+         //this._onFixHeight();
+         //this._onEnableAutoscroll();
+         //this._onScrollVisibleChange();
+         //this._onOverrideTheme();
+         //this._onBorderBoxWidth();
+         //this._onBorderBoxColor();
+         //this._onBoxColor();
+         //this._onFontColor();
+         //this._onTextTopSize();
+         //this._onTextBottomSize();
+         //this._onOpacity();
+
+         this._onCapacityDetect();
          this._onUnEjecting();
          this._onUnmountAll();
          this._onDisplayMessageChanged();
+
          this._onRaiseKeyChange();
          this._onHddTempChanged();
          this._onHddTempPlaySoundChanged();
@@ -2977,6 +2987,7 @@ MyDesklet.prototype = {
          this._onHddTempWarningTempChanged();
          this._onHddTempCritialTempChanged();
          this._onShowModeChange();
+//}));
       } catch(e) {
          Main.notifyError(_("Failed of Drives Manager:"), e.message);
       }
