@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-09-07 00:05-0600\n"
+"PO-Revision-Date: 2014-09-19 10:46-0600\n"
 "Last-Translator: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "Language-Team: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "MIME-Version: 1.0\n"
@@ -416,6 +416,26 @@ msgstr "Čas přenosu souboru (delší čas znamená větší přesnost):"
 #. drivesManager@lestcape->settings-schema.json->meterTimeDelay->tooltip
 msgid "Increase or decrease the time between measurements file transfer speed."
 msgstr "Zvětšete nebo zmenšete čas mezi měřeními přenosové rychlosti souboru."
+
+#. drivesManager@lestcape->settings-schema.json->notMountSystem->description
+msgid "The O.S. do not automount the volume."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->notMountSystem->tooltip
+msgid ""
+"Check this to set in false the desktop.media-handling automount property of "
+"org.cinnamon and org.gnome."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->mountConnect->description
+msgid "Driver Manager automount the volume."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->mountConnect->tooltip
+msgid ""
+"Check this if you want that Drives Manager can automount the volume when is "
+"ready."
+msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->notOpenSystem->description
 msgid "The O.S. do not auto open mount points."

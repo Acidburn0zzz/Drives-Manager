@@ -443,6 +443,22 @@ msgstr ""
 msgid "Increase or decrease the time between measurements file transfer speed."
 msgstr ""
 
+#. drivesManager@lestcape->settings-schema.json->notMountSystem->description
+msgid "The O.S. do not automount the volume."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->notMountSystem->tooltip
+msgid "Check this to set in false the desktop.media-handling automount property of org.cinnamon and org.gnome."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->mountConnect->description
+msgid "Driver Manager automount the volume."
+msgstr ""
+
+#. drivesManager@lestcape->settings-schema.json->mountConnect->tooltip
+msgid "Check this if you want that Drives Manager can automount the volume when is ready."
+msgstr ""
+
 #. drivesManager@lestcape->settings-schema.json->notOpenSystem->description
 msgid "The O.S. do not auto open mount points."
 msgstr ""

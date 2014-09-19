@@ -48,6 +48,8 @@ const Tweener = imports.ui.tweener;
 const CinnamonMountOperation = imports.ui.cinnamonMountOperation;
 const Main = imports.ui.main;
 const Util = imports.misc.util;
+const ScreenSaver = imports.misc.screenSaver;
+const Params = imports.misc.params;
 
 
 /****Import File****/
@@ -2505,11 +2507,22 @@ VolumeMonitor.prototype = {
       this._openConnect = true;
       this._capacityDetect = true;
       this._displayMessage = true;
+      this._autoMount = false;
       this._globalContainer = globalContainer;
       this._monitor = Gio.VolumeMonitor.get();
       this._client = new GUdev.Client ({subsystems: ["block"]});
       this._volumeMonitorSignals = [];
       this._idGuDev;
+
+      this._settings = new Gio.Settings({ schema: "org.gnome.desktop.media-handling" });
+      this._volumeQueue = [];
+      this._ssProxy = new ScreenSaver.ScreenSaverProxy();
+      this._ssProxy.connectSignal('ActiveChanged',
+                            Lang.bind(this,
+                                      this._screenSaverActiveChanged));
+
+      Mainloop.idle_add(Lang.bind(this, this._startupMountAll));
+
       this.connect();
       this._createCategories();
    },
@@ -2541,28 +2554,82 @@ VolumeMonitor.prototype = {
          this._listCategory[1].updateOpticalByIdentifier(_deviceId);
    },
 */
-   _onVolumeAdded: function() {
-       this._createCategories();
+
+   _screenSaverActiveChanged: function(proxy, senderName, [isActive]) {
+      if (!isActive) {
+         this._volumeQueue.forEach(Lang.bind(this, function(volume) {
+            this._checkAndMountVolume(volume);
+         }));
+      }
+
+      // clear the queue anyway
+      this._volumeQueue = [];
    },
 
-   _onVolumeRemoved: function() {
-       this._createCategories();
+   _startupMountAll: function() {
+      let volumes = this._monitor.get_volumes();
+      volumes.forEach(Lang.bind(this, function(volume) {
+         this._checkAndMountVolume(volume, { checkSession: false,
+                                             useMountOp: false });
+      }));
+
+      return false;
+   },
+
+   _checkAndMountVolume: function(volume, params) {
+      params = Params.parse(params, { checkSession: true,
+                                      useMountOp: true });
+
+      if (!this._autoMount || !volume.should_automount() || !volume.can_mount() || volume.get_mount())
+         return false;
+
+      if (this._ssProxy.screenSaverActive) {
+         if (this._volumeQueue.indexOf(volume) == -1)
+            this._volumeQueue.push(volume);
+      }
+      this._mountVolume(volume, null);
+      return true;
+   },
+
+   _mountVolume: function(volume, operation) {
+      volume.mount(0, operation, null, Lang.bind(this, this._onVolumeMounted));
+   },
+
+   _onVolumeMounted: function(volume, res) {
+      try {
+         volume.mount_finish(res);
+      } catch (e) {
+         log('Unable to mount volume ' + volume.get_name() + ': ' +
+             e.toString());
+      }
+   },
+
+   _onVolumeAdded: function(monitor, volume) {
+      this._checkAndMountVolume(volume);
+      this._createCategories();
+   },
+
+   _onVolumeRemoved: function(monitor, volume) {
+      this._volumeQueue = this._volumeQueue.filter(function(element) {
+         return (element != volume);
+      });
+      this._createCategories();
    },
 
    _onDriveConnected: function() {
-       this._createCategories();
+      this._createCategories();
    },
 
    _onDriveDisconnected: function() {
-       this._createCategories();
+      this._createCategories();
    },
 
 //   _onDriveChange: function() {
-//       Main.notify("changed");
+//      Main.notify("changed");
 //   },
 
 //   _onDriveEjectButton: function() {
-//       Main.notify("Eject Button");
+//      Main.notify("Eject Button");
 //   },
 
    disconnect: function() {
@@ -2701,6 +2768,10 @@ VolumeMonitor.prototype = {
       this._openConnect = open;
       for(let category in this._listCategory)
          this._listCategory[category].openOnConnect(open);
+   },
+
+   autoMountOnConnect: function(autoMount) {
+      this._autoMount = autoMount;
    },
 
    unEjecting: function(unEjecting) {
@@ -2861,7 +2932,12 @@ MyDesklet.prototype = {
          this._notOpenSystem = !this.cinnamonSettings.get_boolean("automount-open");
          this._onTypeOpenChanged();
       }));
-      this.isGSettingRead = false;
+      this.cinnamonSettings.connect("changed::automount", Lang.bind(this, function() {
+         this._notMountSystem= !this.cinnamonSettings.get_boolean("automount");
+         this._onTypeMountChanged();
+      }));
+      this.isOpenConnectRead = false;
+      this.isMountConnectRead = false;
       this._initSettings();
       this._createAppletManager();
       this._initComponents();
@@ -3106,27 +3182,6 @@ MyDesklet.prototype = {
       this.speedDisk.setMeterTimeDelay(this._meterTimeDelay);
    },
 
-   _onTypeOpenChanged: function() { //This will read the current gsetting first, and preserve only the cinnamon value also in gnome.
-      try {
-         if(this.isGSettingRead) {
-            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
-               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
-            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem)
-               this.cinnamonSettings.set_boolean("automount-open", !this._notOpenSystem);
-         } else {
-            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem) {
-               this._notOpenSystem = (!this._notOpenSystem); 
-            }
-            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
-               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
-         }
-         this._onOpenConnect();//if gsetting is active disable Drive Manager.
-         this.isGSettingRead = true;
-      } catch(e) {
-         Main.notifyError(_("Failed of Drives Manager:"), e.message);
-      }
-   },
-
    _toggleRaise: function() {
       try {
          if(this._myManager.applet) {
@@ -3166,6 +3221,55 @@ MyDesklet.prototype = {
       DeskletManager.checkMouseTracking();
       this._desklet_raised = false;
       this.changingRaiseState = false;
+   },
+
+
+   _onTypeMountChanged: function() { //This will read the current gsetting first, and preserve only the cinnamon value also in gnome.
+      try {
+         if(this.isMountConnectRead) {
+            if(this.gnomeSettings.get_boolean("automount") == this._notMountSystem)
+               this.gnomeSettings.set_boolean("automount", !this._notMountSystem);
+            if(this.cinnamonSettings.get_boolean("automount") == this._notMountSystem)
+               this.cinnamonSettings.set_boolean("automount", !this._notMountSystem);
+         } else {
+            if(this.cinnamonSettings.get_boolean("automount") == this._notMountSystem) {
+               this._notMountSystem = (!this._notOpenSystem); 
+            }
+            if(this.gnomeSettings.get_boolean("automount") == this._notMountSystem)
+               this.gnomeSettings.set_boolean("automount", !this._notMountSystem);
+         }
+         this._onMountConnect();//if gsetting is active disable Drive Manager.
+         this.isMountConnectRead = true;
+      } catch(e) {
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
+      }
+   },
+
+   _onMountConnect: function() {
+      if((!this._notMountSystem)&&(this._mountConnect)) //Do not allow set drive manager if gsetting is active. 
+         this._mountConnect = (!this._mountConnect);
+      this.volumeMonitor.autoMountOnConnect(this._mountConnect);
+   },
+
+   _onTypeOpenChanged: function() { //This will read the current gsetting first, and preserve only the cinnamon value also in gnome.
+      try {
+         if(this.isOpenConnectRead) {
+            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
+            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.cinnamonSettings.set_boolean("automount-open", !this._notOpenSystem);
+         } else {
+            if(this.cinnamonSettings.get_boolean("automount-open") == this._notOpenSystem) {
+               this._notOpenSystem = (!this._notOpenSystem); 
+            }
+            if(this.gnomeSettings.get_boolean("automount-open") == this._notOpenSystem)
+               this.gnomeSettings.set_boolean("automount-open", !this._notOpenSystem);
+         }
+         this._onOpenConnect();//if gsetting is active disable Drive Manager.
+         this.isOpenConnectRead = true;
+      } catch(e) {
+         Main.notifyError(_("Failed of Drives Manager:"), e.message);
+      }
    },
 
    _onOpenConnect: function() {
@@ -3290,6 +3394,8 @@ MyDesklet.prototype = {
          this.settings.bindProperty(Settings.BindingDirection.IN, "meterTimeDelay", "_meterTimeDelay", this._onMeterTimeDelay, null);
 
 
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "notMountSystem", "_notMountSystem", this._onTypeMountChanged, null);
+         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "mountConnect", "_mountConnect", this._onMountConnect, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "notOpenSystem", "_notOpenSystem", this._onTypeOpenChanged, null);
          this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, "openConnect", "_openConnect", this._onOpenConnect, null);
          this.settings.bindProperty(Settings.BindingDirection.IN, "capacityDetect", "_capacityDetect", this._onCapacityDetect, null);

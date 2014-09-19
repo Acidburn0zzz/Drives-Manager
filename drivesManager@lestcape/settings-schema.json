@@ -77,6 +77,20 @@
     "separator-tools-bottom": {
         "type": "separator"
     },
+    "notMountSystem": {
+        "default": false,
+        "description": "The O.S. do not automount the volume.",
+        "type": "checkbox",
+        "tooltip": "Check this to set in false the desktop.media-handling automount property of org.cinnamon and org.gnome."
+    },
+    "mountConnect": {
+        "default": false,
+        "description": "Driver Manager automount the volume.",
+        "type": "checkbox",
+        "tooltip": "Check this if you want that Drives Manager can automount the volume when is ready.",
+        "indent": true,
+        "dependency": "notMountSystem"
+    },
     "notOpenSystem": {
         "default": false,
         "description": "The O.S. do not auto open mount points.",

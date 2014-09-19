@@ -52,6 +52,12 @@ const St = imports.gi.St;
 const GUdev = imports.gi.GUdev;
 const GObject = imports.gi.GObject;
 
+/*
+try {
+} catch(e) {
+}
+*/
+
 let UDisksDriveProxyInternal;
 let UDisksDriveAtaProxyInternal;
 try {
@@ -371,8 +377,6 @@ Installer.prototype = {
       return this._system.isPackageInstall(packageName);      
    }
 };
-
-
 
 // routines for handling of udisks2
 const UDisks = {
