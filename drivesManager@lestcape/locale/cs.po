@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-09-19 10:46-0600\n"
+"PO-Revision-Date: 2014-09-19 16:32-0600\n"
 "Last-Translator: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "Language-Team: Jakub Vanek <vanek.jakub4@seznam.cz>\n"
 "MIME-Version: 1.0\n"
@@ -428,7 +428,7 @@ msgid ""
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->description
-msgid "Driver Manager automount the volume."
+msgid "Drives Manager automount the volume."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->tooltip

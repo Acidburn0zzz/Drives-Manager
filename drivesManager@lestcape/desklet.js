@@ -1,12 +1,11 @@
 
-// Desklet : Drives Manager         Version      : v1.2-RTM
-// O.S.    : Cinnamon               Release Date : 5 September 2014.
+// Desklet : Drives Manager         Version      : v1.3-RTM
+// O.S.    : Cinnamon               Release Date : 19 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
 //
 // This is a desklet to show devices connected to the computer and interact with them.
-//
 //
 //    This program is free software:
 //
@@ -22,7 +21,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+
 const Clutter = imports.gi.Clutter;
 
 const Gio = imports.gi.Gio;
@@ -2521,8 +2520,6 @@ VolumeMonitor.prototype = {
                             Lang.bind(this,
                                       this._screenSaverActiveChanged));
 
-      Mainloop.idle_add(Lang.bind(this, this._startupMountAll));
-
       this.connect();
       this._createCategories();
    },
@@ -2564,16 +2561,6 @@ VolumeMonitor.prototype = {
 
       // clear the queue anyway
       this._volumeQueue = [];
-   },
-
-   _startupMountAll: function() {
-      let volumes = this._monitor.get_volumes();
-      volumes.forEach(Lang.bind(this, function(volume) {
-         this._checkAndMountVolume(volume, { checkSession: false,
-                                             useMountOp: false });
-      }));
-
-      return false;
    },
 
    _checkAndMountVolume: function(volume, params) {
@@ -2772,6 +2759,20 @@ VolumeMonitor.prototype = {
 
    autoMountOnConnect: function(autoMount) {
       this._autoMount = autoMount;
+      let volumes = this._monitor.get_volumes();
+
+      if(this._autoMount) {
+         let volume;
+         for(pos in volumes) {
+            volume = volumes[pos];
+            if (volume.should_automount() && volume.can_mount() && volume.get_mount())
+               return false;
+         }
+         volumes.forEach(Lang.bind(this, function(volume) {
+            this._checkAndMountVolume(volume, { checkSession: false,
+                                                useMountOp: false });
+         }));
+      }
    },
 
    unEjecting: function(unEjecting) {
@@ -3026,7 +3027,9 @@ MyDesklet.prototype = {
 //Mainloop.idle_add(Lang.bind(this, function() {
          this.volumeMonitor = new VolumeMonitor(this.globalContainer);
 
+         this._onTypeMountChanged();
          this._onTypeOpenChanged();
+         //this._onMountConnect();
          //this._onOpenConnect();
 
          this._onShowOpticalDrives();

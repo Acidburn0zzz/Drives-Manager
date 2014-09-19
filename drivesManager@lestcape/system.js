@@ -1,32 +1,15 @@
 
-// Desklet : Drives Manager         Version      : v1.1-RTM
-// O.S.    : Cinnamon               Release Date : 30 October 2013.
+// Desklet : Drives Manager         Version      : v1.3-RTM
+// O.S.    : Cinnamon               Release Date : 19 September 2014.
+// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
+
+// Desklet : Drives Manager         Version      : v1.3-RTM
+// O.S.    : Cinnamon               Release Date : 19 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
 //
 // This is a desklet to show devices connected to the computer and interact with them.
-//
-// Skills including:
-//
-// 1- Show different volumes containing a device, also if is not currently mounted.
-// 2- The volumes can be mounted and unmounted with a single click.
-// 3- If you have data volumes mounted, you can access the mount point with your favorite
-//    browser (Nemo or Nautilus) with a single click or automatically if desired when the
-//    volume is mounted.
-// 4- The desklet has a wide range of configuration options, allowing you to fit almost all
-//    themes desk.
-// 5- Through this desklet, you can monitor the temperatures of your hard disks and even
-//    activate an alarm when the disc temperature exceeds a value, that you consider unacceptable.
-//    To use this option, we required the installation and configuration of hddtemp program,
-//    but do not worry, simply activate the option and the desklet will installed and configured,
-//    without your intervention.
-// 6- You can enable the option to reconnect removable usb device, without the need to remove the
-//    device from the connector. Like USB Safely Removed works in Windows.
-// 7- You can also monitor the speed of read/write files on your system.
-// 8- If you have a CD-ROM disc tray, you can opened/closed it with a single click, even if a
-//    disc is present. Unfortunately, this skill requires that you have installed eject and
-//    cdrecord programs.
 //
 //    This program is free software:
 //

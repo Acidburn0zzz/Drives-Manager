@@ -1,6 +1,6 @@
-Cinnamon Desklet: Drives Manager Version: v1.2-RTM
+Cinnamon Desklet: Drives Manager Version: v1.3-RTM
 
-Last version release date: 7 September 2014
+Last version release date: 19 September 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 
@@ -71,6 +71,9 @@ Known bugs and requirements:
 
 Change Log:
 ==============
+1.3-RTM
+  - Drives Manager automount the volumes.
+
 1.2-RTM
   - All icons are in svg now.
   - Added Czech language(thanks vanek.jakub4).

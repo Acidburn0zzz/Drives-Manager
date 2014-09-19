@@ -71,6 +71,8 @@ Known bugs and requirements:
 --------------
 Change Log:
 --------------
+1.3-RTM
+  - Drives Manager automount the volumes.
 
 1.2-RTM
   - All icons are in svg now.

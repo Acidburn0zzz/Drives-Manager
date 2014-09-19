@@ -85,7 +85,7 @@
     },
     "mountConnect": {
         "default": false,
-        "description": "Driver Manager automount the volume.",
+        "description": "Drives Manager automount the volume.",
         "type": "checkbox",
         "tooltip": "Check this if you want that Drives Manager can automount the volume when is ready.",
         "indent": true,

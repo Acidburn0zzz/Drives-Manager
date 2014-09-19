@@ -1,6 +1,6 @@
-Cinnamon Desklet: Drives Manager Version: v1.2-RTM
+Cinnamon Desklet: Drives Manager Version: v1.3-RTM
 
-Last version release date: 7 de Septiembre 2014
+Last version release date: 19 de Septiembre 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 Contact: lestcape@gmail.com
@@ -70,12 +70,15 @@ Errores conocidos y requerimientos:
 --------------
 Registro de cambios:
 --------------
+1.3-RTM
+  - Drives Manager monta automáticamente los volúmenes.
+
 1.2-RTM
   - Se están cambiando los iconos a svg.
   - Añadido el idioma Checo(gracias a vanek.jakub4).
   - El programa hddtemp fue reemplazado por Udisk2(gracias a rgcjonas).
   - Añadido soporte para los temas de Cinnamon.
-  - Ahora se puede elegir si Driver Manager será un Applet o un Desklet.
+  - Ahora se puede elegir si Drives Manager será un Applet o un Desklet.
   - Los puntos de montaje ahora se abren con el navegador por defecto de su computadora.
   - Se limitó la altura, para que no sobrepase la altura del monitor con un scroll.
   - Se añadiron opciones para configurar el comportamiento del scroll.

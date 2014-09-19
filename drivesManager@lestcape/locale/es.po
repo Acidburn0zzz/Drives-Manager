@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Drives-Manager v1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-25 01:53-0500\n"
-"PO-Revision-Date: 2014-09-19 10:46-0600\n"
+"PO-Revision-Date: 2014-09-19 16:32-0600\n"
 "Last-Translator: Lester Carballo Pérez <lestcape@gmail.com>\n"
 "Language-Team: lestcape <lestcape@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -445,8 +445,8 @@ msgstr ""
 "desktop.media-handling de org.cinnamon y org.gnome."
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->description
-msgid "Driver Manager automount the volume."
-msgstr "Driver Manager monta automáticamente el volumen."
+msgid "Drives Manager automount the volume."
+msgstr "Drives Manager monta automáticamente el volumen."
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->tooltip
 msgid ""

@@ -1,11 +1,11 @@
-// Desklet : Drives Manager         Version      : v1.2-RTM
-// O.S.    : Cinnamon               Release Date : 7 September 2014.
+
+// Desklet : Drives Manager         Version      : v1.3-RTM
+// O.S.    : Cinnamon               Release Date : 19 September 2014.
 // Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
 //
 // Website : https://github.com/lestcape/Drives-Manager
 //
 // This is a desklet to show devices connected to the computer and interact with them.
-//
 //
 //    This program is free software:
 //
@@ -21,7 +21,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+
 const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
 const GLib = imports.gi.GLib;

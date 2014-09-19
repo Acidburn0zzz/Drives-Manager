@@ -452,7 +452,7 @@ msgid "Check this to set in false the desktop.media-handling automount property 
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->description
-msgid "Driver Manager automount the volume."
+msgid "Drives Manager automount the volume."
 msgstr ""
 
 #. drivesManager@lestcape->settings-schema.json->mountConnect->tooltip
