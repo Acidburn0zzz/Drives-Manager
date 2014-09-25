@@ -733,7 +733,8 @@ GlobalContainer.prototype = {
       this.setFontColor(this._fontColor); 
       this._setStyle();
       this.scrollActor.setParent(parent);
-
+      this.setWidth(this._width);
+      this.setHeight(this._height);
    },
 
    diplayedMesageID: function() {

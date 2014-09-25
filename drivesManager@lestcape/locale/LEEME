@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.3-RTM
 
-Last version release date: 19 de Septiembre 2014
+Last version release date: 25 de Septiembre 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 Contact: lestcape@gmail.com
@@ -72,6 +72,7 @@ Registro de cambios:
 --------------
 1.3-RTM
   - Drives Manager monta automáticamente los volúmenes.
+  - Solucionado el problema de fijar el ancho y el alto en el reinicio de Cinnamon.
 
 1.2-RTM
   - Se están cambiando los iconos a svg.
