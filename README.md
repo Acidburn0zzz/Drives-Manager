@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.3-RTM
 
-Last version release date: 25 September 2014
+Last version release date: 27 September 2014
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 

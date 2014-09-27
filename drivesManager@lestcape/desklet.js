@@ -733,8 +733,10 @@ GlobalContainer.prototype = {
       this.setFontColor(this._fontColor); 
       this._setStyle();
       this.scrollActor.setParent(parent);
-      this.setWidth(this._width);
-      this.setHeight(this._height);
+      Mainloop.idle_add(Lang.bind(this, function() {
+         this.setWidth(this._width);
+         this.setHeight(this._height);
+      }));
    },
 
    diplayedMesageID: function() {
@@ -970,15 +972,15 @@ GlobalContainer.prototype = {
 
    setHeight: function(height) {
       this._height = height;
-      let monitor = Main.layoutManager.findMonitorForActor(this._mainBox);
+      let monitorHeight = Main.layoutManager.findMonitorForActor(this._mainBox).height;
       if(this._fixHeight) {
-         if(this._height <= monitor.height - 100)
+         if(this._height <= monitorHeight - 100)
             this._mainBox.set_height(this._height);
          else
-            this._mainBox.set_height(monitor.height - 100);
+            this._mainBox.set_height(monitorHeight - 100);
       } else {
-         if(this._rootBox.get_height() > monitor.height - 100)
-            this._mainBox.set_height(monitor.height - 100);
+         if(this._rootBox.get_height() > monitorHeight - 100)
+            this._mainBox.set_height(monitorHeight - 100);
          else
             this._mainBox.set_height(-1);
       }
@@ -2516,10 +2518,15 @@ VolumeMonitor.prototype = {
 
       this._settings = new Gio.Settings({ schema: "org.gnome.desktop.media-handling" });
       this._volumeQueue = [];
-      this._ssProxy = new ScreenSaver.ScreenSaverProxy();
-      this._ssProxy.connectSignal('ActiveChanged',
-                            Lang.bind(this,
-                                      this._screenSaverActiveChanged));
+      try {
+         this._ssProxy = new ScreenSaver.ScreenSaverProxy();
+         if(this._ssProxy.connectSignal)
+            this._ssProxy.connectSignal('ActiveChanged', Lang.bind(this, this._screenSaverActiveChanged));
+         else
+            this._ssProxy.connect('ActiveChanged', Lang.bind(this, this._screenSaverActiveChanged));
+      } catch(e) {
+         global.log(e);
+      }
 
       this.connect();
       this._createCategories();
@@ -2571,7 +2578,7 @@ VolumeMonitor.prototype = {
       if (!this._autoMount || !volume.should_automount() || !volume.can_mount() || volume.get_mount())
          return false;
 
-      if (this._ssProxy.screenSaverActive) {
+      if((this._ssProxy)&&(this._ssProxy.screenSaverActive)) {
          if (this._volumeQueue.indexOf(volume) == -1)
             this._volumeQueue.push(volume);
       }
@@ -2760,9 +2767,8 @@ VolumeMonitor.prototype = {
 
    autoMountOnConnect: function(autoMount) {
       this._autoMount = autoMount;
-      let volumes = this._monitor.get_volumes();
-
       if(this._autoMount) {
+         let volumes = this._monitor.get_volumes();
          let volume;
          for(pos in volumes) {
             volume = volumes[pos];
@@ -2774,6 +2780,7 @@ VolumeMonitor.prototype = {
                                                 useMountOp: false });
          }));
       }
+      return true;
    },
 
    unEjecting: function(unEjecting) {
