@@ -1,34 +1,30 @@
-Cinnamon Desklet: Drives Manager Version: v1.3-RTM
+Cinnamon Desklet: Drives Manager Version: v1.3
 
-Last version release date: 27 September 2014
+Last version release date: 24 November 2014.
+
+Contact: lestcape@gmail.com  Website: https://github.com/lestcape/Drives-Manager
 ***
-Authors: Lester Carballo Pérez (https://github.com/lestcape)
 
-Contact: lestcape@gmail.com
+![Alt text](/drivesManager@lestcape/Capture.png)
 
-Website: https://github.com/lestcape/Drives-Manager
+--------------
+Authors:
+--------------
+   [Lester Carballo Pérez](https://github.com/lestcape)
 
 --------------
 Special thanks to:
 --------------
- - The Cinnamon programmers.
- - mtwebster http://cinnamon-spices.linuxmint.com/users/view/339
- - rgcjonas https://github.com/rgcjonas
- - KZom https://github.com/KZom
- - duncannz https://github.com/duncannz
- - nimdahk https://github.com/nimdahk
- - collins (https://github.com/collinss)
+ - [mtwebster](https://github.com/mtwebster) Included the translation support on cinnamon.
+ - [rgcjonas](https://github.com/rgcjonas) Udisk2 asyncronous temperature detections.
+ - [collinss](https://github.com/collinss) The raise desklet behavior.
 
 --------------
 Author of language translation:
 --------------
- - Czech(Cs_Cz):     Kuba Vaněk(vanek.jakub4@seznam.cz)
- - Spanish(Es):      Lester Carballo Pérez(lestcape@gmail.com)
- - English(En):      Lester Carballo Pérez(lestcape@gmail.com)
-
-
-![Alt text](/drivesManager@lestcape/Capture.png)
-
+ - Czech(Cs_Cz):     [Kuba Vaněk](vanek.jakub4@seznam.cz)
+ - Spanish(Es):      [Lester Carballo Pérez](lestcape@gmail.com)
+ - English(En):      [Lester Carballo Pérez](lestcape@gmail.com)
 
 Skills including:
 --------------
@@ -71,7 +67,7 @@ Known bugs and requirements:
 
 Change Log:
 ==============
-1.3-RTM
+1.3
   - Drives Manager automount the volumes.
   - Fixed the fix width and height on the Cinnamon restart.
 

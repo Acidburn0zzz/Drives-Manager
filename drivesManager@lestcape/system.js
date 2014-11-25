@@ -1,12 +1,7 @@
 
-// Desklet : Drives Manager         Version      : v1.3-RTM
-// O.S.    : Cinnamon               Release Date : 19 September 2014.
-// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
-
-// Desklet : Drives Manager         Version      : v1.3-RTM
-// O.S.    : Cinnamon               Release Date : 19 September 2014.
-// Author  : Lester Carballo Pérez  Email        : lestcape@gmail.com
-//
+// Desklet : Drives Manager
+// Author  : Lester Carballo Pérez 
+// Email   : lestcape@gmail.com
 // Website : https://github.com/lestcape/Drives-Manager
 //
 // This is a desklet to show devices connected to the computer and interact with them.
@@ -34,12 +29,6 @@ const Main = imports.ui.main;
 const St = imports.gi.St;
 const GUdev = imports.gi.GUdev;
 const GObject = imports.gi.GObject;
-
-/*
-try {
-} catch(e) {
-}
-*/
 
 let UDisksDriveProxyInternal;
 let UDisksDriveAtaProxyInternal;
