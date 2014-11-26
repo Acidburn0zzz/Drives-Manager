@@ -1,6 +1,6 @@
-Cinnamon Desklet: Drives Manager Version: v1.3
+Cinnamon Desklet: Drives Manager Version: v1.4
 
-Last version release date: 24 November 2014.
+Last version release date: 26 November 2014.
 
 Contact: lestcape@gmail.com  Website: https://github.com/lestcape/Drives-Manager
 ***
@@ -22,9 +22,10 @@ Special thanks to:
 --------------
 Author of language translation:
 --------------
- - Czech(Cs_Cz):     [Kuba Vaněk](vanek.jakub4@seznam.cz)
- - Spanish(Es):      [Lester Carballo Pérez](lestcape@gmail.com)
- - English(En):      [Lester Carballo Pérez](lestcape@gmail.com)
+ - Bulgarian(Bg):    [Peyu Yovev (spacy01)](https://github.com/spacy01) (spacy00001@gmail.com) )
+ - Czech(Cs_Cz):     [Kuba Vaněk] (vanek.jakub4@seznam.cz)
+ - Spanish(Es):      [Lester Carballo Pérez](https://github.com/lestcape) (lestcape@gmail.com)
+ - English(En):      [Lester Carballo Pérez](https://github.com/lestcape) (lestcape@gmail.com)
 
 Skills including:
 --------------
@@ -67,6 +68,9 @@ Known bugs and requirements:
 
 Change Log:
 ==============
+1.4
+   - Added Bulgarian language, thanks to Peyu Yovev
+
 1.3
   - Drives Manager automount the volumes.
   - Fixed the fix width and height on the Cinnamon restart.
