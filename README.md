@@ -23,7 +23,7 @@ Special thanks to:
 Author of language translation:
 --------------
  - Bulgarian(Bg):    [Peyu Yovev (spacy01)](https://github.com/spacy01) (spacy00001@gmail.com) )
- - Czech(Cs_Cz):     [Kuba Vaněk] (vanek.jakub4@seznam.cz)
+ - Czech(Cs_Cz):     [Kuba Vaněk]() (vanek.jakub4@seznam.cz)
  - Spanish(Es):      [Lester Carballo Pérez](https://github.com/lestcape) (lestcape@gmail.com)
  - English(En):      [Lester Carballo Pérez](https://github.com/lestcape) (lestcape@gmail.com)
 
