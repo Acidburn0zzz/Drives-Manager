@@ -1,6 +1,6 @@
-Cinnamon Desklet: Drives Manager Version: v1.4
+Cinnamon Desklet: Drives Manager Version: v1.5
 
-Last version release date: 26 November 2014.
+Last version release date: 02 December 2014.
 ***
 Authors: Lester Carballo Pérez (https://github.com/lestcape)
 Contact: lestcape@gmail.com
@@ -66,6 +66,10 @@ Known bugs and requirements:
 --------------
 Change Log:
 --------------
+1.5
+   - Added the missing instance_id parameter that prevent remember the settings.
+   - Now when the applet will be removed and the desklet it's currently shown as an applet, also will be removed the desklet from the desktop.
+
 1.4
    - Added Bulgarian language, thanks to Peyu Yovev.
 

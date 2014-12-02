@@ -2894,16 +2894,16 @@ function _(str) {
    return Gettext.gettext(str);
 }
 
-function MyDesklet(metadata) {
-    this._init(metadata);
+function MyDesklet(metadata, desklet_id) {
+    this._init(metadata, desklet_id);
 }
 
 MyDesklet.prototype = {
 
    __proto__: Desklet.Desklet.prototype,
 
-   _init: function(metadata) {
-      Desklet.Desklet.prototype._init.call(this, metadata);
+   _init: function(metadata, desklet_id) {
+      Desklet.Desklet.prototype._init.call(this, metadata, desklet_id);
       this.metadata = metadata;
       this.uuid = this.metadata["uuid"];
       if(!Main.deskletContainer.contains(this.actor)) {
@@ -2980,15 +2980,22 @@ MyDesklet.prototype = {
       }
    },
 
+   removed_applet_from_panel: function() {
+      if((this._myManager)&&(this._myManager.applet)) {
+         this._myManager.applet.swapContextToApplet(this._showAsApplet);
+         this.setVisibleAppletManager(false);
+      }
+   },
+
    on_applet_removed_from_panel: function() {
-      this._showAsApplet = false;
-      this._onShowModeChange();
+      //this._showAsApplet = false;
+      this._onRemoveDesklet();
    },
 
    on_desklet_removed: function() {
       try {
          if(this._showAsApplet) {
-            this.on_applet_removed_from_panel();
+            this.removed_applet_from_panel();
          }
          this.hardDisk.destroy();
          this.volumeMonitor.disconnect();
@@ -3094,18 +3101,18 @@ MyDesklet.prototype = {
       this.appletMenuItem._switch.setToggleState(this._showAsApplet);
       if(this._showAsApplet) {
          this.setVisibleAppletManager(this._showAsApplet);
-         if(this._myManager.applet) {
+         if((this._myManager)&&(this._myManager.applet)) {
             this._myManager.applet.swapContextToApplet(this._showAsApplet);
             this._myManager.applet.setAppletSymbolicIcon(this._appletSymbolic);
          }
-      } else if(this._myManager.applet) {
+      } else if((this._myManager)&&(this._myManager.applet)) {
          this._myManager.applet.swapContextToApplet(this._showAsApplet);
          this.setVisibleAppletManager(this._showAsApplet);
       }
    },
 
    _onAppletSymbolicChange: function() {
-      if(this._myManager.applet)
+      if((this._myManager)&&(this._myManager.applet))
          this._myManager.applet.setAppletSymbolicIcon(this._appletSymbolic);
    },
 
@@ -3194,7 +3201,7 @@ MyDesklet.prototype = {
 
    _toggleRaise: function() {
       try {
-         if(this._myManager.applet) {
+         if((this._myManager)&&(this._myManager.applet)) {
             this._myManager.applet.menu.toggle();
          } else {
             if(this._desklet_raised)
