@@ -36,6 +36,9 @@ const Main = imports.ui.main;
 const Util = imports.misc.util;
 
 const FALLBACK_ICON_HEIGHT = 22;
+const PANEL_SCALE_TEXT_ICONS_KEY = "panels-scale-text-icons";
+const PANEL_HEIGHT_KEY = "panels-height";
+const PANEL_RESIZABLE_KEY = "panels-resizable";
 
 function _(str) {
    let resultConf = Gettext.dgettext("drivesManager@lestcape", str);
@@ -76,7 +79,14 @@ MyApplet.prototype = {
                this.desklet._onShowModeChange();
             }
          }));
-         this._applet_context_menu.addMenuItem(this.context_menu_item_swap);
+         this._applet_context_menu.addMenuItem(this.context_menu_item_swap); 
+         this.resize_signals_id = [];
+         this.resize_signals_id.push(global.settings.connect("changed::" + 
+            PANEL_SCALE_TEXT_ICONS_KEY, Lang.bind(this, this.on_panel_height_changed)));
+         this.resize_signals_id.push(global.settings.connect("changed::" +
+            PANEL_HEIGHT_KEY, Lang.bind(this, this.on_panel_height_changed)));
+         this.resize_signals_id.push(global.settings.connect("changed::" + 
+            PANEL_RESIZABLE_KEY, Lang.bind(this, this.on_panel_height_changed)));
       }
       catch(e) {
          Main.notify("appletError", e.message);
@@ -156,11 +166,17 @@ MyApplet.prototype = {
    },
 
    on_applet_removed_from_panel: function() {
+      for(let pos in this.resize_signals_id)
+         global.settings.disconnect(this.resize_signals_id[pos]);
+      this.resize_signals_id = [];
    },
 
    on_panel_height_changed: function() {
-      if(this.appletBox)
+      let height = this._extension._loadedDefinitions[this.instance_id].panel.actor.get_height();
+      if((this._panelHeight != height)&&(this.appletBox)) {
+         this._panelHeight = height;
          this.appletBox.set_panel_height(this._panelHeight);
+      }
    },
    
    finalizeContextMenu: function() {
