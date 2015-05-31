@@ -5,7 +5,7 @@
     "uuid": "drivesManager@lestcape", 
     "comments": "This is not just a desklet, also can be see as an applet and you can customise like you want.", 
     "name": "Drives Manager", 
-    "version": "1.5", 
+    "version": "1.6", 
     "prevent-decorations": false, 
     "description": "A desklet to manager drive's."
 }

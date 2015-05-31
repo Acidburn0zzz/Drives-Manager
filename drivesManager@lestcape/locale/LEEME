@@ -1,6 +1,6 @@
 Cinnamon Desklet: Drives Manager Version: v1.5
 
-Last version release date: 02 de Diciembre de 2014.
+Last version release date: 31 de Mayo de 2015.
 ***
 Autor:     Lester Carballo Pérez (https://github.com/lestcape)
 Contacto:  lestcape@gmail.com
@@ -67,6 +67,10 @@ Errores conocidos y requerimientos:
 --------------
 Registro de cambios:
 --------------
+1.6
+   - Se ha añadido soporte para cinnamon 2.6.
+   - Se amplió la opción simbólico a todos los iconos dentro del applet.
+
 1.5
   - Se ha añadido el parámetro instance_id faltante que evita recordar los ajustes.
   - Ahora al quitar el applet, cuando el desklet es mostrado como un applet, también elimina el desklet del escritorio.

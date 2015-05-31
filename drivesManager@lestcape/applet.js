@@ -48,6 +48,38 @@ function _(str) {
    return Gettext.gettext(str);
 }
 
+// This is only a clone for the dalcde update
+// we used it here to support old cinnamon versions.
+function PopupIconMenuItem() {
+   this._init.apply(this, arguments);
+}
+
+PopupIconMenuItem.prototype = {
+   __proto__: PopupMenu.PopupBaseMenuItem.prototype,
+
+   _init: function (text, iconName, iconType, params) {
+      PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+      if(iconType != St.IconType.FULLCOLOR)
+          iconType = St.IconType.SYMBOLIC;
+      this.label = new St.Label({text: text});
+      this._icon = new St.Icon({ style_class: 'popup-menu-icon',
+         icon_name: iconName,
+         icon_type: iconType});
+      this.addActor(this._icon, {span: 0});
+      this.addActor(this.label);
+   },
+
+   setIconSymbolicName: function (iconName) {
+      this._icon.set_icon_name(iconName);
+      this._icon.set_icon_type(St.IconType.SYMBOLIC);
+   },
+
+   setIconName: function (iconName) {
+      this._icon.set_icon_name(iconName);
+      this._icon.set_icon_type(St.IconType.FULLCOLOR);
+   }
+};
+
 function MyApplet(orientation, panel_height, instanceId) {
    this._init(orientation, panel_height, instanceId);
 }
@@ -71,9 +103,12 @@ MyApplet.prototype = {
          this.menuManager.addMenu(this.menu);
          this.section = new PopupMenu.PopupMenuSection();
          this.menu.addMenuItem(this.section);
+         this._iconType = St.IconType.SYMBOLIC;
+
          this.appletBox = new AppletIconsBox(this, panel_height, St.IconType.FULLCOLOR);
          this.actor.add(this.appletBox.actor, { y_align: St.Align.MIDDLE, y_fill: false });
-         this.context_menu_item_swap = new Applet.MenuItem(_("Show as Desklet"), "computer", Lang.bind(this, function(actor) {
+         this.context_menu_item_swap = new PopupIconMenuItem(_("Show as Desklet"), "computer", this._iconType);
+         this.context_menu_item_swap.connect('activate', Lang.bind(this, function(actor) {
             if(this.desklet) {
                this.desklet._showAsApplet = !this.desklet._showAsApplet;
                this.desklet._onShowModeChange();
@@ -133,9 +168,11 @@ MyApplet.prototype = {
 
    setAppletSymbolicIcon: function(symbolic) {
       if(symbolic)
-         this.appletBox.set_icon_type(St.IconType.SYMBOLIC);
+         this._iconType = St.IconType.SYMBOLIC;
       else
-         this.appletBox.set_icon_type(St.IconType.FULLCOLOR);
+         this._iconType = St.IconType.FULLCOLOR;
+      this.appletBox.set_icon_type(this._iconType);
+      this._setContextMenuIconType();
    },
 
    setParentDesklet: function(desklet) {
@@ -178,6 +215,21 @@ MyApplet.prototype = {
          this.appletBox.set_panel_height(this._panelHeight);
       }
    },
+
+   _setContextMenuIconType: function() {
+      if(this.context_menu_item_remove != null)
+         this.context_menu_item_remove._icon.set_icon_type(this._iconType); 
+      if(this.context_menu_item_about != null)
+         this.context_menu_item_about._icon.set_icon_type(this._iconType);  
+      if(this.context_menu_item_configure != null) {
+         if(this._iconType == St.IconType.SYMBOLIC)
+            this.context_menu_item_configure.setIconSymbolicName("system-run");
+         else
+            this.context_menu_item_configure.setIconName("preferences-system");
+      }
+      if(this.context_menu_item_swap != null)
+         this.context_menu_item_swap._icon.set_icon_type(this._iconType);
+   },
    
    finalizeContextMenu: function() {
       try {
@@ -185,12 +237,15 @@ MyApplet.prototype = {
          let items = this._applet_context_menu._getMenuItems();
 
          if(this.context_menu_item_remove == null) {
-            this.context_menu_item_remove = new Applet.MenuItem(_("Remove this applet"), "edit-delete",
-                                                                Lang.bind(this, this.removedFromPanel));
+            this.context_menu_item_remove = new PopupIconMenuItem(_("Remove this applet"),
+                                                "edit-delete", this._iconType);
+            this.context_menu_item_remove.connect('activate', Lang.bind(this, this.removedFromPanel));
          }
 
          if((this.openAbout)&&(this.context_menu_item_about == null)) {
-            this.context_menu_item_about = new Applet.MenuItem(_("About..."), "dialog-question", Lang.bind(this, this.openAbout));
+            this.context_menu_item_about = new PopupIconMenuItem(_("About..."),
+                                                "dialog-question", this._iconType);
+            this.context_menu_item_about.connect('activate', Lang.bind(this, this.openAbout));
          }
 
          if(this.context_menu_separator == null) {
@@ -207,7 +262,9 @@ MyApplet.prototype = {
 
          if(!this._meta["hide-configuration"] && GLib.file_test(this._meta["path"] + "/settings-schema.json", GLib.FileTest.EXISTS)) {     
             if(this.context_menu_item_configure == null) {           
-               this.context_menu_item_configure = new Applet.MenuItem(_("Configure..."), "system-run", Lang.bind(this, function() {
+               this.context_menu_item_configure = new PopupIconMenuItem(_("Configure..."),
+                                                           "system-run", this._iconType);
+               this.context_menu_item_configure.connect('activate', Lang.bind(this, function() {
                   Util.spawnCommandLine("cinnamon-settings desklets " + this._uuid + " " + this.desklet.instance_id);
                }));
             }
