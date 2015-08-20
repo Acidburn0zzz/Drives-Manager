@@ -2484,8 +2484,9 @@ DeviceContainer.prototype = {
       {
          let _sizeDr;
          let _usedDr;
-         if((this._deviceType == "RemovableMount")||(this._deviceType == "HardMount")) {
+         if((this._deviceType == "RemovableMount")||(this._deviceType == "HardMount")||(this._deviceType == "NotDriveMount")) {
             for(let i = 0; i < this._listDriveContainer.length; i++) {
+               //Main.notify("fue: " + this._listDevices[i]);
                _sizeDr = this.getDriveSize(this._listDevices[i]);
                _usedDr = this.getDriveUsedSpace(this._listDevices[i]);
                this._listDriveContainer[i].setLeftBottomText("" + this.convertToString(_usedDr) + "/" + this.convertToString(_sizeDr));
@@ -2985,6 +2986,14 @@ MyDesklet.prototype = {
          this._myManager.applet.swapContextToApplet(this._showAsApplet);
          this.setVisibleAppletManager(false);
       }
+   },
+
+   // Returns the original actor that should align with the actor
+   // we show as the item is being dragged.
+   getDragActorSource: function() {
+      if((this._myManager)&&(this._myManager.applet))
+         return this._myManager.applet.actor;
+      return this.actor;
    },
 
    on_applet_removed_from_panel: function() {
