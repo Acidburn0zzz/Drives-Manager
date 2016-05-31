@@ -1,11 +1,12 @@
 {
     "website": "https://github.com/lestcape/Drives-Manager", 
-    "name": "Drives Manager", 
-    "contributors": "Author: Lester Carballo P\u00e9rez", 
-    "description": "A desklet to manager drive's.", 
     "uuid": "drivesManager@lestcape", 
+    "contributors": "Author: Lester Carballo P\u00e9rez", 
+    "dangerous": true, 
+    "description": "A desklet to manager drive's.", 
     "comments": "This is not just a desklet, also can be see as an applet and you can customise like you want.", 
     "version": "1.6", 
+    "last-edited": "1433078147", 
     "prevent-decorations": false, 
-    "last-edited": "1433078147"
+    "name": "Drives Manager"
 }
